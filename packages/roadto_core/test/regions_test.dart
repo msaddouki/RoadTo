@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
+import 'package:cryptography/cryptography.dart' hide Hmac, Sha256;
 import 'package:roadto_core/roadto_core.dart';
 import 'package:test/test.dart';
 
@@ -8,6 +10,10 @@ import 'package:test/test.dart';
 /// (pipeline/roadto_pipeline) and signed with the RFC 8032 test key below,
 /// so these tests check that Dart accepts exactly what the pipeline emits.
 const rfc8032PublicKey = '11qYAYKxCrfVS/7TyWQHOg7hcvPapiMlrwIaaPcHURo=';
+final rfc8032Seed = [
+  for (var i = 0; i < 64; i += 2)
+    int.parse('9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60'.substring(i, i + 2), radix: 16),
+];
 final fixtures = Directory('test/fixtures/region');
 
 /// Serves the fixture package over HTTP, optionally altering files.
@@ -185,6 +191,82 @@ void main() {
     test('installs from an unpacked folder', () async {
       await store.install(DirectoryPackageSource(fixtures)).drain<void>();
       expect((await store.installed()).single.id, 'test');
+    });
+  });
+
+  group('offline routing files', () {
+    late Directory root;
+    late Directory pkg;
+
+    /// The fixture package plus a routing graph and its config, re-signed
+    /// with the RFC 8032 test key like the pipeline would.
+    Future<Directory> packageWithRouting() async {
+      final dir = Directory('${root.path}/pkg')..createSync();
+      for (final f in fixtures.listSync().whereType<File>()) {
+        f.copySync('${dir.path}/${f.uri.pathSegments.last}');
+      }
+      final extra = {
+        'routing.tar': ('routing', utf8.encode('graph')),
+        'routing.json': (
+          'routing_config',
+          utf8.encode('{"mjolnir":{"tile_extract":"@ROADTO_REGION_DIR@/routing.tar"}}'),
+        ),
+      };
+      final manifest = jsonDecode(File('${dir.path}/manifest.json').readAsStringSync()) as Map<String, dynamic>;
+      for (final MapEntry(key: name, value: (kind, bytes)) in extra.entries) {
+        File('${dir.path}/$name').writeAsBytesSync(bytes);
+        (manifest['files'] as List).add({
+          'kind': kind,
+          'name': name,
+          'url': name,
+          'size': bytes.length,
+          'sha256': sha256.convert(bytes).toString(),
+          'required': false,
+        });
+      }
+      final bytes = utf8.encode(jsonEncode(manifest));
+      File('${dir.path}/manifest.json').writeAsBytesSync(bytes);
+      final keys = await Ed25519().newKeyPairFromSeed(rfc8032Seed);
+      final sig = await Ed25519().sign(bytes, keyPair: keys);
+      File('${dir.path}/manifest.json.sig').writeAsStringSync(base64.encode(sig.bytes));
+      return dir;
+    }
+
+    setUp(() async {
+      root = Directory.systemTemp.createTempSync('routing');
+      pkg = await packageWithRouting();
+    });
+    tearDown(() => root.deleteSync(recursive: true));
+
+    test('a platform that routes offline installs the graph and gets a local config', () async {
+      final android = RegionStore(
+        Directory('${root.path}/android'),
+        trustedKeys: const [rfc8032PublicKey],
+        wantedKinds: const {'map', 'places', 'style', 'routing', 'routing_config'},
+      );
+      await android.install(DirectoryPackageSource(pkg)).drain<void>();
+      final region = (await android.load('test'))!;
+      expect(region.hasOfflineRouting, isTrue);
+      final config = jsonDecode(File(region.routingConfigPath).readAsStringSync()) as Map<String, dynamic>;
+      expect(config['mjolnir']['tile_extract'], '${region.dir.absolute.path}/routing.tar');
+    });
+
+    test('other platforms skip the graph', () async {
+      final ios = RegionStore(Directory('${root.path}/ios'), trustedKeys: const [rfc8032PublicKey]);
+      await ios.install(DirectoryPackageSource(pkg)).drain<void>();
+      final region = (await ios.load('test'))!;
+      expect(region.hasOfflineRouting, isFalse);
+      expect(File('${region.dir.path}/routing.tar').existsSync(), isFalse);
+    });
+
+    test('a package without the optional files still installs where they are wanted', () async {
+      final android = RegionStore(
+        Directory('${root.path}/android'),
+        trustedKeys: const [rfc8032PublicKey],
+        wantedKinds: const {'map', 'places', 'style', 'routing', 'routing_config'},
+      );
+      await android.install(DirectoryPackageSource(fixtures)).drain<void>();
+      expect((await android.load('test'))!.hasOfflineRouting, isFalse);
     });
   });
 

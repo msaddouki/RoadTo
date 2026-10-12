@@ -12,7 +12,8 @@ manifest. Regions are defined in `regions/<id>.json`; the first one is
 | `map.pmtiles` | [Planetiler](https://github.com/onthegomap/planetiler) 0.10.2, OpenMapTiles schema | offline map (MapLibre `pmtiles://`) |
 | `places.sqlite` | `roadto_pipeline places` (pyosmium + SQLite FTS5) | offline address and place search |
 | `style.tar.gz` | `roadto_pipeline style` (OpenFreeMap Liberty, rewritten) | style, sprites and fonts, no network |
-| `routing.tar` | [Valhalla](https://github.com/valhalla/valhalla) 3.9.1 | not yet (valhalla-mobile), optional download |
+| `routing.tar` | [Valhalla](https://github.com/valhalla/valhalla) 3.9.1 | offline routing on Android (valhalla-mobile); optional |
+| `routing.json` | `roadto_pipeline routing-config` | Valhalla config for that graph, paths filled in by the app; optional |
 | `manifest.json` | `roadto_pipeline manifest` | size and SHA-256 of every file |
 | `manifest.json.sig` | `roadto_pipeline sign` | Ed25519 signature of the manifest |
 | `<id>.roadto` | `roadto_pipeline bundle` | the signed package as one file, to embed or import |
@@ -29,6 +30,12 @@ areas) are indexed even without a name, labelled by brand or operator when
 there is one; private ones (`access=private|no`) are left out. An index on
 `(kind, lat, lon)` serves category search; it is additive, so older apps
 read new packages unchanged.
+
+Each place shows its commune: `addr:city` when OSM has it, otherwise the
+commune whose boundary (`boundary=administrative`, `admin_level=8`) contains
+it, and the nearest city, town or village only where no boundary is known.
+The extract keeps boundary relations complete (`-S types=multipolygon,boundary`)
+so communes cut by the bbox still have their full outline.
 
 File URLs in the manifest are relative to it, so a package can be served
 from any static host. The schema of `places.sqlite` is
@@ -75,6 +82,10 @@ region on demand and on the 1st of every month. When the `REGION_SIGNING_KEY`
 secret exists, it signs the package, packs `<id>.roadto` and uploads
 everything to the rolling GitHub Release `region-<id>`. Without the secret,
 the unsigned package is kept as a workflow artifact for inspection.
+
+To try a pipeline change before merging it, run the workflow on the branch
+with **publish** unticked: the package is built (and signed) but only kept
+as a workflow artifact, and the release that app builds embed is left alone.
 
 The repository is private, so the app never downloads from that release.
 The package reaches phones in two ways, with no server:
