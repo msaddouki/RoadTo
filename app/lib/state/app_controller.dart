@@ -42,6 +42,9 @@ class AppController extends ChangeNotifier {
   bool routing = false;
   List<AlertAhead> ahead = const [];
 
+  /// Posted speed limits along [route], filled in shortly after it starts.
+  SpeedLimits speedLimits = SpeedLimits.none;
+
   /// Alerte croisée à laquelle on demande « toujours là ? ».
   RoadAlert? pendingConfirmation;
   final _asked = <String>{};
@@ -91,7 +94,11 @@ class AppController extends ChangeNotifier {
     final region = activeRegion;
     if (region == null || !region.hasOfflineRouting || !DeviceRouting.supported) return online;
     return FallbackRouter(
-      NativeValhallaRouter(configPath: region.routingConfigPath, call: DeviceRouting.route),
+      NativeValhallaRouter(
+        configPath: region.routingConfigPath,
+        call: DeviceRouting.route,
+        traceAttributes: DeviceRouting.traceAttributes,
+      ),
       online,
       onFallback: (e) => debugPrint('Offline routing failed, using the server: ${e.message}'),
     );
@@ -253,6 +260,8 @@ class AppController extends ChangeNotifier {
 
   void _setRoute(TripRoute r) {
     route = r;
+    speedLimits = SpeedLimits.none;
+    unawaited(_loadSpeedLimits(r));
     _guidance = GuidanceEngine(r);
     guidance = null;
     _cells = const {};
@@ -281,9 +290,35 @@ class AppController extends ChangeNotifier {
     }
   }
 
+  /// Posted limit where the car is, when known.
+  SpeedLimitSpan? get speedLimit {
+    final g = guidance;
+    if (route == null || g == null || g.offRoute) return null;
+    return speedLimits.at(g.projection.alongM);
+  }
+
+  bool get overSpeed {
+    final limit = speedLimit?.kph, f = fix;
+    return limit != null && f != null && isOverLimit(f.speedMps * 3.6, limit);
+  }
+
+  Future<void> _loadSpeedLimits(TripRoute r) async {
+    if (_router case final SpeedLimitSource source) {
+      try {
+        final limits = await source.speedLimits(r);
+        if (!identical(route, r)) return; // rerouted or stopped meanwhile
+        speedLimits = limits;
+        notifyListeners();
+      } on RoutingException catch (e) {
+        debugPrint('No speed limits for this route: ${e.message}');
+      }
+    }
+  }
+
   void stopNavigation() {
     _stopSimulator();
     route = null;
+    speedLimits = SpeedLimits.none;
     _guidance = null;
     guidance = null;
     destination = null;

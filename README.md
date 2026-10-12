@@ -23,6 +23,9 @@ once a region is downloaded.
 - Route from Valhalla, turn-by-turn guidance with French voice prompts,
   arrival time, rerouting when off route. **Offline on Android** with the
   region's graph (valhalla-mobile); online on iOS and outside the region.
+- **Speed limits** from OSM on the navigation screen, red when over the
+  limit (5 km/h margin, 5 % above 100 km/h); from the region's graph on
+  Android, from the routing server otherwise.
 - **Simulated driving** on by default: the trip is replayed along the route,
   so everything can be tested without driving.
 - **One-gesture reporting**: six large tiles, 5 s to cancel. The police
