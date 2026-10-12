@@ -8,3 +8,5 @@ deps.txt
 __pycache__/
 .pytest_cache/
 pipeline/work/
+app/assets/regions/*/*
+!app/assets/regions/*/README.md

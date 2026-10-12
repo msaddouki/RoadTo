@@ -6,6 +6,7 @@ import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 
 import 'manifest.dart';
+import 'package_source.dart';
 
 /// Failure while installing or loading a region. [message] is shown to the
 /// user, hence in French.
@@ -121,33 +122,28 @@ class RegionStore {
     if (await dir.exists()) await dir.delete(recursive: true);
   }
 
-  /// Fetches and verifies a manifest without installing anything.
-  Future<(RegionManifest, List<int>, String)> fetchManifest(Uri url) async {
-    final http.Response res;
-    final http.Response sig;
-    try {
-      res = await _client.get(url).timeout(const Duration(seconds: 30));
-      sig = await _client.get(url.replace(path: '${url.path}.sig')).timeout(const Duration(seconds: 30));
-    } catch (e) {
-      throw RegionException('Serveur des régions injoignable ($e)');
-    }
-    if (res.statusCode != 200) throw RegionException('Manifeste introuvable (${res.statusCode})');
-    if (sig.statusCode != 200) throw RegionException('Paquet non signé : installation refusée');
+  /// Reads and verifies the manifest of [source] without installing anything.
+  Future<(RegionManifest, List<int>, String)> verifiedManifest(PackageSource source) async {
+    final (bytes, signature) = await source.manifest();
     if (trustedKeys.isEmpty) throw RegionException('Aucune clé de confiance configurée dans l’app');
-    if (!await verifyManifestSignature(res.bodyBytes, sig.body, trustedKeys)) {
+    if (!await verifyManifestSignature(bytes, signature, trustedKeys)) {
       throw RegionException('Signature invalide : paquet refusé');
     }
     try {
-      return (RegionManifest.parse(res.bodyBytes), res.bodyBytes, sig.body.trim());
+      return (RegionManifest.parse(bytes), bytes, signature.trim());
     } on RegionFormatException catch (e) {
       throw RegionException('Manifeste illisible : ${e.message}');
     }
   }
 
-  /// Installs or updates the region described at [manifestUrl].
-  Stream<InstallProgress> install(Uri manifestUrl) async* {
+  /// Installs or updates the region published at [manifestUrl].
+  Stream<InstallProgress> installFromUrl(Uri manifestUrl) => install(HttpPackageSource(manifestUrl, client: _client));
+
+  /// Installs or updates a region from any [source] (download, `.roadto`
+  /// file, app assets).
+  Stream<InstallProgress> install(PackageSource source) async* {
     yield const InstallProgress(InstallStage.manifest);
-    final (manifest, manifestBytes, signature) = await fetchManifest(manifestUrl);
+    final (manifest, manifestBytes, signature) = await verifiedManifest(source);
     final files = [
       for (final f in manifest.requiredFiles)
         if (wantedKinds.contains(f.kind)) f,
@@ -166,14 +162,14 @@ class RegionStore {
       for (final f in files) {
         final target = File('${staging.path}/${f.name}');
         final existing = File('${current.path}/${f.name}');
-        // Unchanged files are reused: a monthly update only downloads what moved.
+        // Unchanged files are reused: an update only copies what moved.
         if (await existing.exists() && await existing.length() == f.size && await _sha256(existing) == f.sha256) {
           await existing.copy(target.path);
           received += f.size;
           yield InstallProgress(InstallStage.download, file: f.name, received: received, total: total);
           continue;
         }
-        await for (final n in _download(manifestUrl.resolve(f.url), target, f)) {
+        await for (final n in _copyChecked(await source.open(f), target, f)) {
           yield InstallProgress(InstallStage.download, file: f.name, received: received + n, total: total);
         }
         received += f.size;
@@ -202,23 +198,15 @@ class RegionStore {
     yield InstallProgress(InstallStage.done, received: total, total: total);
   }
 
-  /// Streams the file to [target], yielding bytes received, then checks its
-  /// size and SHA-256.
-  Stream<int> _download(Uri url, File target, RegionFile f) async* {
-    final http.StreamedResponse res;
-    try {
-      res = await _client.send(http.Request('GET', url)).timeout(const Duration(seconds: 30));
-    } catch (e) {
-      throw RegionException('Téléchargement de ${f.name} impossible ($e)');
-    }
-    if (res.statusCode != 200) throw RegionException('${f.name} introuvable (${res.statusCode})');
-
+  /// Writes [data] to [target], yielding bytes written, then checks its size
+  /// and SHA-256 against the manifest.
+  Stream<int> _copyChecked(Stream<List<int>> data, File target, RegionFile f) async* {
     final digest = _DigestSink();
     final hasher = sha256.startChunkedConversion(digest);
     final sink = target.openWrite();
     var n = 0, lastReport = 0;
     try {
-      await for (final chunk in res.stream) {
+      await for (final chunk in data) {
         n += chunk.length;
         if (n > f.size) throw RegionException('${f.name} plus gros qu’annoncé');
         hasher.add(chunk);

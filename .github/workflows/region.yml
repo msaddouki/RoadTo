@@ -2,8 +2,9 @@ name: Region packages
 
 # Builds a region package (offline map, search index, style, routing graph)
 # and, when the REGION_SIGNING_KEY secret is set, signs it and publishes it
-# to the rolling GitHub Release `region-<id>`, where the app downloads it.
-# Without the secret, the unsigned package is kept as a workflow artifact.
+# to the rolling GitHub Release `region-<id>`: app builds embed it from there
+# (tool/embed_region.sh) and `<id>.roadto` can be imported in the app from a
+# file. Without the secret, the unsigned package is kept as a workflow artifact.
 
 on:
   workflow_dispatch:
@@ -83,7 +84,7 @@ jobs:
           # Data files first, manifest last: a client never sees a manifest
           # that points at files not uploaded yet.
           data=()
-          for f in style.tar.gz places.sqlite map.pmtiles routing.tar; do [[ -f "$pkg/$f" ]] && data+=("$pkg/$f"); done
+          for f in style.tar.gz places.sqlite map.pmtiles routing.tar "$REGION.roadto"; do [[ -f "$pkg/$f" ]] && data+=("$pkg/$f"); done
           gh release upload "$tag" "${data[@]}" --clobber
           gh release upload "$tag" "$pkg/manifest.json" "$pkg/manifest.json.sig" --clobber
       - name: Keep unsigned package

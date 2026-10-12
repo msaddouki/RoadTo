@@ -11,6 +11,7 @@ export 'src/nostr/keys.dart';
 export 'src/nostr/relay_pool.dart';
 export 'src/policy.dart';
 export 'src/regions/manifest.dart';
+export 'src/regions/package_source.dart';
 export 'src/regions/region_store.dart';
 export 'src/routing/guidance.dart';
 export 'src/routing/route.dart';

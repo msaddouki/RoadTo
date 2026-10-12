@@ -15,6 +15,7 @@ manifest. Regions are defined in `regions/<id>.json`; the first one is
 | `routing.tar` | [Valhalla](https://github.com/valhalla/valhalla) 3.9.1 | not yet (valhalla-mobile), optional download |
 | `manifest.json` | `roadto_pipeline manifest` | size and SHA-256 of every file |
 | `manifest.json.sig` | `roadto_pipeline sign` | Ed25519 signature of the manifest |
+| `<id>.roadto` | `roadto_pipeline bundle` | the signed package as one file, to embed or import |
 
 The style bundle only carries the glyph ranges for Latin, Greek and Cyrillic
 text plus punctuation and currency symbols (`LATIN_GLYPH_STARTS` in
@@ -60,20 +61,26 @@ SKIP_ROUTING=1 pipeline/build_region.sh lyon   # faster, without the Valhalla gr
 Downloads (Geofabrik extract, Planetiler's Natural Earth and water polygons)
 are cached in `pipeline/work/cache`.
 
-## Publishing
+## Publishing and delivery
 
 The **Region packages** workflow (`.github/workflows/region.yml`) builds a
 region on demand and on the 1st of every month. When the `REGION_SIGNING_KEY`
-secret exists, it signs the package and uploads it to the rolling GitHub
-Release `region-<id>`, where the app looks for it:
+secret exists, it signs the package, packs `<id>.roadto` and uploads
+everything to the rolling GitHub Release `region-<id>`. Without the secret,
+the unsigned package is kept as a workflow artifact for inspection.
 
-```
-https://github.com/msaddouki/RoadTo/releases/download/region-lyon/manifest.json
-```
+The repository is private, so the app never downloads from that release.
+The package reaches phones in two ways, with no server:
 
-Data files are uploaded before the manifest, so a client never sees a
-manifest pointing at files that are not there yet. Without the secret, the
-unsigned package is kept as a workflow artifact for inspection.
+- **embedded**: the CI app builds run `tool/embed_region.sh lyon`, which
+  copies the signed files into `app/assets/regions/lyon/`; the app installs
+  them on first launch;
+- **imported**: download `lyon.roadto` from the release, copy it to the
+  phone and pick it in Réglages > Régions hors ligne > Importer.
+
+Both go through the same signature and hash checks as a download. A package
+server (MinIO in the plan) can come later: the app core already downloads
+from any static host, data files first and manifest last.
 
 One-time setup:
 
@@ -83,8 +90,6 @@ gh secret set REGION_SIGNING_KEY          # paste the private key
 # add the public key to Defaults.trustedRegionKeys in app/lib/config.dart
 gh workflow run region.yml -f region=lyon
 ```
-
-GitHub Releases stand in for the MinIO bucket of the plan during the POC.
 Map data © OpenStreetMap contributors, under the ODbL.
 
 ## Adding a region

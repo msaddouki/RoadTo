@@ -7,7 +7,7 @@ import json
 import sys
 from pathlib import Path
 
-from . import manifest, places, signing, style
+from . import bundle, manifest, places, signing, style
 
 
 def _cmd_places(a: argparse.Namespace) -> None:
@@ -35,6 +35,11 @@ def _cmd_sign(a: argparse.Namespace) -> None:
     sig, public = signing.sign(path.read_bytes())
     Path(f"{path}.sig").write_text(sig + "\n", encoding="ascii")
     print(f"signed {path} with public key {public}")
+
+
+def _cmd_bundle(a: argparse.Namespace) -> None:
+    members = bundle.build_bundle(Path(a.dir), Path(a.out), include_optional=a.include_optional)
+    print(f"bundle: {', '.join(members)} -> {a.out}")
 
 
 def _cmd_verify(a: argparse.Namespace) -> None:
@@ -80,6 +85,12 @@ def main(argv: list[str] | None = None) -> None:
     s = sub.add_parser("sign", help="sign a file (writes <file>.sig)")
     s.add_argument("--file", required=True)
     s.set_defaults(func=_cmd_sign)
+
+    s = sub.add_parser("bundle", help="pack a signed package into a single .roadto file")
+    s.add_argument("--dir", required=True)
+    s.add_argument("--out", required=True)
+    s.add_argument("--include-optional", action="store_true", help="also pack optional files (routing graph)")
+    s.set_defaults(func=_cmd_bundle)
 
     s = sub.add_parser("verify", help="check <file>.sig against a public key")
     s.add_argument("--file", required=True)
