@@ -1,0 +1,65 @@
+# Relays in this release. Each one keeps its own database and replicates
+# with all the others (live stream, plus negentropy reconciliation).
+replicaCount: 2
+
+image:
+  # Built from relay/strfry/Dockerfile (docker build -f relay/strfry/Dockerfile .).
+  repository: ghcr.io/msaddouki/roadto-relay
+  # Defaults to the chart's appVersion.
+  tag: ""
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+# Events accepted per client address and per minute.
+ratePerMinute: 30
+
+# Seconds between two negentropy reconciliations with each peer.
+syncIntervalSeconds: 300
+
+# Header carrying the client address when the relays sit behind an ingress
+# or a proxy, so the rate limit sees clients rather than the proxy
+# (x-forwarded-for with ingress-nginx). Leave empty for direct connections.
+realIpHeader: ""
+
+persistence:
+  size: 10Gi
+  # Empty: the cluster's default storage class.
+  storageClass: ""
+
+service:
+  type: ClusterIP
+  port: 7777
+
+ingress:
+  enabled: false
+  className: ""
+  host: relay.example.org
+  annotations:
+    # Relay connections are long-lived websockets.
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+  # Secret holding the certificate (for example issued by cert-manager).
+  tlsSecretName: ""
+
+metrics:
+  # Prometheus counters of the write policy (decisions by class; never an
+  # address, a key or a position), on <pod>:<port>/metrics.
+  enabled: true
+  port: 9464
+  serviceMonitor:
+    # Needs the Prometheus Operator CRDs.
+    enabled: false
+    interval: 30s
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 1Gi
+
+podAnnotations: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

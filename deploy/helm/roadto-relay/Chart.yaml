@@ -1,0 +1,7 @@
+apiVersion: v2
+name: roadto-relay
+description: Federated RoadTo relays (strfry with the RoadTo write-policy plugin), replicating each other.
+type: application
+version: 0.1.0
+# Version of the relay image built from relay/strfry/Dockerfile.
+appVersion: "0.1.0"
