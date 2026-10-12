@@ -30,7 +30,8 @@ class RegionsScreen extends StatelessWidget {
             children: [
               Text(
                 'Une région installée donne la carte et la recherche d’adresse sans réseau. '
-                'Le calcul d’itinéraire reste en ligne pour l’instant.',
+                'Sur Android, les itinéraires y sont aussi calculés sans réseau ; sur iPhone, ils restent en ligne '
+                'pour l’instant.',
                 style: text.bodyMedium,
               ),
               const SizedBox(height: 16),
@@ -138,6 +139,7 @@ class _InstalledTile extends StatelessWidget {
         title: Text(region.name),
         subtitle: Text(
           'Données du ${region.version} · ${formatBytes(region.manifest.requiredBytes)}'
+          '${region.hasOfflineRouting ? ' · itinéraires hors ligne' : ''}'
           '${embedded ? ' · intégrée à l’app' : ''}',
         ),
         trailing: busy

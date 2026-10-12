@@ -8,7 +8,7 @@ import 'package:roadto_core/roadto_core.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../config.dart';
-import '../services/backup.dart';
+import '../services/device_routing.dart';
 import '../services/embedded_region.dart';
 import '../services/identity_store.dart';
 import '../services/location_source.dart';
@@ -42,6 +42,9 @@ class AppController extends ChangeNotifier {
   bool routing = false;
   List<AlertAhead> ahead = const [];
 
+  /// Posted speed limits along [route], filled in shortly after it starts.
+  SpeedLimits speedLimits = SpeedLimits.none;
+
   /// Alerte croisée à laquelle on demande « toujours là ? ».
   RoadAlert? pendingConfirmation;
   final _asked = <String>{};
@@ -73,14 +76,35 @@ class AppController extends ChangeNotifier {
     final settings = await SettingsStore.load();
     final identity = await store.loadOrCreate();
     final support = await getApplicationSupportDirectory();
-    await BackupExclusion.exclude(Directory('${support.path}/regions'));
-    final regions = RegionStore(Directory('${support.path}/regions'), trustedKeys: Defaults.trustedRegionKeys);
+    final regions = RegionStore(
+      Directory('${support.path}/regions'),
+      trustedKeys: Defaults.trustedRegionKeys,
+      wantedKinds: {'map', 'places', 'style', if (DeviceRouting.supported) ...DeviceRouting.kinds},
+    );
     return AppController._(settings, identity.keys, store, regions)..hasRecoveryPhrase = identity.hasRecoveryPhrase;
   }
 
   bool get navigating => route != null;
 
-  RouteEngine get _router => ValhallaRouter(baseUrl: settings.routingUrl);
+  /// On the device when the installed region carries a routing graph
+  /// (Android), with the online server as fallback, e.g. for a destination
+  /// outside the region.
+  RouteEngine get _router {
+    final online = ValhallaRouter(baseUrl: settings.routingUrl);
+    final region = activeRegion;
+    if (region == null || !region.hasOfflineRouting || !DeviceRouting.supported) return online;
+    return FallbackRouter(
+      NativeValhallaRouter(
+        configPath: region.routingConfigPath,
+        call: DeviceRouting.route,
+        traceAttributes: DeviceRouting.traceAttributes,
+      ),
+      online,
+      onFallback: (e) => debugPrint('Offline routing failed, using the server: ${e.message}'),
+    );
+  }
+
+  bool get routesOffline => DeviceRouting.supported && (activeRegion?.hasOfflineRouting ?? false);
   Geocoder get _onlineGeocoder => PhotonGeocoder(baseUrl: settings.geocoderUrl);
 
   /// Style to display: the installed region's offline map when there is one.
@@ -236,6 +260,8 @@ class AppController extends ChangeNotifier {
 
   void _setRoute(TripRoute r) {
     route = r;
+    speedLimits = SpeedLimits.none;
+    unawaited(_loadSpeedLimits(r));
     _guidance = GuidanceEngine(r);
     guidance = null;
     _cells = const {};
@@ -264,9 +290,35 @@ class AppController extends ChangeNotifier {
     }
   }
 
+  /// Posted limit where the car is, when known.
+  SpeedLimitSpan? get speedLimit {
+    final g = guidance;
+    if (route == null || g == null || g.offRoute) return null;
+    return speedLimits.at(g.projection.alongM);
+  }
+
+  bool get overSpeed {
+    final limit = speedLimit?.kph, f = fix;
+    return limit != null && f != null && isOverLimit(f.speedMps * 3.6, limit);
+  }
+
+  Future<void> _loadSpeedLimits(TripRoute r) async {
+    if (_router case final SpeedLimitSource source) {
+      try {
+        final limits = await source.speedLimits(r);
+        if (!identical(route, r)) return; // rerouted or stopped meanwhile
+        speedLimits = limits;
+        notifyListeners();
+      } on RoutingException catch (e) {
+        debugPrint('No speed limits for this route: ${e.message}');
+      }
+    }
+  }
+
   void stopNavigation() {
     _stopSimulator();
     route = null;
+    speedLimits = SpeedLimits.none;
     _guidance = null;
     guidance = null;
     destination = null;
@@ -472,6 +524,11 @@ class AppController extends ChangeNotifier {
   Future<void> regenerateIdentity() => _setIdentity(_identityStore.regenerate());
 
   Future<void> restoreIdentity(RecoveryPhrase phrase) => _setIdentity(_identityStore.restore(phrase));
+
+  Future<String> exportIdentity(String password) => _identityStore.exportEncrypted(password);
+
+  Future<void> restoreEncryptedIdentity(String encrypted, String password) =>
+      _setIdentity(_identityStore.restoreEncrypted(encrypted, password));
 
   Future<void> _setIdentity(Future<Identity> next) async {
     final id = await next;

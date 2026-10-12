@@ -1,0 +1,14 @@
+{{ .Values.replicaCount }} RoadTo relay(s) replicating each other.
+
+Clients (the app's relay list):
+{{- if .Values.ingress.enabled }}
+  {{ if .Values.ingress.tlsSecretName }}wss{{ else }}ws{{ end }}://{{ .Values.ingress.host }}
+{{- else }}
+  kubectl port-forward svc/{{ include "roadto-relay.fullname" . }} 7777:{{ .Values.service.port }}
+  then ws://localhost:7777
+{{- end }}
+{{- if and .Values.ingress.enabled (not .Values.realIpHeader) }}
+
+WARNING: behind an ingress, set realIpHeader (x-forwarded-for with
+ingress-nginx), or every client shares the ingress address and the rate limit.
+{{- end }}
