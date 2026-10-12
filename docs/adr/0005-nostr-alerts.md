@@ -6,9 +6,11 @@
 ## Decision
 
 Alerts and "still there?" answers are Nostr events (NIP-01) published to
-several relays. Production relays will be strfry with a write-policy plugin
-(J3). The repository ships a Dart dev relay (`relay/dev_relay`) that enforces
-**the same policy** (`checkWritePolicy` in the core).
+several relays. Production relays are strfry with a write-policy plugin
+written in Dart (`relay/strfry`, `relay/strfry_policy`). The plugin and the
+Dart dev relay (`relay/dev_relay`) both call `checkWritePolicy` from the
+core, so the rules cannot drift apart. Relays replicate each other live
+(strfry router) and reconcile by negentropy.
 
 ### Alert event (kind 4550, provisional)
 
