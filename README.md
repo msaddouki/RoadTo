@@ -70,11 +70,17 @@ Offline region packages: [pipeline/README.md](pipeline/README.md).
 ## Tests
 
 ```bash
-cd packages/roadto_core && dart test   # geo, Nostr, alerts, policy, guidance, regions, offline search
+cd packages/roadto_core && dart test   # geo, Nostr, alerts, policy, guidance and GPX replay, regions, offline search
 cd relay/dev_relay && dart test        # end to end: publish, receive in < 5 s, expiry, rate limit
 cd app && flutter test                 # report sheet, map layers
 PYTHONPATH=pipeline python -m pytest pipeline/tests   # region pipeline
 ```
+
+Guidance is replayed over ten reference drives of a Lyon route (GPS noise,
+outliers, a tunnel, a red light, 0.5 to 2 s fixes, 12 to 70 km/h): none may
+declare a false off-route, miss an announcement or the arrival. Real drives
+recorded on the road go in `packages/roadto_core/test/fixtures/gpx/` with
+their route and are replayed the same way.
 
 CI also builds the Android APK and the iOS app (simulator) on every pull
 request; both can be downloaded from the workflow artifacts.
