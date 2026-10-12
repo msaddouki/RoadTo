@@ -5,6 +5,7 @@ import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:roadto_core/roadto_core.dart';
 
 import '../state/app_controller.dart';
+import 'favorite_name_dialog.dart';
 import 'map_layers.dart';
 import 'report_sheet.dart';
 import 'search_screen.dart';
@@ -170,7 +171,12 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> _openSearch() async {
     final place = await Navigator.of(context).push<Place>(
       MaterialPageRoute(
-        builder: (_) => SearchScreen(search: app.search, from: app.position, searchCategory: app.searchCategory),
+        builder: (_) => SearchScreen(
+          search: app.search,
+          from: app.position,
+          searchCategory: app.searchCategory,
+          favorites: app.favorites,
+        ),
       ),
     );
     if (place != null) {
@@ -180,7 +186,9 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> _onLongPress(LatLng at) async {
-    final go = await showModalBottomSheet<bool>(
+    final point = LatLon(at.latitude, at.longitude);
+    final favorite = app.favorites.find(point);
+    final choice = await showModalBottomSheet<String>(
       context: context,
       showDragHandle: true,
       builder: (c) => SafeArea(
@@ -189,7 +197,7 @@ class _MapScreenState extends State<MapScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('${at.latitude.toStringAsFixed(5)}, ${at.longitude.toStringAsFixed(5)}'),
+              Text(favorite?.name ?? '${at.latitude.toStringAsFixed(5)}, ${at.longitude.toStringAsFixed(5)}'),
               const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
@@ -197,17 +205,35 @@ class _MapScreenState extends State<MapScreen> {
                 child: FilledButton.icon(
                   icon: const Icon(Icons.directions),
                   label: const Text('Y aller'),
-                  onPressed: () => Navigator.pop(c, true),
+                  onPressed: () => Navigator.pop(c, 'go'),
                 ),
               ),
+              if (favorite == null) ...[
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.star_border),
+                    label: const Text('Ajouter aux favoris'),
+                    onPressed: () => Navigator.pop(c, 'favorite'),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
       ),
     );
-    if (go ?? false) {
+    if (!mounted) return;
+    if (choice == 'go') {
       setState(() => _follow = true);
-      await app.navigateTo(Place(name: 'Point choisi', position: LatLon(at.latitude, at.longitude)));
+      await app.navigateTo(favorite ?? Place(name: 'Point choisi', position: point));
+    } else if (choice == 'favorite') {
+      final name = await askFavoriteName(context);
+      if (name == null) return;
+      await app.favorites.add(Place(name: name, position: point));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('« $name » ajouté aux favoris')));
     }
   }
 

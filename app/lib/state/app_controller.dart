@@ -9,6 +9,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../config.dart';
 import '../services/embedded_region.dart';
+import '../services/favorites.dart';
 import '../services/identity_store.dart';
 import '../services/location_source.dart';
 import '../services/settings_store.dart';
@@ -34,6 +35,9 @@ class AppController extends ChangeNotifier {
   LocationAvailability? locationStatus;
 
   Place? destination;
+
+  /// Saved places (Maison, Travail…), on the phone only.
+  late final Favorites favorites;
   TripRoute? route;
   GuidanceEngine? _guidance;
   GuidanceState? guidance;
@@ -73,7 +77,10 @@ class AppController extends ChangeNotifier {
     final identity = await store.loadOrCreate();
     final support = await getApplicationSupportDirectory();
     final regions = RegionStore(Directory('${support.path}/regions'), trustedKeys: Defaults.trustedRegionKeys);
-    return AppController._(settings, identity.keys, store, regions)..hasRecoveryPhrase = identity.hasRecoveryPhrase;
+    final favorites = await Favorites.load();
+    return AppController._(settings, identity.keys, store, regions)
+      ..hasRecoveryPhrase = identity.hasRecoveryPhrase
+      ..favorites = favorites;
   }
 
   bool get navigating => route != null;
