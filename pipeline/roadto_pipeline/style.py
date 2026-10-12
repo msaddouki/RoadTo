@@ -109,6 +109,31 @@ def rewrite_style(style: dict) -> tuple[dict, dict[str, str], list[tuple[str, st
     return out, fonts, sprites
 
 
+# Glyph ranges are 256 code points each. A full font is 256 ranges per font
+# and most of the weight is CJK; Latin, Greek and Cyrillic plus punctuation
+# and currency symbols cover French and its neighbours at a fraction of the
+# size. Labels outside these ranges render with missing glyphs: regions with
+# other scripts must pass their own starts.
+LATIN_GLYPH_STARTS = (
+    *range(0x0000, 0x0500, 256),  # Latin, Latin Extended, IPA, Greek, Cyrillic
+    0x1E00,  # Latin Extended Additional
+    0x1F00,  # Greek Extended
+    0x2000,  # General punctuation, super/subscripts, currency
+    0x2100,  # Letter-like symbols, number forms, arrows
+)
+
+
+def glyph_jobs(fonts: dict[str, str], template: str, starts: tuple[int, ...]) -> list[tuple[str, str]]:
+    """(bundle path, remote URL) for every glyph range of every font."""
+    jobs = []
+    for name, safe in fonts.items():
+        for start in starts:
+            rng = f"{start}-{start + 255}"
+            url = template.replace("{fontstack}", urllib.parse.quote(name)).replace("{range}", rng)
+            jobs.append((f"fonts/{safe}/{rng}.pbf", url))
+    return jobs
+
+
 # Identify ourselves: CDNs commonly reject urllib's default user agent.
 USER_AGENT = "RoadTo-pipeline/0.1 (+https://github.com/msaddouki/RoadTo)"
 
@@ -124,7 +149,13 @@ def _get(url: str) -> bytes | None:
         raise
 
 
-def build_bundle(out_path: Path, style_url: str = DEFAULT_STYLE_URL, *, workers: int = 16) -> dict:
+def build_bundle(
+    out_path: Path,
+    style_url: str = DEFAULT_STYLE_URL,
+    *,
+    glyph_starts: tuple[int, ...] = LATIN_GLYPH_STARTS,
+    workers: int = 16,
+) -> dict:
     """Downloads the style, its sprites and glyphs, and writes the bundle."""
     style = json.loads(_get(style_url) or b"null")
     if not style:
@@ -138,11 +169,7 @@ def build_bundle(out_path: Path, style_url: str = DEFAULT_STYLE_URL, *, workers:
     for sprite_id, url in sprites:
         for suffix in (".json", ".png", "@2x.json", "@2x.png"):
             jobs.append((f"sprites/{sprite_id}{suffix}", url + suffix))
-    for name, safe in fonts.items():
-        for start in range(0, 65536, 256):
-            rng = f"{start}-{start + 255}"
-            url = glyph_template.replace("{fontstack}", urllib.parse.quote(name)).replace("{range}", rng)
-            jobs.append((f"fonts/{safe}/{rng}.pbf", url))
+    jobs += glyph_jobs(fonts, glyph_template, glyph_starts)
 
     with ThreadPoolExecutor(max_workers=workers) as pool:
         for path, data in zip((p for p, _ in jobs), pool.map(lambda j: _get(j[1]), jobs)):

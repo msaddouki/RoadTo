@@ -16,6 +16,12 @@ manifest. Regions are defined in `regions/<id>.json`; the first one is
 | `manifest.json` | `roadto_pipeline manifest` | size and SHA-256 of every file |
 | `manifest.json.sig` | `roadto_pipeline sign` | Ed25519 signature of the manifest |
 
+The style bundle only carries the glyph ranges for Latin, Greek and Cyrillic
+text plus punctuation and currency symbols (`LATIN_GLYPH_STARTS` in
+`roadto_pipeline/style.py`). Shipping every range, CJK included, made the
+bundle 59 MB for no benefit in France; a region with other scripts must pass
+its own ranges.
+
 File URLs in the manifest are relative to it, so a package can be served
 from any static host. The schema of `places.sqlite` is
 [`schema/places.sql`](schema/places.sql).
