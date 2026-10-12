@@ -50,14 +50,17 @@ only with a passenger.
 
 ## 3. Offline map and search
 
-Réglages > **Régions hors ligne** > Lyon et sa périphérie > **Télécharger**.
-The app checks the package signature and every file hash before installing
-it; the map and address search then work in airplane mode. Routing still
-needs the network until valhalla-mobile is integrated.
+Builds from CI (the APK and simulator artifacts) **embed the Lyon region**:
+on first launch the app installs it (a progress bar shows in Réglages >
+Régions hors ligne), then the map and address search work in airplane mode.
+Routing still needs the network until valhalla-mobile is integrated.
 
-The package must first be published once (see
-[pipeline/README.md](../pipeline/README.md#publishing)): until the signing
-key is set up, the app refuses every package.
+A local `flutter run` has no embedded region unless you run
+`tool/embed_region.sh lyon` first (needs the `gh` CLI and access to the
+repository). Otherwise import `lyon.roadto`, downloaded from the
+`region-lyon` release: Réglages > Régions hors ligne > **Importer un fichier
+.roadto**. Either way the app checks the signature and every file hash
+before installing.
 
 ## 4. Two phones, one alert
 
@@ -83,9 +86,7 @@ The same scenario runs automatically in `relay/dev_relay/test/`.
 | Guidance | in-house Dart engine | in-house or Ferrostar (spike C) |
 | Relay | in-memory dev relay, or two strfry relays (`relay/strfry`, Docker) | Helm chart, metrics, TLS (J3) |
 | Identity | key in Keystore / Keychain | + BIP-39 recovery phrase (J3) |
-| Android location | geolocator, LocationManager forced | plugin without Google services (J2) |
-| Car | — | Android Auto (J4), CarPlay (after Apple's approval) |
-| Police alerts | disabled | after the L130-11 channel (J6) |
+
 
 The public servers (OpenFreeMap, FOSSGIS, Komoot) are free services:
 reasonable test use only.

@@ -88,6 +88,8 @@ python3 -m roadto_pipeline manifest --region "$REGION_JSON" --dir "$OUT" \
 if [[ -n "${ROADTO_SIGNING_KEY:-}" || ( -n "${VAULT_ADDR:-}" && -n "${ROADTO_VAULT_TRANSIT_KEY:-}" ) ]]; then
   step "Signature"
   python3 -m roadto_pipeline sign --file "$OUT/manifest.json"
+  step "Single-file bundle"
+  python3 -m roadto_pipeline bundle --dir "$OUT" --out "$OUT/$REGION_ID.roadto"
 else
   echo "WARNING: no signing key configured, manifest left unsigned (the app will refuse it)." >&2
 fi

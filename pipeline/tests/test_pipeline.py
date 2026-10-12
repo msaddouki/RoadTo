@@ -7,7 +7,9 @@ from pathlib import Path
 
 import pytest
 
-from roadto_pipeline import manifest, places, signing, style
+import tarfile
+
+from roadto_pipeline import bundle, manifest, places, signing, style
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -102,6 +104,18 @@ def test_style_is_rewritten_for_offline_use():
     assert src["sources"]["openmaptiles"]["url"] == "https://tiles.example.org/planet"
 
 
+def test_glyph_ranges_are_limited_to_latin_scripts():
+    jobs = style.glyph_jobs({"Noto Sans Regular": "Noto_Sans_Regular"}, "https://x/{fontstack}/{range}.pbf",
+                            style.LATIN_GLYPH_STARTS)
+    paths = [p for p, _ in jobs]
+    assert len(paths) == len(style.LATIN_GLYPH_STARTS) == 9
+    assert "fonts/Noto_Sans_Regular/0-255.pbf" in paths          # basic Latin, French accents
+    assert "fonts/Noto_Sans_Regular/1024-1279.pbf" in paths      # Cyrillic
+    assert "fonts/Noto_Sans_Regular/8192-8447.pbf" in paths      # punctuation, euro sign
+    assert not any("19968" in p for p in paths)                  # no CJK
+    assert jobs[0][1] == "https://x/Noto%20Sans%20Regular/0-255.pbf"
+
+
 def test_style_without_vector_source_is_rejected():
     with pytest.raises(ValueError):
         style.rewrite_style({"sources": {}, "layers": []})
@@ -165,3 +179,28 @@ def test_sign_without_key_fails(monkeypatch):
         monkeypatch.delenv(var, raising=False)
     with pytest.raises(signing.SigningError):
         signing.sign(b"x")
+
+
+# --- bundle ---------------------------------------------------------------
+
+def test_bundle_packs_signed_package_manifest_first(tmp_path):
+    (tmp_path / "pkg").mkdir()
+    pkg = _package(tmp_path / "pkg", with_routing=True)
+    m = manifest.build_manifest(REGION, pkg, version="v")
+    (pkg / "manifest.json").write_bytes(manifest.encode(m))
+    (pkg / "manifest.json.sig").write_text("sig\n")
+    out = tmp_path / "test.roadto"
+    names = bundle.build_bundle(pkg, out)
+    assert names == ["manifest.json", "manifest.json.sig", "style.tar.gz", "places.sqlite", "map.pmtiles"]
+    with tarfile.open(out) as tar:
+        assert tar.getnames() == names
+        assert all(t.isfile() and t.mtime == 0 for t in tar.getmembers())
+        assert tar.extractfile("map.pmtiles").read() == b"map.pmtiles"
+    assert "routing.tar" in bundle.build_bundle(pkg, out, include_optional=True)
+
+
+def test_bundle_refuses_unsigned_package(tmp_path):
+    pkg = _package(tmp_path)
+    (pkg / "manifest.json").write_bytes(manifest.encode(manifest.build_manifest(REGION, pkg, version="v")))
+    with pytest.raises(FileNotFoundError):
+        bundle.build_bundle(pkg, tmp_path / "x.roadto")

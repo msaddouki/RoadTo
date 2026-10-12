@@ -2,9 +2,12 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -124,6 +127,10 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
+      - name: Embed the Lyon region
+        run: tool/embed_region.sh lyon
+        env:
+          GH_TOKEN: ${{ github.token }}
       - name: Build
         working-directory: app
         run: |
@@ -151,6 +158,10 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
+      - name: Embed the Lyon region
+        run: tool/embed_region.sh lyon
+        env:
+          GH_TOKEN: ${{ github.token }}
       - name: Build
         working-directory: app
         run: |

@@ -15,21 +15,23 @@ class RegionSource {
 /// map and search already work offline once a region is installed; routing
 /// moves offline with valhalla-mobile.
 abstract final class Defaults {
-  /// Regions offered for download. Packages are published to rolling GitHub
-  /// Releases by .github/workflows/region.yml.
-  static const regions = [
-    RegionSource(
-      'lyon',
-      'Lyon et sa périphérie',
-      'https://github.com/msaddouki/RoadTo/releases/download/region-lyon/manifest.json',
-    ),
-  ];
+  /// Regions shipped inside the app, installed on first launch. CI copies the
+  /// signed packages into `assets/regions/<id>/` before building; a local build
+  /// without them simply has no embedded region.
+  static const embeddedRegions = ['lyon'];
 
-  /// Ed25519 public keys (base64) allowed to sign region manifests. Generate
-  /// the pair with `python -m roadto_pipeline keygen`, store the private key
-  /// as the REGION_SIGNING_KEY secret and add the public key here. Until then
-  /// the app refuses every package.
-  static const trustedRegionKeys = <String>[];
+  /// Regions offered for download from a server. Empty until a package host
+  /// (MinIO, see docs/adr/0009) is set up; regions come embedded or from a
+  /// `.roadto` file meanwhile.
+  static const regions = <RegionSource>[];
+
+  /// Ed25519 public keys (base64) allowed to sign region manifests; the
+  /// matching private key is the REGION_SIGNING_KEY secret of the repository.
+  /// To rotate: `python -m roadto_pipeline keygen`, replace the secret, add
+  /// the new key here and drop the old one after one release.
+  static const trustedRegionKeys = <String>[
+    '7hKf0Z8kswZm/IeEVc7gHvx7IrW0cMEGYBA704fp8Kc=', // 2026-10-12, POC key
+  ];
 
   /// OpenFreeMap styles: free OSM tiles, no key, no tracking.
   static const mapStyles = {
