@@ -84,8 +84,17 @@ class AppController extends ChangeNotifier {
   /// Style to display: the installed region's offline map when there is one.
   String get mapStyle {
     final r = activeRegion;
-    return r != null && settings.offlineMap ? r.stylePath : settings.mapStyle;
+    if (r == null || !settings.offlineMap) return settings.mapStyle;
+    return nightMap && r.hasNightStyle ? r.nightStylePath : r.stylePath;
   }
+
+  /// Night colours for the map: by the sun where the car is (auto), or as
+  /// set. Re-read on every refresh, so the map switches at sunset.
+  bool get nightMap => switch (settings.nightMap) {
+    NightMap.always => true,
+    NightMap.never => false,
+    NightMap.auto => isNight(position, DateTime.now()),
+  };
 
   bool get usingOfflineMap => activeRegion != null && settings.offlineMap;
 

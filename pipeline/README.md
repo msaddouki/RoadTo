@@ -17,6 +17,13 @@ manifest. Regions are defined in `regions/<id>.json`; the first one is
 | `manifest.json.sig` | `roadto_pipeline sign` | Ed25519 signature of the manifest |
 | `<id>.roadto` | `roadto_pipeline bundle` | the signed package as one file, to embed or import |
 
+The style bundle also holds `style-night.json`, the same style with night
+colours (`roadto_pipeline/night.py`): lightness inverted with the hue kept,
+roads kept lighter than the ground, map text lifted with dark halos, fill
+patterns toned down. The app shows it between sunset and sunrise (computed
+from the position, offline), or always or never as set. Apps that predate it
+ignore the file.
+
 The style bundle only carries the glyph ranges for Latin, Greek and Cyrillic
 text plus punctuation and currency symbols (`LATIN_GLYPH_STARTS` in
 `roadto_pipeline/style.py`). Shipping every range, CJK included, made the

@@ -7,7 +7,8 @@ makes it work without network:
 - other sources (raster relief, etc.) and their layers are dropped;
 - sprites and glyphs are downloaded into the bundle;
 - font names are rewritten to path-safe ids, so the glyph URLs resolve the
-  same whether or not the map engine percent-encodes the font stack.
+  same whether or not the map engine percent-encodes the font stack;
+- a night variant, ``style-night.json``, is added next to ``style.json``.
 
 Paths are written with two placeholders that the app replaces at install
 time with ``file://`` URLs of the installed region:
@@ -28,6 +29,8 @@ import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+
+from .night import night_style
 
 DEFAULT_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty"
 VECTOR_SOURCE = "openmaptiles"
@@ -163,7 +166,11 @@ def build_bundle(
     offline, fonts, sprites = rewrite_style(style)
     glyph_template = style["glyphs"]
 
-    files: dict[str, bytes] = {"style.json": json.dumps(offline, ensure_ascii=False, indent=1).encode()}
+    files: dict[str, bytes] = {
+        "style.json": json.dumps(offline, ensure_ascii=False, indent=1).encode(),
+        # Same layers, night colours (night.py); apps older than it ignore it.
+        "style-night.json": json.dumps(night_style(offline), ensure_ascii=False, indent=1).encode(),
+    }
 
     jobs = []
     for sprite_id, url in sprites:
