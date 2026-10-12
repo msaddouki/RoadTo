@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12+. Cloud backup is off (allowBackup="false" in the manifest);
+     these rules also keep the identity and the regions out of phone-to-phone
+     transfers. The identity key is wrapped by this phone's keystore and could
+     not be read elsewhere: it moves with its recovery phrase. Regions are
+     reinstalled from the app or a .roadto file. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="FlutterSecureStorage.xml"/>
+        <exclude domain="file" path="regions"/>
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="FlutterSecureStorage.xml"/>
+        <exclude domain="file" path="regions"/>
+    </device-transfer>
+</data-extraction-rules>

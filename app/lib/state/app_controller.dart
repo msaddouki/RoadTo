@@ -8,6 +8,7 @@ import 'package:roadto_core/roadto_core.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../config.dart';
+import '../services/backup.dart';
 import '../services/embedded_region.dart';
 import '../services/identity_store.dart';
 import '../services/location_source.dart';
@@ -72,6 +73,7 @@ class AppController extends ChangeNotifier {
     final settings = await SettingsStore.load();
     final identity = await store.loadOrCreate();
     final support = await getApplicationSupportDirectory();
+    await BackupExclusion.exclude(Directory('${support.path}/regions'));
     final regions = RegionStore(Directory('${support.path}/regions'), trustedKeys: Defaults.trustedRegionKeys);
     return AppController._(settings, identity.keys, store, regions)..hasRecoveryPhrase = identity.hasRecoveryPhrase;
   }

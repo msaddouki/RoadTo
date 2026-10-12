@@ -23,6 +23,11 @@
 
 - Losing both the phone and the phrase loses the identity: there is no
   account to recover it from, by design.
+- The key does not leave the phone through backups on Android: Google Drive
+  backup is off and phone-to-phone transfers skip the secure storage (the key
+  is wrapped by this phone's keystore and would be unreadable elsewhere).
+  Moving to a new phone goes through the phrase. On iOS it stays in the
+  keychain, which only travels in encrypted backups.
 - To do before the beta: an encrypted file export as an alternative to
   writing words down (plan, J3), and screen-capture protection on the phrase
   screen (Android `FLAG_SECURE`, iOS secure text).
