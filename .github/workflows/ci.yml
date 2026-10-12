@@ -118,6 +118,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # The release build with the embedded region and routing graph (and
+      # Valhalla for four ABIs) runs out of the runner's disk. Toolchains the
+      # build never uses are removed first.
+      - name: Free disk space
+        run: tool/free_ci_disk.sh
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -136,6 +141,9 @@ jobs:
         run: |
           flutter pub get
           flutter build apk --release
+      - name: Disk usage
+        if: always()
+        run: df -h / && du -sh app/build ~/.gradle 2>/dev/null || true
       - name: No trackers in the build
         working-directory: app/android
         run: |
