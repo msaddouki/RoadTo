@@ -48,6 +48,35 @@ void main() {
     });
   });
 
+  group('encrypted backup (NIP-49)', () {
+    test('export then restore on another phone gives the same key, without phrase', () async {
+      final phone1 = _MemoryStore();
+      final original = await IdentityStore(phone1, 4).restore(RecoveryPhrase.parse(_nip06Phrase));
+      final backup = await IdentityStore(phone1, 4).exportEncrypted('correct horse battery');
+      expect(backup, startsWith('ncryptsec1'));
+
+      final phone2 = _MemoryStore();
+      await IdentityStore(phone2, 4).loadOrCreate();
+      final restored = await IdentityStore(phone2, 4).restoreEncrypted(backup, 'correct horse battery');
+      expect(restored.keys.publicKey, original.keys.publicKey);
+      expect(restored.hasRecoveryPhrase, isFalse);
+      final reloaded = await IdentityStore(phone2, 4).loadOrCreate();
+      expect(reloaded.keys.publicKey, _nip06Public);
+      expect(reloaded.hasRecoveryPhrase, isFalse);
+    });
+
+    test('a wrong password leaves the identity untouched', () async {
+      final store = _MemoryStore();
+      final id = await IdentityStore(store, 4).loadOrCreate();
+      final backup = await IdentityStore(store, 4).exportEncrypted('correct horse battery');
+      await expectLater(
+        IdentityStore(store, 4).restoreEncrypted(backup, 'wrong'),
+        throwsA(isA<EncryptedKeyException>()),
+      );
+      expect((await IdentityStore(store, 4).loadOrCreate()).keys.publicKey, id.keys.publicKey);
+    });
+  });
+
   group('screens', () {
     testWidgets('the phrase is shown numbered', (tester) async {
       await tester.pumpWidget(MaterialApp(home: RecoveryPhraseScreen(phrase: RecoveryPhrase.parse(_nip06Phrase))));
@@ -70,6 +99,67 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Restaurer').last);
       await tester.pumpAndSettle();
       expect(restored!.keyPair().publicKey, _nip06Public);
+    });
+
+    testWidgets('export checks the password, then shows the backup', (tester) async {
+      String? used;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ExportIdentityScreen(
+            export: (pw) async {
+              used = pw;
+              return 'ncryptsec1test';
+            },
+          ),
+        ),
+      );
+      await tester.enterText(find.byKey(const Key('export-password')), 'court');
+      await tester.enterText(find.byKey(const Key('export-confirm')), 'court');
+      await tester.tap(find.text('Chiffrer'));
+      await tester.pump();
+      expect(find.text('Au moins 10 caractères'), findsOneWidget);
+
+      await tester.enterText(find.byKey(const Key('export-password')), 'un long mot de passe');
+      await tester.enterText(find.byKey(const Key('export-confirm')), 'un long mot de passe!');
+      await tester.tap(find.text('Chiffrer'));
+      await tester.pump();
+      expect(find.text('Les deux mots de passe diffèrent'), findsOneWidget);
+      expect(used, isNull);
+
+      await tester.enterText(find.byKey(const Key('export-confirm')), 'un long mot de passe');
+      await tester.tap(find.text('Chiffrer'));
+      await tester.pumpAndSettle();
+      expect(used, 'un long mot de passe');
+      expect(find.text('ncryptsec1test'), findsOneWidget);
+    });
+
+    testWidgets('restoring a backup shows a wrong password, then restores', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: RestoreEncryptedScreen(
+            open: () async => '  ncryptsec1fromfile\n',
+            onRestore: (text, pw) async {
+              expect(text, 'ncryptsec1fromfile');
+              if (pw != 'bon mot de passe') throw const EncryptedKeyException('Mot de passe incorrect');
+            },
+          ),
+        ),
+      );
+      await tester.tap(find.text('Ouvrir un fichier'));
+      await tester.pump();
+      await tester.enterText(find.byKey(const Key('restore-password')), 'mauvais');
+      await tester.tap(find.widgetWithText(FilledButton, 'Restaurer'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Restaurer').last);
+      await tester.pumpAndSettle();
+      expect(find.text('Mot de passe incorrect'), findsOneWidget);
+
+      await tester.enterText(find.byKey(const Key('restore-password')), 'bon mot de passe');
+      await tester.tap(find.widgetWithText(FilledButton, 'Restaurer'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(FilledButton, 'Restaurer').last);
+      await tester.pumpAndSettle();
+      expect(find.byType(RestoreEncryptedScreen), findsNothing);
     });
   });
 }

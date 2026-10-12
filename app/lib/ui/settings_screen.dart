@@ -190,10 +190,27 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ListTile(
               contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.lock_outline),
+              title: const Text('Sauvegarde chiffrée par mot de passe'),
+              subtitle: const Text('Fichier ncryptsec (Nostr NIP-49)'),
+              onTap: () => Navigator.of(
+                context,
+              ).push(MaterialPageRoute(builder: (_) => ExportIdentityScreen(export: app.exportIdentity))),
+            ),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.restore),
               title: const Text('Restaurer avec une phrase'),
               onTap: () =>
                   Navigator.of(context).push(MaterialPageRoute(builder: (_) => RestoreIdentityScreen(app: app))),
+            ),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.lock_open),
+              title: const Text('Restaurer une sauvegarde chiffrée'),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => RestoreEncryptedScreen(onRestore: app.restoreEncryptedIdentity)),
+              ),
             ),
             OutlinedButton(
               onPressed: () async {

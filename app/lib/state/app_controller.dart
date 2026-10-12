@@ -525,6 +525,11 @@ class AppController extends ChangeNotifier {
 
   Future<void> restoreIdentity(RecoveryPhrase phrase) => _setIdentity(_identityStore.restore(phrase));
 
+  Future<String> exportIdentity(String password) => _identityStore.exportEncrypted(password);
+
+  Future<void> restoreEncryptedIdentity(String encrypted, String password) =>
+      _setIdentity(_identityStore.restoreEncrypted(encrypted, password));
+
   Future<void> _setIdentity(Future<Identity> next) async {
     final id = await next;
     identity = id.keys;
