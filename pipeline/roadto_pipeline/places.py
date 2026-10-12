@@ -1,7 +1,9 @@
 """Builds the offline search index (places.sqlite) from an OSM extract.
 
 The index holds addresses, named streets, settlements and named points of
-interest, with a full-text index (SQLite FTS5) that ignores accents. The
+interest, with a full-text index (SQLite FTS5) that ignores accents. Places
+without ``addr:city`` get the commune whose boundary contains them, or the
+nearest settlement where no boundary is known. The
 schema lives in ``pipeline/schema/places.sql`` and is read by
 ``OfflineGeocoder`` in ``packages/roadto_core``.
 """
@@ -14,6 +16,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import osmium
+import shapely
 
 SCHEMA_VERSION = "1"
 SCHEMA_PATH = Path(__file__).resolve().parent.parent / "schema" / "places.sql"
@@ -31,6 +34,9 @@ PLACE_IMPORTANCE = {
     "locality": 40,
 }
 CITY_LEVELS = {"city", "town", "village"}
+
+# Administrative level of municipalities (communes in France).
+COMMUNE_ADMIN_LEVEL = "8"
 
 STREET_IMPORTANCE = 30
 POI_IMPORTANCE = 20
@@ -108,6 +114,8 @@ class _Collector(osmium.SimpleHandler):
         super().__init__()
         self.rows: list[Row] = []
         self.streets: dict[tuple[str, int, int], Row] = {}
+        self.communes: list[tuple[str, str]] = []  # (name, WKB in hex)
+        self._wkb = osmium.geom.WKBFactory()
 
     def node(self, n) -> None:
         if n.location.valid():
@@ -123,6 +131,20 @@ class _Collector(osmium.SimpleHandler):
             return
         # Mean of the vertices: good enough to centre a result on screen.
         self._feature(w.tags, sum(lats) / len(lats), sum(lons) / len(lons), is_way=True)
+
+    def area(self, a) -> None:
+        # Defining this callback makes apply_file() assemble areas (closed
+        # ways and multipolygon or boundary relations) in a second pass.
+        tags = a.tags
+        if tags.get("boundary") != "administrative" or tags.get("admin_level") != COMMUNE_ADMIN_LEVEL:
+            return
+        name = tags.get("name")
+        if not name:
+            return
+        try:
+            self.communes.append((name, self._wkb.create_multipolygon(a)))
+        except RuntimeError:
+            pass  # broken geometry: the nearest settlement is used instead
 
     def _feature(self, tags, lat: float, lon: float, *, is_way: bool) -> None:
         name = tags.get("name")
@@ -191,15 +213,36 @@ class _CityIndex:
         return None
 
 
+class _CommuneIndex:
+    """Commune containing a point, from the administrative boundaries."""
+
+    def __init__(self, communes: list[tuple[str, str]]) -> None:
+        self.names = [name for name, _ in communes]
+        self.tree = shapely.STRtree(shapely.from_wkb([wkb for _, wkb in communes]))
+
+    def lookup(self, rows: list[Row]) -> list[str | None]:
+        found: list[str | None] = [None] * len(rows)
+        if not rows or not self.names:
+            return found
+        points = shapely.points([r.lon for r in rows], [r.lat for r in rows])
+        # Pairs (point, commune), ordered by point. A point on a shared border
+        # gets the first commune.
+        for p, c in zip(*self.tree.query(points, predicate="intersects")):
+            if found[p] is None:
+                found[p] = self.names[c]
+        return found
+
+
 def collect(osm_path: str | Path) -> list[Row]:
     """Reads an OSM file (.osm.pbf or .osm) and returns the rows to index."""
     handler = _Collector()
     handler.apply_file(str(osm_path), locations=True)
     rows = handler.rows + list(handler.streets.values())
+    pending = [r for r in rows if r.city is None and not r.kind.startswith("place=")]
+    communes = _CommuneIndex(handler.communes).lookup(pending)
     cities = _CityIndex(rows)
-    for r in rows:
-        if r.city is None and not r.kind.startswith("place="):
-            r.city = cities.nearest(r.lat, r.lon)
+    for r, commune in zip(pending, communes):
+        r.city = commune or cities.nearest(r.lat, r.lon)
     return rows
 
 
@@ -229,6 +272,35 @@ def write_index(rows: list[Row], out_path: str | Path, *, region_id: str, osm_ti
         db.executemany("INSERT INTO meta (key, value) VALUES (?, ?)", meta.items())
         db.commit()
         db.execute("VACUUM")
+    finally:
+        db.close()
+
+
+def index_stats(path: str | Path, probes: list[str] = ()) -> str:
+    """Markdown summary of a built index, for the region workflow: how many
+    places lack a commune, the largest communes, and where [probes] (exact
+    names) landed."""
+    db = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+    try:
+        total = db.execute("SELECT count(*) FROM place").fetchone()[0]
+        no_city = db.execute(
+            "SELECT count(*) FROM place WHERE city IS NULL AND kind NOT LIKE 'place=%'").fetchone()[0]
+        top = db.execute(
+            "SELECT city, count(*) FROM place WHERE city IS NOT NULL GROUP BY city ORDER BY 2 DESC LIMIT 10"
+        ).fetchall()
+        lines = [
+            f"Search index: {total} places, {no_city} ({no_city / max(total, 1):.1%}) without a commune.",
+            "",
+            "| Commune | Places |",
+            "| --- | ---: |",
+            *(f"| {city} | {n} |" for city, n in top),
+        ]
+        if probes:
+            lines.append("")
+            for name in probes:
+                cities = [c or "?" for (c,) in db.execute("SELECT city FROM place WHERE name = ? LIMIT 3", (name,))]
+                lines.append(f"- {name}: {', '.join(cities) if cities else 'not found'}")
+        return "\n".join(lines) + "\n"
     finally:
         db.close()
 

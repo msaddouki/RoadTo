@@ -31,6 +31,12 @@ there is one; private ones (`access=private|no`) are left out. An index on
 `(kind, lat, lon)` serves category search; it is additive, so older apps
 read new packages unchanged.
 
+Each place shows its commune: `addr:city` when OSM has it, otherwise the
+commune whose boundary (`boundary=administrative`, `admin_level=8`) contains
+it, and the nearest city, town or village only where no boundary is known.
+The extract keeps boundary relations complete (`-S types=multipolygon,boundary`)
+so communes cut by the bbox still have their full outline.
+
 File URLs in the manifest are relative to it, so a package can be served
 from any static host. The schema of `places.sqlite` is
 [`schema/places.sql`](schema/places.sql).
@@ -76,6 +82,10 @@ region on demand and on the 1st of every month. When the `REGION_SIGNING_KEY`
 secret exists, it signs the package, packs `<id>.roadto` and uploads
 everything to the rolling GitHub Release `region-<id>`. Without the secret,
 the unsigned package is kept as a workflow artifact for inspection.
+
+To try a pipeline change before merging it, run the workflow on the branch
+with **publish** unticked: the package is built (and signed) but only kept
+as a workflow artifact, and the release that app builds embed is left alone.
 
 The repository is private, so the app never downloads from that release.
 The package reaches phones in two ways, with no server:
