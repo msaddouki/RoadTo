@@ -46,3 +46,12 @@ kotlin {
 flutter {
     source = "../.."
 }
+
+// No Google Play Services in the APK. maplibre_gl declares play-services-base
+// and -location for an optional location engine (GMSLocationEngine) that only
+// MapLibre's own location component uses; the app never enables it
+// (myLocationEnabled stays false, see map_screen.dart) and draws its own
+// position from DeviceLocation.kt.
+configurations.all {
+    exclude(group = "com.google.android.gms")
+}

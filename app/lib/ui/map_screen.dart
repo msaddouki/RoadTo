@@ -234,6 +234,9 @@ class _MapScreenState extends State<MapScreen> {
             onPointerDown: (_) {
               if (_follow) setState(() => _follow = false);
             },
+            // Never set myLocationEnabled: MapLibre's location component would
+            // use its Play Services engine, which the Android build excludes.
+            // The position layer is drawn from DeviceLocation instead.
             child: MapLibreMap(
               key: ValueKey('${app.mapStyle}@${app.activeRegion?.version}'),
               styleString: app.mapStyle,

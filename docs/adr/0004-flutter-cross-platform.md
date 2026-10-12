@@ -41,8 +41,11 @@ New requirement: target Android and iOS from the start.
   LocationManager through its own channel (`DeviceLocation.kt`, GPS with
   network as a stopgap), because `geolocator_android` ships
   `play-services-location`. iOS keeps geolocator's Apple implementation
-  (Core Location) only. CI fails the build if any `com.google.android.gms`
-  library comes back (`tool/check_no_trackers.sh`).
+  (Core Location) only. maplibre_gl also declares Play Services for an
+  optional location engine of its own; the app excludes them in Gradle and
+  never enables MapLibre's location component, which is the only user of
+  that engine. CI fails the build if any `com.google.android.gms` library
+  comes back (`tool/check_no_trackers.sh`).
 
 ## Alternatives considered
 
