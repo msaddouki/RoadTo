@@ -20,6 +20,7 @@ import '../services/voice.dart';
 class AppController extends ChangeNotifier {
   AppSettings settings;
   KeyPair identity;
+  bool hasRecoveryPhrase = false;
   final IdentityStore _identityStore;
   final Voice _voice = Voice();
   final AlertStore alerts = AlertStore();
@@ -72,7 +73,7 @@ class AppController extends ChangeNotifier {
     final identity = await store.loadOrCreate();
     final support = await getApplicationSupportDirectory();
     final regions = RegionStore(Directory('${support.path}/regions'), trustedKeys: Defaults.trustedRegionKeys);
-    return AppController._(settings, identity, store, regions);
+    return AppController._(settings, identity.keys, store, regions)..hasRecoveryPhrase = identity.hasRecoveryPhrase;
   }
 
   bool get navigating => route != null;
@@ -454,8 +455,16 @@ class AppController extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> regenerateIdentity() async {
-    identity = await _identityStore.regenerate();
+  Future<RecoveryPhrase?> recoveryPhrase() => _identityStore.recoveryPhrase();
+
+  Future<void> regenerateIdentity() => _setIdentity(_identityStore.regenerate());
+
+  Future<void> restoreIdentity(RecoveryPhrase phrase) => _setIdentity(_identityStore.restore(phrase));
+
+  Future<void> _setIdentity(Future<Identity> next) async {
+    final id = await next;
+    identity = id.keys;
+    hasRecoveryPhrase = id.hasRecoveryPhrase;
     _ownKeys.add(identity.publicKey);
     notifyListeners();
   }

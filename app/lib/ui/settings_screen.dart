@@ -4,6 +4,7 @@ import 'package:roadto_core/roadto_core.dart';
 
 import '../config.dart';
 import '../state/app_controller.dart';
+import 'identity_screens.dart';
 import 'regions_screen.dart';
 
 /// Relais, simulation, services et identité.
@@ -163,6 +164,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onPressed: () => Clipboard.setData(ClipboardData(text: app.identity.publicKey)),
               ),
             ),
+            if (!app.hasRecoveryPhrase)
+              Card(
+                color: Theme.of(context).colorScheme.tertiaryContainer,
+                child: const Padding(
+                  padding: EdgeInsets.all(12),
+                  child: Text(
+                    'Cette identité n’a pas de phrase de récupération : elle sera perdue avec le téléphone. '
+                    'Créez une nouvelle identité pour en obtenir une.',
+                  ),
+                ),
+              ),
+            if (app.hasRecoveryPhrase)
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.key),
+                title: const Text('Afficher la phrase de récupération'),
+                onTap: () async {
+                  final phrase = await app.recoveryPhrase();
+                  if (phrase == null || !context.mounted) return;
+                  await Navigator.of(
+                    context,
+                  ).push(MaterialPageRoute(builder: (_) => RecoveryPhraseScreen(phrase: phrase)));
+                },
+              ),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.restore),
+              title: const Text('Restaurer avec une phrase'),
+              onTap: () =>
+                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => RestoreIdentityScreen(app: app))),
+            ),
             OutlinedButton(
               onPressed: () async {
                 final ok = await showDialog<bool>(
@@ -170,7 +202,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   builder: (c) => AlertDialog(
                     title: const Text('Nouvelle identité ?'),
                     content: const Text(
-                      'L’ancienne clé sera perdue. La sauvegarde par phrase de récupération arrive au jalon J3.',
+                      'L’identité actuelle sera perdue si vous n’avez pas noté sa phrase de récupération.',
                     ),
                     actions: [
                       TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Annuler')),
@@ -178,7 +210,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ],
                   ),
                 );
-                if (ok ?? false) await app.regenerateIdentity();
+                if (ok ?? false) {
+                  await app.regenerateIdentity();
+                  final phrase = await app.recoveryPhrase();
+                  if (phrase != null && context.mounted) {
+                    await Navigator.of(
+                      context,
+                    ).push(MaterialPageRoute(builder: (_) => RecoveryPhraseScreen(phrase: phrase)));
+                  }
+                }
               },
               child: const Text('Générer une nouvelle identité'),
             ),

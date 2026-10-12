@@ -8,6 +8,7 @@ export 'src/geohash.dart';
 export 'src/nostr/event.dart';
 export 'src/nostr/filter.dart';
 export 'src/nostr/keys.dart';
+export 'src/nostr/nip06.dart';
 export 'src/nostr/relay_pool.dart';
 export 'src/policy.dart';
 export 'src/regions/manifest.dart';

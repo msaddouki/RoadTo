@@ -27,8 +27,9 @@ once a region is downloaded.
   on the route ("Accident dans 800 m").
 - **"Still there?"** when passing an alert: yes or no, and its reliability is
   recomputed. A closed road reported ahead triggers a reroute around it.
-- Identity generated on the phone (Keystore or Keychain); a throwaway key per
-  trip signs the alerts.
+- Identity generated on the phone (Keystore or Keychain) with a 12-word
+  **recovery phrase** (BIP-39, NIP-06) to restore it on another phone; a
+  throwaway key per trip signs the alerts.
 
 ## Repository layout
 
