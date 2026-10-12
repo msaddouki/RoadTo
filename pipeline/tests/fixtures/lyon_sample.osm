@@ -60,4 +60,41 @@
     <tag k="amenity" v="charging_station"/>
     <tag k="operator" v="Izivia"/>
   </node>
+  <!-- Commune boundaries: Lyon as a boundary relation, Villeurbanne as a
+       closed way. The station is closer to Villeurbanne's centre node but
+       inside Lyon. -->
+  <node id="20" lat="45.7000" lon="4.8000" version="1"/>
+  <node id="21" lat="45.7000" lon="4.8800" version="1"/>
+  <node id="22" lat="45.8100" lon="4.8800" version="1"/>
+  <node id="23" lat="45.8100" lon="4.8000" version="1"/>
+  <node id="24" lat="45.7000" lon="4.9300" version="1"/>
+  <node id="25" lat="45.8100" lon="4.9300" version="1"/>
+  <way id="103" version="1">
+    <nd ref="20"/><nd ref="21"/><nd ref="22"/>
+  </way>
+  <way id="104" version="1">
+    <nd ref="22"/><nd ref="23"/><nd ref="20"/>
+  </way>
+  <way id="105" version="1">
+    <nd ref="21"/><nd ref="24"/><nd ref="25"/><nd ref="22"/><nd ref="21"/>
+    <tag k="boundary" v="administrative"/>
+    <tag k="admin_level" v="8"/>
+    <tag k="name" v="Villeurbanne"/>
+  </way>
+  <relation id="200" version="1">
+    <member type="way" ref="103" role="outer"/>
+    <member type="way" ref="104" role="outer"/>
+    <tag k="type" v="boundary"/>
+    <tag k="boundary" v="administrative"/>
+    <tag k="admin_level" v="8"/>
+    <tag k="name" v="Lyon"/>
+  </relation>
+  <node id="26" lat="45.7719" lon="4.8902" version="1">
+    <tag k="place" v="city"/>
+    <tag k="name" v="Villeurbanne"/>
+  </node>
+  <node id="27" lat="45.7690" lon="4.8700" version="1">
+    <tag k="railway" v="station"/>
+    <tag k="name" v="Gare Part-Dieu"/>
+  </node>
 </osm>

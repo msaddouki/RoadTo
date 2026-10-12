@@ -41,12 +41,24 @@ def search(db: sqlite3.Connection, query: str) -> list[tuple]:
 
 def test_settlements_are_indexed(index):
     rows = index.execute("SELECT kind, name FROM place WHERE kind LIKE 'place=%' ORDER BY name").fetchall()
-    assert rows == [("place=city", "Lyon"), ("place=town", "Écully")]
+    assert rows == [("place=city", "Lyon"), ("place=city", "Villeurbanne"), ("place=town", "Écully")]
 
 
 def test_address_gets_nearest_city(index):
     rows = search(index, "12 republique")
     assert ("address", None, "12", "Rue de la République", "Lyon") in rows
+
+
+def test_city_comes_from_the_commune_boundary(index):
+    city = dict(index.execute("SELECT name, city FROM place WHERE name IN ('Gare Part-Dieu', 'Izivia')").fetchall())
+    # Closer to Villeurbanne's centre, but inside Lyon (boundary relation).
+    assert city["Gare Part-Dieu"] == "Lyon"
+    # Inside Villeurbanne (boundary drawn as a closed way).
+    assert city["Izivia"] == "Villeurbanne"
+
+
+def test_city_falls_back_to_nearest_settlement_outside_boundaries(index):
+    assert index.execute("SELECT city FROM place WHERE street = 'Chemin des Cerisiers'").fetchone() == ("Écully",)
 
 
 def test_search_ignores_accents_and_accepts_prefixes(index):
