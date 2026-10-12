@@ -1,5 +1,5 @@
 name: roadto_core
-description: Cœur métier de RoadTo, partagé par Android et iOS (géo, guidage, alertes Nostr).
+description: RoadTo business logic shared by Android and iOS (geo, guidance, Nostr alerts, offline regions).
 version: 0.1.0
 publish_to: none
 
@@ -7,11 +7,21 @@ environment:
   sdk: ^3.8.0
 
 dependencies:
+  archive: ^4.0.0
   bip340: ^0.3.1
   crypto: ^3.0.7
+  cryptography: ^2.9.0
   http: ^1.6.0
+  sqlite3: ^3.7.0
   web_socket_channel: ^3.0.3
 
 dev_dependencies:
   lints: ^6.0.0
   test: ^1.25.6
+
+# Tests run against the system SQLite (Linux CI and dev machines ship it with
+# FTS5). The app does not set this and bundles its own SQLite build.
+hooks:
+  user_defines:
+    sqlite3:
+      source: system

@@ -235,8 +235,8 @@ class _MapScreenState extends State<MapScreen> {
               if (_follow) setState(() => _follow = false);
             },
             child: MapLibreMap(
-              key: ValueKey(app.settings.mapStyle),
-              styleString: app.settings.mapStyle,
+              key: ValueKey('${app.mapStyle}@${app.activeRegion?.version}'),
+              styleString: app.mapStyle,
               initialCameraPosition: CameraPosition(target: LatLng(app.position.lat, app.position.lon), zoom: 13),
               compassEnabled: false,
               onMapCreated: (c) {

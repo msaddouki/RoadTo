@@ -1,51 +1,51 @@
-# ADR 0004 — Une seule app Flutter pour Android et iOS, cœur en Dart
+# ADR 0004 — One Flutter app for Android and iOS, Dart core
 
-- Statut : accepté (POC), à confirmer à la fin du J1
-- Date : 2026-10-12
-- Remplace : « 0004 cœur Rust + UI natives » du plan de développement
+- Status: accepted (POC), to be confirmed at the end of J1
+- Date: 2026-10-12
+- Replaces: "0004 Rust core + native UIs" from the development plan
 
-## Contexte
+## Context
 
-Le plan prévoyait un cœur Rust exposé par UniFFI, une app Android native
-(Kotlin, Compose) puis, après la bêta Android, une app iOS native (Swift,
-SwiftUI) : environ 40 jours de plus pour iOS et CarPlay, et deux langages
-mobiles à apprendre pour une personne seule et débutante en mobile.
+The plan called for a Rust core exposed through UniFFI, a native Android app
+(Kotlin, Compose) and then, after the Android beta, a native iOS app (Swift,
+SwiftUI): about 40 more days for iOS and CarPlay, and two mobile languages to
+learn for a single developer new to mobile.
 
-Nouvelle exigence : viser Android et iOS dès le départ.
+New requirement: target Android and iOS from the start.
 
-## Décision
+## Decision
 
-- **Une app Flutter** (`app/`) pour les deux téléphones : un seul langage
-  (Dart), une seule base d'interface.
-- **Un cœur en Dart pur** (`packages/roadto_core/`), sans dépendance à
-  Flutter : géohash, événements Nostr (signature BIP-340, PoW NIP-13,
-  expiration NIP-40), alertes et fiabilité, politique d'écriture des
-  relais, guidage, simulation. Testé en CI sans émulateur.
-- **Les écrans voiture restent natifs**, dans les dossiers `android/` et
-  `ios/` de l'app : Android Auto (Car App Library, Kotlin) et CarPlay
-  (templates, Swift) n'affichent pas de vue Flutter. Ils parleront au cœur
-  Dart par MethodChannel. Ce sont les seules parties natives prévues.
+- **One Flutter app** (`app/`) for both phones: one language (Dart), one UI
+  codebase.
+- **A pure Dart core** (`packages/roadto_core/`), with no Flutter dependency:
+  geohash, Nostr events (BIP-340 signatures, NIP-13 proof of work, NIP-40
+  expiry), alerts and reliability, relay write policy, guidance, simulation,
+  offline regions and search. Tested in CI without an emulator.
+- **Car screens stay native**, in the app's `android/` and `ios/` folders:
+  Android Auto (Car App Library, Kotlin) and CarPlay (templates, Swift) cannot
+  host a Flutter view. They will talk to the Dart core over MethodChannels.
+  These are the only native parts planned.
 
-## Conséquences
+## Consequences
 
-- iOS avance en même temps qu'Android : le jalon J8 se réduit à CarPlay,
-  à la publication App Store et aux réglages propres à iOS.
-- Ferrostar n'a pas de binding Flutter : le POC utilise un moteur de
-  guidage maison (`GuidanceEngine`). Le spike C du J1 dira s'il suffit ou
-  s'il faut brancher Ferrostar par des plugins natifs.
-- valhalla-mobile (routage hors ligne) devra être exposé à Dart par un
-  plugin (FFI ou MethodChannel) : à mesurer au spike B.
-- Rust reste possible plus tard pour un morceau précis (crypto, Valhalla)
-  via `flutter_rust_bridge`, si une mesure le justifie.
-- Dette connue : `geolocator` embarque `play-services-location` sur
-  Android. L'app force le LocationManager (pas d'appel aux services Google
-  à l'exécution), mais la CI le signale. À remplacer au J2 par un petit
-  plugin LocationManager / CoreLocation.
+- iOS moves forward together with Android: milestone J8 shrinks to CarPlay,
+  App Store publishing and iOS-specific settings.
+- Ferrostar has no Flutter binding: the POC uses an in-house guidance engine
+  (`GuidanceEngine`). Spike C will tell whether it is enough or whether
+  Ferrostar must be plugged in through native plugins.
+- valhalla-mobile (offline routing) has to be exposed to Dart through a
+  plugin (FFI or MethodChannel): to be measured in spike B.
+- Rust remains possible later for a specific piece (crypto, Valhalla) through
+  `flutter_rust_bridge`, if a measurement justifies it.
+- Known debt: `geolocator` ships `play-services-location` on Android. The app
+  forces the platform LocationManager (no call to Google services at run
+  time), but CI flags it. To be replaced in J2 by a small LocationManager /
+  CoreLocation plugin.
 
-## Alternatives écartées
+## Alternatives considered
 
-- **Kotlin Multiplatform + Compose Multiplatform** : bon pour Android Auto,
-  mais Gradle KMP et la chaîne iOS sont lourds pour un débutant.
-- **React Native** : écosystème carto correct, mais une couche JS de plus
-  entre la carte et le guidage.
-- **Natif ×2** (plan initial) : meilleure intégration, double travail.
+- **Kotlin Multiplatform + Compose Multiplatform**: good for Android Auto,
+  but the KMP Gradle setup and the iOS toolchain are heavy for a beginner.
+- **React Native**: decent mapping ecosystem, but one more JS layer between
+  the map and the guidance.
+- **Native ×2** (initial plan): best integration, twice the work.

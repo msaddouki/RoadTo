@@ -1,4 +1,7 @@
 # roadto_core
 
-Cœur métier de RoadTo en Dart pur, partagé par l'app Android/iOS et le relais de dev.
-Voir le [README principal](../../README.md).
+RoadTo business logic in pure Dart, shared by the Android/iOS app and the dev relay:
+geo and geohash, Nostr events and relay pool, alerts and reliability, relay write
+policy, routing and guidance, simulation, offline region packages and search.
+
+See the [main README](../../README.md).

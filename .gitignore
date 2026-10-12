@@ -5,3 +5,6 @@
 .dart_tool/
 build/
 deps.txt
+__pycache__/
+.pytest_cache/
+pipeline/work/

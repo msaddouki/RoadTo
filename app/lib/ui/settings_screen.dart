@@ -4,6 +4,7 @@ import 'package:roadto_core/roadto_core.dart';
 
 import '../config.dart';
 import '../state/app_controller.dart';
+import 'regions_screen.dart';
 
 /// Relais, simulation, services et identité.
 class SettingsScreen extends StatefulWidget {
@@ -105,6 +106,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             const Divider(height: 32),
             Text('Carte', style: text.titleMedium),
+            ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: const Icon(Icons.download_for_offline_outlined),
+              title: const Text('Régions hors ligne'),
+              subtitle: Text(
+                app.activeRegion == null
+                    ? 'Aucune région installée : carte et recherche en ligne'
+                    : '${app.activeRegion!.name} · ${app.activeRegion!.version}',
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => RegionsScreen(app: app))),
+            ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Carte hors ligne'),
+              subtitle: const Text('Affiche la carte de la région installée plutôt que les tuiles en ligne.'),
+              value: _s.offlineMap,
+              onChanged: app.activeRegion == null ? null : (v) => setState(() => _s = _s.copyWith(offlineMap: v)),
+            ),
+            Text('Style en ligne', style: text.bodyMedium),
             RadioGroup<String>(
               groupValue: _s.mapStyle,
               onChanged: (v) => setState(() => _s = _s.copyWith(mapStyle: v)),

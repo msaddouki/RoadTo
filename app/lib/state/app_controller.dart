@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:roadto_core/roadto_core.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
@@ -51,19 +53,38 @@ class AppController extends ChangeNotifier {
   DateTime _lastReroute = DateTime.fromMillisecondsSinceEpoch(0);
   bool _rerouting = false;
 
-  AppController._(this.settings, this.identity, this._identityStore);
+  // Offline regions.
+  final RegionStore regionStore;
+  List<InstalledRegion> regions = const [];
+  InstalledRegion? activeRegion;
+  OfflineGeocoder? _offlineGeocoder;
+  String? installingRegion;
+  InstallProgress? installProgress;
+  String? regionError;
+
+  AppController._(this.settings, this.identity, this._identityStore, this.regionStore);
 
   static Future<AppController> create() async {
     final store = IdentityStore();
     final settings = await SettingsStore.load();
     final identity = await store.loadOrCreate();
-    return AppController._(settings, identity, store);
+    final support = await getApplicationSupportDirectory();
+    final regions = RegionStore(Directory('${support.path}/regions'), trustedKeys: Defaults.trustedRegionKeys);
+    return AppController._(settings, identity, store, regions);
   }
 
   bool get navigating => route != null;
 
   RouteEngine get _router => ValhallaRouter(baseUrl: settings.routingUrl);
-  Geocoder get _geocoder => PhotonGeocoder(baseUrl: settings.geocoderUrl);
+  Geocoder get _onlineGeocoder => PhotonGeocoder(baseUrl: settings.geocoderUrl);
+
+  /// Style to display: the installed region's offline map when there is one.
+  String get mapStyle {
+    final r = activeRegion;
+    return r != null && settings.offlineMap ? r.stylePath : settings.mapStyle;
+  }
+
+  bool get usingOfflineMap => activeRegion != null && settings.offlineMap;
 
   LatLon get position => fix?.position ?? Defaults.fallbackPosition;
 
@@ -72,6 +93,7 @@ class AppController extends ChangeNotifier {
   List<RoadAlert> get visibleAlerts => alerts.visible();
 
   Future<void> start() async {
+    await _reloadRegions();
     _ownKeys
       ..add(identity.publicKey)
       ..add(tripKeys.publicKey);
@@ -94,6 +116,7 @@ class AppController extends ChangeNotifier {
     _simSub?.cancel();
     _alertSub?.cancel();
     _sim?.dispose();
+    _offlineGeocoder?.close();
     pool.close();
     _messages.close();
     super.dispose();
@@ -158,7 +181,16 @@ class AppController extends ChangeNotifier {
 
   // --- Navigation -------------------------------------------------------
 
-  Future<List<Place>> search(String query) => _geocoder.search(query, near: position);
+  /// Offline index first when a region is installed, online search otherwise
+  /// or when the region has no match.
+  Future<List<Place>> search(String query) async {
+    final offline = _offlineGeocoder;
+    if (offline != null) {
+      final found = offline.searchSync(query, near: position);
+      if (found.isNotEmpty) return found;
+    }
+    return _onlineGeocoder.search(query, near: position);
+  }
 
   List<LatLon> get _blockedPoints => [
     for (final a in alerts.visible())
@@ -302,6 +334,69 @@ class AppController extends ChangeNotifier {
           : '${type.label} non transmis : ${results.map((r) => r.message).join(', ')}',
       speak: ok > 0,
     );
+  }
+
+  // --- Offline regions --------------------------------------------------
+
+  Future<void> _reloadRegions() async {
+    try {
+      regions = await regionStore.installed();
+    } catch (_) {
+      regions = const [];
+    }
+    final here = position;
+    final active = regions.where((r) => r.contains(here.lat, here.lon)).firstOrNull ?? regions.firstOrNull;
+    if (active?.dir.path != activeRegion?.dir.path || active?.version != activeRegion?.version) {
+      _offlineGeocoder?.close();
+      _offlineGeocoder = null;
+      if (active != null) {
+        try {
+          _offlineGeocoder = OfflineGeocoder.open(active.placesPath);
+        } catch (_) {
+          // Unknown index schema: search stays online until the region is updated.
+        }
+      }
+    }
+    activeRegion = active;
+  }
+
+  Future<void> installRegion(RegionSource source) async {
+    if (installingRegion != null) return;
+    installingRegion = source.id;
+    installProgress = null;
+    regionError = null;
+    notifyListeners();
+    try {
+      await for (final p in regionStore.install(Uri.parse(source.manifestUrl))) {
+        installProgress = p;
+        notifyListeners();
+      }
+      // The map reopens on the new files.
+      _offlineGeocoder?.close();
+      _offlineGeocoder = null;
+      activeRegion = null;
+      await _reloadRegions();
+      _say('Région ${source.name} installée', speak: false);
+    } on RegionException catch (e) {
+      regionError = e.message;
+    } catch (e) {
+      regionError = 'Échec de l’installation : $e';
+    } finally {
+      installingRegion = null;
+      installProgress = null;
+      notifyListeners();
+    }
+  }
+
+  Future<void> removeRegion(String id) async {
+    if (activeRegion?.id == id) {
+      _offlineGeocoder?.close();
+      _offlineGeocoder = null;
+      activeRegion = null;
+    }
+    await regionStore.remove(id);
+    await _reloadRegions();
+    notifyListeners();
   }
 
   // --- Réglages ---------------------------------------------------------

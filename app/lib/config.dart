@@ -2,11 +2,36 @@ import 'dart:io' show Platform;
 
 import 'package:roadto_core/roadto_core.dart';
 
-/// Réglages par défaut du POC. Les services publics ci-dessous servent au POC
-/// seulement : la carte, le routage et la recherche passeront hors ligne au
-/// jalon J2 (PMTiles, valhalla-mobile, index SQLite).
+/// A downloadable region package (built by pipeline/, see pipeline/README.md).
+class RegionSource {
+  final String id;
+  final String name;
+  final String manifestUrl;
+
+  const RegionSource(this.id, this.name, this.manifestUrl);
+}
+
+/// POC defaults. The public online services below are for the POC only:
+/// map and search already work offline once a region is installed; routing
+/// moves offline with valhalla-mobile.
 abstract final class Defaults {
-  /// Styles OpenFreeMap : tuiles OSM gratuites, sans clé ni traceur.
+  /// Regions offered for download. Packages are published to rolling GitHub
+  /// Releases by .github/workflows/region.yml.
+  static const regions = [
+    RegionSource(
+      'lyon',
+      'Lyon et sa périphérie',
+      'https://github.com/msaddouki/RoadTo/releases/download/region-lyon/manifest.json',
+    ),
+  ];
+
+  /// Ed25519 public keys (base64) allowed to sign region manifests. Generate
+  /// the pair with `python -m roadto_pipeline keygen`, store the private key
+  /// as the REGION_SIGNING_KEY secret and add the public key here. Until then
+  /// the app refuses every package.
+  static const trustedRegionKeys = <String>[];
+
+  /// OpenFreeMap styles: free OSM tiles, no key, no tracking.
   static const mapStyles = {
     'Liberty': 'https://tiles.openfreemap.org/styles/liberty',
     'Positron': 'https://tiles.openfreemap.org/styles/positron',

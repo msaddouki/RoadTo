@@ -1,0 +1,46 @@
+{
+  "attribution": "© OpenStreetMap contributors (ODbL) · © OpenMapTiles · Style © OpenFreeMap",
+  "created_at": "2026-10-12T12:20:45Z",
+  "files": [
+    {
+      "kind": "style",
+      "name": "style.tar.gz",
+      "required": true,
+      "sha256": "df1c47ae3cb92616cf7dac4ac576b2925f6ecc598ebc976c4f75caf1493f2c05",
+      "size": 362,
+      "url": "style.tar.gz"
+    },
+    {
+      "kind": "places",
+      "name": "places.sqlite",
+      "required": true,
+      "sha256": "b08f515cde5e9cb5c2727f1c11423effc59fc4ad3c01d2f4ba7baec87814ed92",
+      "size": 32768,
+      "url": "places.sqlite"
+    },
+    {
+      "kind": "map",
+      "name": "map.pmtiles",
+      "required": true,
+      "sha256": "0f3644618bfe422cd503b3a8362dd21bd101958ee7af60f5abebabd22e1f4078",
+      "size": 8,
+      "url": "map.pmtiles"
+    }
+  ],
+  "format": 1,
+  "generator": {
+    "planetiler": "0.10.2"
+  },
+  "osm_timestamp": "2026-10-01T00:00:00Z",
+  "region": {
+    "bbox": [
+      4.77,
+      45.75,
+      4.84,
+      45.78
+    ],
+    "id": "test",
+    "name": "Région de test"
+  },
+  "version": "2026-10-12"
+}

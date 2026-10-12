@@ -1,5 +1,5 @@
 name: roadto
-description: "RoadTo : navigation et alertes routières communautaires, sans traceur."
+description: "RoadTo: community navigation and road alerts, without tracking."
 publish_to: 'none'
 version: 0.1.0+1
 
@@ -17,6 +17,7 @@ dependencies:
   flutter_secure_storage: ^11.2.0
   shared_preferences: ^2.5.6
   wakelock_plus: ^1.4.0
+  path_provider: ^2.1.6
 
 dev_dependencies:
   flutter_test:

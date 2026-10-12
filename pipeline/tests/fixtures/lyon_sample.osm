@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Hand-made sample around Lyon for pipeline tests. Not real OSM data. -->
+<osm version="0.6" generator="roadto-tests">
+  <node id="1" lat="45.7640" lon="4.8357" version="1">
+    <tag k="place" v="city"/>
+    <tag k="name" v="Lyon"/>
+  </node>
+  <node id="2" lat="45.7740" lon="4.7760" version="1">
+    <tag k="place" v="town"/>
+    <tag k="name" v="Écully"/>
+  </node>
+  <node id="3" lat="45.7600" lon="4.8360" version="1">
+    <tag k="addr:housenumber" v="12"/>
+    <tag k="addr:street" v="Rue de la République"/>
+    <tag k="addr:postcode" v="69002"/>
+  </node>
+  <node id="4" lat="45.7590" lon="4.8355" version="1"/>
+  <node id="5" lat="45.7610" lon="4.8358" version="1"/>
+  <node id="6" lat="45.7620" lon="4.8359" version="1"/>
+  <way id="100" version="1">
+    <nd ref="4"/><nd ref="5"/>
+    <tag k="highway" v="pedestrian"/>
+    <tag k="name" v="Rue de la République"/>
+  </way>
+  <way id="101" version="1">
+    <nd ref="5"/><nd ref="6"/>
+    <tag k="highway" v="pedestrian"/>
+    <tag k="name" v="Rue de la République"/>
+  </way>
+  <node id="7" lat="45.7700" lon="4.7800" version="1">
+    <tag k="amenity" v="fuel"/>
+    <tag k="name" v="Station du Méridien"/>
+    <tag k="addr:city" v="Écully"/>
+  </node>
+  <node id="8" lat="45.7605" lon="4.8350" version="1">
+    <tag k="amenity" v="bench"/>
+    <tag k="name" v="Banc nommé"/>
+  </node>
+  <node id="9" lat="45.7700" lon="4.7801" version="1"/>
+  <node id="10" lat="45.7702" lon="4.7803" version="1"/>
+  <node id="11" lat="45.7704" lon="4.7801" version="1"/>
+  <way id="102" version="1">
+    <nd ref="9"/><nd ref="10"/><nd ref="11"/><nd ref="9"/>
+    <tag k="building" v="yes"/>
+    <tag k="addr:housenumber" v="3 bis"/>
+    <tag k="addr:street" v="Chemin des Cerisiers"/>
+  </way>
+</osm>

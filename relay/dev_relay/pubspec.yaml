@@ -1,5 +1,5 @@
 name: roadto_dev_relay
-description: Relais Nostr minimal de développement, avec la politique d'écriture RoadTo.
+description: Minimal Nostr relay for development, enforcing the RoadTo write policy.
 version: 0.1.0
 publish_to: none
 

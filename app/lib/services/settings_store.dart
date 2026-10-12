@@ -12,6 +12,9 @@ class AppSettings {
   final double simulationSpeedKmh;
   final bool voice;
 
+  /// Use the installed region's offline map instead of online tiles.
+  final bool offlineMap;
+
   const AppSettings({
     required this.mapStyle,
     required this.routingUrl,
@@ -20,6 +23,7 @@ class AppSettings {
     required this.simulate,
     required this.simulationSpeedKmh,
     required this.voice,
+    required this.offlineMap,
   });
 
   factory AppSettings.defaults() => AppSettings(
@@ -30,6 +34,7 @@ class AppSettings {
     simulate: true,
     simulationSpeedKmh: Defaults.simulationSpeedKmh,
     voice: true,
+    offlineMap: true,
   );
 
   AppSettings copyWith({
@@ -40,6 +45,7 @@ class AppSettings {
     bool? simulate,
     double? simulationSpeedKmh,
     bool? voice,
+    bool? offlineMap,
   }) => AppSettings(
     mapStyle: mapStyle ?? this.mapStyle,
     routingUrl: routingUrl ?? this.routingUrl,
@@ -48,6 +54,7 @@ class AppSettings {
     simulate: simulate ?? this.simulate,
     simulationSpeedKmh: simulationSpeedKmh ?? this.simulationSpeedKmh,
     voice: voice ?? this.voice,
+    offlineMap: offlineMap ?? this.offlineMap,
   );
 }
 
@@ -65,6 +72,7 @@ class SettingsStore {
         simulate: p.getBool('simulate') ?? d.simulate,
         simulationSpeedKmh: p.getDouble('simulationSpeedKmh') ?? d.simulationSpeedKmh,
         voice: p.getBool('voice') ?? d.voice,
+        offlineMap: p.getBool('offlineMap') ?? d.offlineMap,
       );
     } catch (_) {
       return d;
@@ -80,5 +88,6 @@ class SettingsStore {
     await p.setBool('simulate', s.simulate);
     await p.setDouble('simulationSpeedKmh', s.simulationSpeedKmh);
     await p.setBool('voice', s.voice);
+    await p.setBool('offlineMap', s.offlineMap);
   }
 }

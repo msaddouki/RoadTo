@@ -15,7 +15,7 @@ env:
 
 jobs:
   core:
-    name: Cœur et relais (Dart)
+    name: Core and relay (Dart)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,27 +24,42 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
-      - name: Dépendances
+      - name: Dependencies
         run: |
           (cd packages/roadto_core && dart pub get)
           (cd relay/dev_relay && dart pub get)
           (cd app && flutter pub get)
-      # Après pub get : le formateur lit la largeur de ligne dans analysis_options.yaml.
+      # After pub get: the formatter reads the line width from analysis_options.yaml.
       - name: Format
         run: dart format --output=none --set-exit-if-changed packages relay app/lib app/test
       - name: roadto_core
         working-directory: packages/roadto_core
         run: |
+          sudo apt-get install -y -q libsqlite3-dev # core tests use the system SQLite (FTS5)
           dart analyze --fatal-infos
           dart test
-      - name: Relais de dev (bout en bout)
+      - name: Dev relay (end to end)
         working-directory: relay/dev_relay
         run: |
           dart analyze --fatal-infos
           dart test
 
+  pipeline:
+    name: Region pipeline (Python)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install -q -r pipeline/requirements.txt
+      - run: python -m pytest -q pipeline/tests
+        env:
+          PYTHONPATH: pipeline
+      - run: bash -n pipeline/build_region.sh
+
   app:
-    name: App Flutter (analyse et tests)
+    name: Flutter app (analyze and test)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -60,7 +75,7 @@ jobs:
           flutter test
 
   android:
-    name: APK Android
+    name: Android APK
     needs: [core, app]
     runs-on: ubuntu-latest
     steps:
@@ -68,7 +83,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "21"  # maplibre_gl 0.27 compile en Java 21
+          java-version: "21" # maplibre_gl 0.27 compiles with Java 21
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
@@ -79,7 +94,7 @@ jobs:
         run: |
           flutter pub get
           flutter build apk --release
-      - name: Pas de traceur dans le build
+      - name: No trackers in the build
         working-directory: app/android
         run: |
           ./gradlew -q :app:dependencies --configuration releaseRuntimeClasspath > ../../deps.txt
@@ -91,7 +106,7 @@ jobs:
           retention-days: 14
 
   ios:
-    name: App iOS (simulateur, sans signature)
+    name: iOS app (simulator, unsigned)
     needs: [core, app]
     runs-on: macos-latest
     steps:
@@ -107,7 +122,7 @@ jobs:
           flutter pub get
           flutter build ios --simulator --debug
           flutter build ios --release --no-codesign
-      - name: Archive du build simulateur
+      - name: Archive the simulator build
         run: cd app/build/ios/iphonesimulator && zip -qr ../../../../roadto-ios-simulator.zip Runner.app
       - uses: actions/upload-artifact@v4
         with:

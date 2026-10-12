@@ -1,35 +1,36 @@
-# Lancer et tester le POC
+# Running and testing the POC
 
-## Prérequis
+## Prerequisites
 
-- Flutter 3.47 (stable) : <https://docs.flutter.dev/get-started/install>
-- Android : Android Studio (JDK 21, exigé par MapLibre) et un émulateur, ou un téléphone en mode développeur.
-- iOS : un Mac avec Xcode (simulateur ou iPhone).
+- Flutter 3.47 (stable): <https://docs.flutter.dev/get-started/install>
+- Android: Android Studio (JDK 21, required by MapLibre) and an emulator, or a
+  phone in developer mode.
+- iOS: a Mac with Xcode (simulator or iPhone).
 
-Sans poste de dev mobile, chaque PR produit dans GitHub Actions :
+Without a mobile dev machine, every pull request produces in GitHub Actions:
 
-- `roadto-android-apk` : APK à installer sur un téléphone Android ;
-- `roadto-ios-simulator` : app pour le simulateur iOS d'un Mac
+- `roadto-android-apk`: APK to install on an Android phone;
+- `roadto-ios-simulator`: app for the iOS simulator on a Mac
   (`xcrun simctl install booted Runner.app`).
 
-## 1. Le relais de dev
+## 1. The dev relay
 
 ```bash
 cd relay/dev_relay
 dart pub get
-dart run bin/dev_relay.dart            # écoute sur 0.0.0.0:7777
+dart run bin/dev_relay.dart            # listens on 0.0.0.0:7777
 ```
 
-Le relais garde les alertes en mémoire, applique la politique d'écriture
-RoadTo et journalise les refus. Les adresses par défaut de l'app :
+The relay keeps alerts in memory, enforces the RoadTo write policy and logs
+rejections. Default addresses in the app:
 
-| Où tourne l'app | Adresse du relais |
+| Where the app runs | Relay address |
 | --- | --- |
-| Émulateur Android | `ws://10.0.2.2:7777` (par défaut) |
-| Simulateur iOS | `ws://127.0.0.1:7777` (par défaut) |
-| Vrai téléphone, même Wi-Fi | `ws://<IP du poste>:7777`, à saisir dans Réglages |
+| Android emulator | `ws://10.0.2.2:7777` (default) |
+| iOS simulator | `ws://127.0.0.1:7777` (default) |
+| Real phone, same Wi-Fi | `ws://<computer IP>:7777`, set in Réglages |
 
-## 2. L'app
+## 2. The app
 
 ```bash
 cd app
@@ -37,43 +38,54 @@ flutter pub get
 flutter run
 ```
 
-1. **Où allez-vous ?** : tapez une adresse (« Part-Dieu, Lyon »), ou faites
-   un appui long sur la carte puis **Y aller**.
-2. La conduite simulée démarre (50 km/h, réglable). Le bandeau du haut
-   affiche la prochaine manœuvre ; la barre du bas, l'heure d'arrivée.
-3. **Signaler** (gros bouton orange) : choisissez un type ; l'envoi part
-   après 5 s, sauf si vous annulez.
+1. **Où allez-vous ?**: type an address ("Part-Dieu, Lyon"), or long-press
+   the map and tap **Y aller**.
+2. Simulated driving starts (50 km/h, adjustable). The top banner shows the
+   next maneuver, the bottom bar the arrival time.
+3. **Signaler** (big orange button): pick a type; it is sent after 5 s
+   unless cancelled.
 
-Sans simulation (Réglages > Conduite simulée), l'app suit le GPS : à faire
-uniquement avec un passager.
+Without simulation (Réglages > Conduite simulée) the app follows the GPS:
+only with a passenger.
 
-## 3. Deux téléphones, une alerte
+## 3. Offline map and search
 
-Critère du jalon J3, à la main :
+Réglages > **Régions hors ligne** > Lyon et sa périphérie > **Télécharger**.
+The app checks the package signature and every file hash before installing
+it; the map and address search then work in airplane mode. Routing still
+needs the network until valhalla-mobile is integrated.
 
-1. Lancez le relais sur le poste, et deux instances de l'app (deux émulateurs,
-   ou un émulateur et un simulateur) pointant sur le relais.
-2. Sur A, lancez un trajet et signalez **Route fermée**.
-3. Sur B, lancez un trajet qui passe au même endroit : l'alerte apparaît sur
-   la carte, puis « Route fermée dans … ». B recalcule pour l'éviter.
-4. Quand B passe à moins de 150 m d'une alerte, **toujours là ?** s'affiche.
-   Deux « Non » la font disparaître.
+The package must first be published once (see
+[pipeline/README.md](../pipeline/README.md#publishing)): until the signing
+key is set up, the app refuses every package.
 
-Le même scénario tourne automatiquement dans `relay/dev_relay/test/`.
+## 4. Two phones, one alert
 
-## Limites du POC
+Exit criterion of milestone J3, by hand:
 
-| Sujet | POC | Cible |
+1. Start the relay on the computer and two app instances (two emulators, or
+   an emulator and a simulator) pointing at it.
+2. On A, start a trip and report **Route fermée**.
+3. On B, start a trip through the same place: the alert appears on the map,
+   then "Route fermée dans …". B reroutes around it.
+4. When B passes within 150 m of an alert, **toujours là ?** shows up. Two
+   "Non" make it disappear.
+
+The same scenario runs automatically in `relay/dev_relay/test/`.
+
+## POC limitations
+
+| Topic | POC | Target |
 | --- | --- | --- |
-| Carte | tuiles OpenFreeMap en ligne | PMTiles de la région, hors ligne (J2) |
-| Itinéraire | Valhalla public FOSSGIS | valhalla-mobile embarqué (J2) |
-| Recherche | Photon en ligne | index SQLite FTS5 du paquet région (J2) |
-| Guidage | moteur Dart maison | maison ou Ferrostar (spike C) |
-| Relais | relais de dev en mémoire | strfry + plugin, deux relais synchronisés (J3) |
-| Identité | clé dans Keystore / Keychain | + phrase de récupération BIP-39 (J3) |
-| Localisation Android | geolocator, LocationManager forcé | plugin sans services Google (J2) |
-| Voiture | — | Android Auto (J4), CarPlay (après accord d'Apple) |
-| Alertes police | désactivées | après le canal L130-11 (J6) |
+| Map | offline PMTiles for Lyon, online OpenFreeMap tiles elsewhere | one package per region (J2), France-wide (V1) |
+| Routing | public FOSSGIS Valhalla server | valhalla-mobile on the phone (J2); the graph is already in the package |
+| Search | offline SQLite FTS5 index, Photon online as fallback | offline only, plus categories (J5) |
+| Guidance | in-house Dart engine | in-house or Ferrostar (spike C) |
+| Relay | in-memory dev relay | strfry + plugin, two synchronized relays (J3) |
+| Identity | key in Keystore / Keychain | + BIP-39 recovery phrase (J3) |
+| Android location | geolocator, LocationManager forced | plugin without Google services (J2) |
+| Car | — | Android Auto (J4), CarPlay (after Apple's approval) |
+| Police alerts | disabled | after the L130-11 channel (J6) |
 
-Les serveurs publics (OpenFreeMap, FOSSGIS, Komoot) sont des services
-gracieux : usage de test raisonnable uniquement.
+The public servers (OpenFreeMap, FOSSGIS, Komoot) are free services:
+reasonable test use only.

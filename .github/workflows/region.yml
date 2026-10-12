@@ -1,0 +1,89 @@
+name: Region packages
+
+# Builds a region package (offline map, search index, style, routing graph)
+# and, when the REGION_SIGNING_KEY secret is set, signs it and publishes it
+# to the rolling GitHub Release `region-<id>`, where the app downloads it.
+# Without the secret, the unsigned package is kept as a workflow artifact.
+
+on:
+  workflow_dispatch:
+    inputs:
+      region:
+        description: Region id (pipeline/regions/<id>.json)
+        default: lyon
+        required: true
+  schedule:
+    - cron: "17 3 1 * *" # monthly refresh of the OSM data
+
+permissions:
+  contents: write
+
+concurrency:
+  group: region-${{ inputs.region || 'lyon' }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      REGION: ${{ inputs.region || 'lyon' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Tools
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q osmium-tool
+          pip install -q -r pipeline/requirements.txt
+      - name: Pipeline tests
+        run: python -m pytest -q pipeline/tests
+        env:
+          PYTHONPATH: pipeline
+      - uses: actions/cache@v4
+        with:
+          path: pipeline/work/cache
+          key: region-sources-${{ env.REGION }}-${{ github.run_id }}
+          restore-keys: region-sources-${{ env.REGION }}-
+      - name: Build
+        run: pipeline/build_region.sh "$REGION"
+        env:
+          ROADTO_SIGNING_KEY: ${{ secrets.REGION_SIGNING_KEY }}
+      - name: Summary
+        run: |
+          {
+            echo "### Region package: $REGION"
+            echo '```'
+            ls -lh "pipeline/work/$REGION/package"
+            echo '```'
+            if [[ -f "pipeline/work/$REGION/package/manifest.json.sig" ]]; then
+              echo "Signed and published to release \`region-$REGION\`."
+            else
+              echo "**Unsigned**: add the \`REGION_SIGNING_KEY\` secret to publish (see pipeline/README.md)."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Publish
+        if: hashFiles(format('pipeline/work/{0}/package/manifest.json.sig', env.REGION)) != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="region-$REGION"
+          pkg="pipeline/work/$REGION/package"
+          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --prerelease \
+            --target "$GITHUB_SHA" --title "Region package: $REGION" \
+            --notes "Offline data for the RoadTo app. Map data © OpenStreetMap contributors (ODbL). Refreshed monthly."
+          # Data files first, manifest last: a client never sees a manifest
+          # that points at files not uploaded yet.
+          data=()
+          for f in style.tar.gz places.sqlite map.pmtiles routing.tar; do [[ -f "$pkg/$f" ]] && data+=("$pkg/$f"); done
+          gh release upload "$tag" "${data[@]}" --clobber
+          gh release upload "$tag" "$pkg/manifest.json" "$pkg/manifest.json.sig" --clobber
+      - name: Keep unsigned package
+        if: hashFiles(format('pipeline/work/{0}/package/manifest.json.sig', env.REGION)) == ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: region-${{ env.REGION }}-unsigned
+          path: pipeline/work/${{ env.REGION }}/package
+          retention-days: 7
