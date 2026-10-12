@@ -3,7 +3,7 @@
 ## Prérequis
 
 - Flutter 3.47 (stable) : <https://docs.flutter.dev/get-started/install>
-- Android : Android Studio et un émulateur, ou un téléphone en mode développeur.
+- Android : Android Studio (JDK 21, exigé par MapLibre) et un émulateur, ou un téléphone en mode développeur.
 - iOS : un Mac avec Xcode (simulateur ou iPhone).
 
 Sans poste de dev mobile, chaque PR produit dans GitHub Actions :
