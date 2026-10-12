@@ -10,6 +10,7 @@ export 'src/nostr/filter.dart';
 export 'src/nostr/keys.dart';
 export 'src/nostr/nip06.dart';
 export 'src/nostr/relay_pool.dart';
+export 'src/nostr/verifier.dart';
 export 'src/policy.dart';
 export 'src/regions/manifest.dart';
 export 'src/regions/package_source.dart';
