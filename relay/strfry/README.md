@@ -50,6 +50,9 @@ addresses rather than the proxy's.
 
 - Helm chart and Argo CD deployment.
 - Prometheus metrics.
-- Check that strfry's own logs contain no client addresses: the plugin
-  writes none, but strfry's connection logging has not been audited yet.
+- **Client addresses in strfry's own logs.** The plugin writes none, but
+  strfry logs every connection with its address
+  (`[Websocket] Connect from <ip>`), as seen in CI. The plan requires logs
+  without IP: filter these lines before they are stored (log driver or
+  shipper), or patch strfry's log line, before running a public relay.
 - Load test with a nostr-sdk generator.
