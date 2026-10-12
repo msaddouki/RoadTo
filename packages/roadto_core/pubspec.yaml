@@ -1,0 +1,17 @@
+name: roadto_core
+description: Cœur métier de RoadTo, partagé par Android et iOS (géo, guidage, alertes Nostr).
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.8.0
+
+dependencies:
+  bip340: ^0.3.1
+  crypto: ^3.0.7
+  http: ^1.6.0
+  web_socket_channel: ^3.0.3
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.25.6

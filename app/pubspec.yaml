@@ -1,0 +1,27 @@
+name: roadto
+description: "RoadTo : navigation et alertes routières communautaires, sans traceur."
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.8.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  roadto_core:
+    path: ../packages/roadto_core
+  maplibre_gl: ^0.27.1
+  geolocator: ^14.1.1
+  flutter_tts: ^4.2.5
+  flutter_secure_storage: ^11.2.0
+  shared_preferences: ^2.5.6
+  wakelock_plus: ^1.4.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true

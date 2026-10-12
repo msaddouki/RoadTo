@@ -1,0 +1,7 @@
+.DS_Store
+.idea/
+.vscode/
+*.iml
+.dart_tool/
+build/
+deps.txt
