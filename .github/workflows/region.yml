@@ -67,12 +67,16 @@ jobs:
           path: pipeline/work/cache
           key: region-sources-${{ env.REGION }}-${{ github.run_id }}
       - name: Summary
+        env:
+          PYTHONPATH: pipeline
         run: |
           {
             echo "### Region package: $REGION"
             echo '```'
             ls -lh "pipeline/work/$REGION/package"
             echo '```'
+            python3 -m roadto_pipeline places-stats --db "pipeline/work/$REGION/package/places.sqlite" \
+              --region "pipeline/regions/$REGION.json" | tee /dev/stderr
             if [[ -f "pipeline/work/$REGION/package/manifest.json.sig" && "$PUBLISH" == true ]]; then
               echo "Signed and published to release \`region-$REGION\`."
             elif [[ -f "pipeline/work/$REGION/package/manifest.json.sig" ]]; then

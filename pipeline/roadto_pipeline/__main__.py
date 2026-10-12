@@ -15,6 +15,13 @@ def _cmd_places(a: argparse.Namespace) -> None:
     print(f"places: {n} rows -> {a.out}")
 
 
+def _cmd_places_stats(a: argparse.Namespace) -> None:
+    probes = list(a.probe or [])
+    if a.region:
+        probes += json.loads(Path(a.region).read_text(encoding="utf-8")).get("search_probes", [])
+    print(places.index_stats(a.db, probes), end="")
+
+
 def _cmd_style(a: argparse.Namespace) -> None:
     stats = style.build_bundle(Path(a.out), a.style_url)
     print(f"style: {stats} -> {a.out}")
@@ -68,6 +75,12 @@ def main(argv: list[str] | None = None) -> None:
     s.add_argument("--region-id", required=True)
     s.add_argument("--osm-timestamp")
     s.set_defaults(func=_cmd_places)
+
+    s = sub.add_parser("places-stats", help="summarize a built search index (markdown)")
+    s.add_argument("--db", required=True)
+    s.add_argument("--region", help="region definition; its search_probes are looked up")
+    s.add_argument("--probe", action="append", help="exact place name to look up (repeatable)")
+    s.set_defaults(func=_cmd_places_stats)
 
     s = sub.add_parser("style", help="build the offline style bundle")
     s.add_argument("--out", required=True)

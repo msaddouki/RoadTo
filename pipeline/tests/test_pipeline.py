@@ -99,6 +99,15 @@ def test_building_address_uses_way_centroid(index):
     assert lon == pytest.approx(4.78015, abs=1e-4)
 
 
+def test_index_stats(index, tmp_path_factory):
+    path = index.execute("PRAGMA database_list").fetchone()[2]
+    text = places.index_stats(path, ["Gare Part-Dieu", "Nowhere"])
+    assert "without a commune" in text
+    assert "| Lyon |" in text
+    assert "- Gare Part-Dieu: Lyon" in text
+    assert "- Nowhere: not found" in text
+
+
 def test_meta(index):
     meta = dict(index.execute("SELECT key, value FROM meta").fetchall())
     assert meta["schema_version"] == places.SCHEMA_VERSION

@@ -276,6 +276,35 @@ def write_index(rows: list[Row], out_path: str | Path, *, region_id: str, osm_ti
         db.close()
 
 
+def index_stats(path: str | Path, probes: list[str] = ()) -> str:
+    """Markdown summary of a built index, for the region workflow: how many
+    places lack a commune, the largest communes, and where [probes] (exact
+    names) landed."""
+    db = sqlite3.connect(f"file:{path}?mode=ro", uri=True)
+    try:
+        total = db.execute("SELECT count(*) FROM place").fetchone()[0]
+        no_city = db.execute(
+            "SELECT count(*) FROM place WHERE city IS NULL AND kind NOT LIKE 'place=%'").fetchone()[0]
+        top = db.execute(
+            "SELECT city, count(*) FROM place WHERE city IS NOT NULL GROUP BY city ORDER BY 2 DESC LIMIT 10"
+        ).fetchall()
+        lines = [
+            f"Search index: {total} places, {no_city} ({no_city / max(total, 1):.1%}) without a commune.",
+            "",
+            "| Commune | Places |",
+            "| --- | ---: |",
+            *(f"| {city} | {n} |" for city, n in top),
+        ]
+        if probes:
+            lines.append("")
+            for name in probes:
+                cities = [c or "?" for (c,) in db.execute("SELECT city FROM place WHERE name = ? LIMIT 3", (name,))]
+                lines.append(f"- {name}: {', '.join(cities) if cities else 'not found'}")
+        return "\n".join(lines) + "\n"
+    finally:
+        db.close()
+
+
 def build(osm_path: str | Path, out_path: str | Path, *, region_id: str, osm_timestamp: str | None = None) -> int:
     rows = collect(osm_path)
     write_index(rows, out_path, region_id=region_id, osm_timestamp=osm_timestamp)
