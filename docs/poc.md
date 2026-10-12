@@ -83,7 +83,7 @@ The same scenario runs automatically in `relay/dev_relay/test/`.
 | --- | --- | --- |
 | Map | offline PMTiles for Lyon, online OpenFreeMap tiles elsewhere | one package per region (J2), France-wide (V1) |
 | Routing | on the phone on Android (valhalla-mobile, region graph), FOSSGIS server on iOS and as fallback | iOS on the phone once the xcframework is built in CI |
-| Search | offline SQLite FTS5 index, Photon online as fallback | offline only, plus categories (J5) |
+| Search | offline SQLite FTS5 index and categories, Photon online as fallback | fuel prices and charger availability (J5) |
 | Guidance | in-house Dart engine | in-house or Ferrostar (spike C) |
 | Relay | in-memory dev relay, or two strfry relays (`relay/strfry`, Docker) | Helm chart, metrics, TLS (J3) |
 | Identity | key in Keystore / Keychain | + BIP-39 recovery phrase (J3) |

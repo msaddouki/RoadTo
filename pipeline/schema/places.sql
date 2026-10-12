@@ -11,6 +11,7 @@ CREATE TABLE place (
   id          INTEGER PRIMARY KEY,
   -- 'address', 'street', 'place=<value>' or '<key>=<value>' for points of interest
   kind        TEXT    NOT NULL,
+  -- NULL for unnamed driver places (fuel, parking...), found by category only
   name        TEXT,
   housenumber TEXT,
   street      TEXT,
@@ -21,6 +22,9 @@ CREATE TABLE place (
   -- Ranking prior: cities above streets above points of interest above addresses.
   importance  INTEGER NOT NULL DEFAULT 0
 );
+
+-- Category search ("nearest fuel station") filters on kind, then on distance.
+CREATE INDEX place_kind ON place (kind, lat, lon);
 
 CREATE VIRTUAL TABLE place_fts USING fts5(
   name, street, housenumber, city,
