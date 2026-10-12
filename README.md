@@ -17,6 +17,9 @@ once a region is downloaded.
 - Address and place search, **offline** in the installed region (SQLite
   FTS5, accent-insensitive), online (Photon) as a fallback. Long-press on the
   map to pick a destination.
+- **Search by category** (fuel, charging, parking, rest areas, toilets,
+  food), offline: nearest around you, or next ones ahead on the route with
+  the distance to them and how far they are from the road.
 - Route from Valhalla, turn-by-turn guidance with French voice prompts,
   arrival time, rerouting when off route.
 - **Simulated driving** on by default: the trip is replayed along the route,

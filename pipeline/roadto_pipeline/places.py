@@ -59,6 +59,19 @@ POI_SKIP = {
     ("public_transport", "platform"),
 }
 
+# Places drivers look for by category ("nearest fuel"), indexed even without
+# a name: many stations and car parks only carry a brand, an operator, or
+# nothing at all.
+DRIVER_KINDS = {
+    ("amenity", "fuel"),
+    ("amenity", "charging_station"),
+    ("amenity", "parking"),
+    ("amenity", "toilets"),
+    ("highway", "rest_area"),
+    ("highway", "services"),
+}
+NOT_PUBLIC = {"private", "no"}
+
 STREET_HIGHWAYS = {
     "motorway", "trunk", "primary", "secondary", "tertiary", "unclassified",
     "residential", "living_street", "pedestrian", "service", "road",
@@ -124,6 +137,12 @@ class _Collector(osmium.SimpleHandler):
         if name and place in PLACE_IMPORTANCE:
             self.rows.append(Row(f"place={place}", lat, lon, PLACE_IMPORTANCE[place], name=name,
                                  postcode=addr["postcode"]))
+            return
+
+        driver = next((f"{k}={v}" for k, v in DRIVER_KINDS if tags.get(k) == v), None)
+        if driver and tags.get("access") not in NOT_PUBLIC:
+            label = name or tags.get("brand") or tags.get("operator")
+            self.rows.append(Row(driver, lat, lon, POI_IMPORTANCE, name=label, **addr))
             return
 
         poi = _poi_kind(tags)
