@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:io' show Platform;
 
-import 'package:geolocator/geolocator.dart';
+import 'package:flutter/services.dart';
+import 'package:geolocator_apple/geolocator_apple.dart';
 import 'package:roadto_core/roadto_core.dart';
 
-/// Position courante, réelle ou simulée.
+/// Current position, real or simulated.
 class Fix {
   final LatLon position;
   final double? bearingDeg;
@@ -15,13 +16,55 @@ class Fix {
 
 enum LocationAvailability { ok, serviceDisabled, denied, deniedForever }
 
-/// Localisation par les API standard du système. Sur Android, on force le
-/// LocationManager : pas de dépendance aux services Google à l'exécution.
-class DeviceLocation {
+/// Position from the system's own APIs: Android's LocationManager through
+/// [AndroidLocation] (no Google Play Services), Core Location on iOS.
+abstract final class DeviceLocation {
+  static Future<LocationAvailability> ensurePermission() =>
+      Platform.isAndroid ? AndroidLocation.ensurePermission() : _AppleLocation.ensurePermission();
+
+  static Stream<Fix> stream() => Platform.isAndroid ? AndroidLocation.stream() : _AppleLocation.stream();
+}
+
+/// Android side, implemented in MainActivity (DeviceLocation.kt).
+abstract final class AndroidLocation {
+  static const methods = MethodChannel('org.roadto/location');
+  static const fixes = EventChannel('org.roadto/location/fixes');
+
   static Future<LocationAvailability> ensurePermission() async {
-    if (!await Geolocator.isLocationServiceEnabled()) return LocationAvailability.serviceDisabled;
-    var p = await Geolocator.checkPermission();
-    if (p == LocationPermission.denied) p = await Geolocator.requestPermission();
+    final status = await methods.invokeMapMethod<String, Object?>('status') ?? const {};
+    if (status['service'] != true) return LocationAvailability.serviceDisabled;
+    if (status['permission'] == 'granted') return LocationAvailability.ok;
+    return switch (await methods.invokeMethod<String>('request')) {
+      'granted' => LocationAvailability.ok,
+      'deniedForever' => LocationAvailability.deniedForever,
+      _ => LocationAvailability.denied,
+    };
+  }
+
+  static Stream<Fix> stream() => fixes.receiveBroadcastStream().map((e) => fixFromMap(e as Map));
+
+  /// A fix sent by the platform. Speed, bearing and accuracy are -1 when
+  /// unknown. The bearing is only trusted while moving.
+  static Fix fixFromMap(Map<Object?, Object?> m) {
+    final speed = (m['speed'] as num?)?.toDouble() ?? -1;
+    final bearing = (m['bearing'] as num?)?.toDouble() ?? -1;
+    return Fix(
+      LatLon((m['lat'] as num).toDouble(), (m['lon'] as num).toDouble()),
+      bearingDeg: speed > 1 && bearing >= 0 ? bearing : null,
+      speedMps: speed < 0 ? 0 : speed,
+    );
+  }
+}
+
+/// iOS: geolocator's Apple implementation only, so the Android build does not
+/// pull geolocator_android and Google Play Services.
+abstract final class _AppleLocation {
+  static final _platform = GeolocatorApple();
+
+  static Future<LocationAvailability> ensurePermission() async {
+    if (!await _platform.isLocationServiceEnabled()) return LocationAvailability.serviceDisabled;
+    var p = await _platform.checkPermission();
+    if (p == LocationPermission.denied) p = await _platform.requestPermission();
     return switch (p) {
       LocationPermission.denied => LocationAvailability.denied,
       LocationPermission.deniedForever => LocationAvailability.deniedForever,
@@ -29,33 +72,22 @@ class DeviceLocation {
     };
   }
 
-  static LocationSettings _settings() {
-    if (Platform.isAndroid) {
-      return AndroidSettings(
-        accuracy: LocationAccuracy.bestForNavigation,
-        distanceFilter: 0,
-        intervalDuration: const Duration(seconds: 1),
-        forceLocationManager: true,
+  static Stream<Fix> stream() => _platform
+      .getPositionStream(
+        locationSettings: AppleSettings(
+          accuracy: LocationAccuracy.bestForNavigation,
+          activityType: ActivityType.automotiveNavigation,
+          distanceFilter: 0,
+          pauseLocationUpdatesAutomatically: false,
+          // No background location in the POC.
+          allowBackgroundLocationUpdates: false,
+        ),
+      )
+      .map(
+        (p) => Fix(
+          LatLon(p.latitude, p.longitude),
+          bearingDeg: p.speed > 1 && p.heading >= 0 ? p.heading : null,
+          speedMps: p.speed < 0 ? 0 : p.speed,
+        ),
       );
-    }
-    if (Platform.isIOS) {
-      return AppleSettings(
-        accuracy: LocationAccuracy.bestForNavigation,
-        activityType: ActivityType.automotiveNavigation,
-        distanceFilter: 0,
-        pauseLocationUpdatesAutomatically: false,
-        // Pas de localisation en arrière-plan dans le POC.
-        allowBackgroundLocationUpdates: false,
-      );
-    }
-    return const LocationSettings(accuracy: LocationAccuracy.best);
-  }
-
-  static Stream<Fix> stream() => Geolocator.getPositionStream(locationSettings: _settings()).map(
-    (p) => Fix(
-      LatLon(p.latitude, p.longitude),
-      bearingDeg: p.speed > 1 && p.heading >= 0 ? p.heading : null,
-      speedMps: p.speed < 0 ? 0 : p.speed,
-    ),
-  );
 }
