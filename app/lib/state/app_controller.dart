@@ -8,6 +8,7 @@ import 'package:roadto_core/roadto_core.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../config.dart';
+import '../services/device_routing.dart';
 import '../services/embedded_region.dart';
 import '../services/identity_store.dart';
 import '../services/location_source.dart';
@@ -72,13 +73,31 @@ class AppController extends ChangeNotifier {
     final settings = await SettingsStore.load();
     final identity = await store.loadOrCreate();
     final support = await getApplicationSupportDirectory();
-    final regions = RegionStore(Directory('${support.path}/regions'), trustedKeys: Defaults.trustedRegionKeys);
+    final regions = RegionStore(
+      Directory('${support.path}/regions'),
+      trustedKeys: Defaults.trustedRegionKeys,
+      wantedKinds: {'map', 'places', 'style', if (DeviceRouting.supported) ...DeviceRouting.kinds},
+    );
     return AppController._(settings, identity.keys, store, regions)..hasRecoveryPhrase = identity.hasRecoveryPhrase;
   }
 
   bool get navigating => route != null;
 
-  RouteEngine get _router => ValhallaRouter(baseUrl: settings.routingUrl);
+  /// On the device when the installed region carries a routing graph
+  /// (Android), with the online server as fallback, e.g. for a destination
+  /// outside the region.
+  RouteEngine get _router {
+    final online = ValhallaRouter(baseUrl: settings.routingUrl);
+    final region = activeRegion;
+    if (region == null || !region.hasOfflineRouting || !DeviceRouting.supported) return online;
+    return FallbackRouter(
+      NativeValhallaRouter(configPath: region.routingConfigPath, call: DeviceRouting.route),
+      online,
+      onFallback: (e) => debugPrint('Offline routing failed, using the server: ${e.message}'),
+    );
+  }
+
+  bool get routesOffline => DeviceRouting.supported && (activeRegion?.hasOfflineRouting ?? false);
   Geocoder get _onlineGeocoder => PhotonGeocoder(baseUrl: settings.geocoderUrl);
 
   /// Style to display: the installed region's offline map when there is one.

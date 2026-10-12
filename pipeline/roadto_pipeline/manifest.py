@@ -23,6 +23,7 @@ PACKAGE_FILES = [
     {"kind": "places", "name": "places.sqlite", "required": True},
     {"kind": "map", "name": "map.pmtiles", "required": True},
     {"kind": "routing", "name": "routing.tar", "required": False},
+    {"kind": "routing_config", "name": "routing.json", "required": False},
 ]
 
 ATTRIBUTION = "© OpenStreetMap contributors (ODbL) · © OpenMapTiles · Style © OpenFreeMap"

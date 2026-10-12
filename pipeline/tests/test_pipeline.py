@@ -9,7 +9,7 @@ import pytest
 
 import tarfile
 
-from roadto_pipeline import bundle, manifest, places, signing, style
+from roadto_pipeline import bundle, manifest, places, routing, signing, style
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -204,3 +204,30 @@ def test_bundle_refuses_unsigned_package(tmp_path):
     (pkg / "manifest.json").write_bytes(manifest.encode(manifest.build_manifest(REGION, pkg, version="v")))
     with pytest.raises(FileNotFoundError):
         bundle.build_bundle(pkg, tmp_path / "x.roadto")
+
+
+# --- routing config -------------------------------------------------------
+
+def test_routing_config_points_at_the_region_and_drops_build_paths():
+    built = {
+        "mjolnir": {
+            "tile_dir": "/data/valhalla_tiles",
+            "tile_extract": "/data/package/routing.tar",
+            "admin": "/data/valhalla_tiles/admins.sqlite",
+            "timezone": "/data/valhalla_tiles/timezones.sqlite",
+            "traffic_extract": "/data/traffic.tar",
+            "max_cache_size": 1000000000,
+            "logging": {"type": "std_out"},
+        },
+        "additional_data": {"elevation": "/data/elevation/"},
+        "service_limits": {"auto": {"max_distance": 5000000.0}},
+        "loki": {"actions": ["route", "locate"]},
+    }
+    out = routing.offline_config(built)
+    assert out["mjolnir"]["tile_extract"] == "@ROADTO_REGION_DIR@/routing.tar"
+    assert out["mjolnir"]["tile_dir"] == ""
+    assert out["mjolnir"]["admin"] == out["mjolnir"]["timezone"] == out["mjolnir"]["traffic_extract"] == ""
+    assert out["additional_data"]["elevation"] == ""
+    assert out["service_limits"] == built["service_limits"]
+    assert out["loki"]["actions"] == ["route", "locate"]
+    assert built["mjolnir"]["admin"].startswith("/data/"), "input left untouched"

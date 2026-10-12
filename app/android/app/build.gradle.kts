@@ -46,3 +46,11 @@ kotlin {
 flutter {
     source = "../.."
 }
+
+dependencies {
+    // Offline routing on the region's Valhalla graph (MIT). Bundles Valhalla
+    // 3.9.0, matching the graphs built by pipeline/ (Valhalla 3.9.x).
+    implementation("io.github.rallista:valhalla-mobile:0.6.1")
+    implementation("io.github.rallista:valhalla-models:0.5.2")
+    implementation("io.github.rallista:valhalla-models-config:0.5.2")
+}

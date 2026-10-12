@@ -127,8 +127,8 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
-      - name: Embed the Lyon region
-        run: tool/embed_region.sh lyon
+      - name: Embed the Lyon region (with the routing graph)
+        run: tool/embed_region.sh lyon --with-routing
         env:
           GH_TOKEN: ${{ github.token }}
       - name: Build

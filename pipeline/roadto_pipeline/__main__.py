@@ -7,7 +7,7 @@ import json
 import sys
 from pathlib import Path
 
-from . import bundle, manifest, places, signing, style
+from . import bundle, manifest, places, routing, signing, style
 
 
 def _cmd_places(a: argparse.Namespace) -> None:
@@ -35,6 +35,11 @@ def _cmd_sign(a: argparse.Namespace) -> None:
     sig, public = signing.sign(path.read_bytes())
     Path(f"{path}.sig").write_text(sig + "\n", encoding="ascii")
     print(f"signed {path} with public key {public}")
+
+
+def _cmd_routing_config(a: argparse.Namespace) -> None:
+    routing.write_offline_config(Path(a.src), Path(a.out))
+    print(f"routing config -> {a.out}")
 
 
 def _cmd_bundle(a: argparse.Namespace) -> None:
@@ -85,6 +90,11 @@ def main(argv: list[str] | None = None) -> None:
     s = sub.add_parser("sign", help="sign a file (writes <file>.sig)")
     s.add_argument("--file", required=True)
     s.set_defaults(func=_cmd_sign)
+
+    s = sub.add_parser("routing-config", help="write the Valhalla config shipped with the package")
+    s.add_argument("--src", required=True, help="config written by valhalla_build_config")
+    s.add_argument("--out", required=True)
+    s.set_defaults(func=_cmd_routing_config)
 
     s = sub.add_parser("bundle", help="pack a signed package into a single .roadto file")
     s.add_argument("--dir", required=True)

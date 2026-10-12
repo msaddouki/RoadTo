@@ -53,7 +53,8 @@ only with a passenger.
 Builds from CI (the APK and simulator artifacts) **embed the Lyon region**:
 on first launch the app installs it (a progress bar shows in Réglages >
 Régions hors ligne), then the map and address search work in airplane mode.
-Routing still needs the network until valhalla-mobile is integrated.
+On Android, routes are computed on the phone too; on iOS they still need
+the network.
 
 A local `flutter run` has no embedded region unless you run
 `tool/embed_region.sh lyon` first (needs the `gh` CLI and access to the
@@ -81,7 +82,7 @@ The same scenario runs automatically in `relay/dev_relay/test/`.
 | Topic | POC | Target |
 | --- | --- | --- |
 | Map | offline PMTiles for Lyon, online OpenFreeMap tiles elsewhere | one package per region (J2), France-wide (V1) |
-| Routing | public FOSSGIS Valhalla server | valhalla-mobile on the phone (J2); the graph is already in the package |
+| Routing | on the phone on Android (valhalla-mobile, region graph), FOSSGIS server on iOS and as fallback | iOS on the phone once the xcframework is built in CI |
 | Search | offline SQLite FTS5 index, Photon online as fallback | offline only, plus categories (J5) |
 | Guidance | in-house Dart engine | in-house or Ferrostar (spike C) |
 | Relay | in-memory dev relay, or two strfry relays (`relay/strfry`, Docker) | Helm chart, metrics, TLS (J3) |

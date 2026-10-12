@@ -18,7 +18,8 @@ once a region is downloaded.
   FTS5, accent-insensitive), online (Photon) as a fallback. Long-press on the
   map to pick a destination.
 - Route from Valhalla, turn-by-turn guidance with French voice prompts,
-  arrival time, rerouting when off route.
+  arrival time, rerouting when off route. **Offline on Android** with the
+  region's graph (valhalla-mobile); online on iOS and outside the region.
 - **Simulated driving** on by default: the trip is replayed along the route,
   so everything can be tested without driving.
 - **One-gesture reporting**: six large tiles, 5 s to cancel. The police

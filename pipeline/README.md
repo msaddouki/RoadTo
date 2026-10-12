@@ -12,7 +12,8 @@ manifest. Regions are defined in `regions/<id>.json`; the first one is
 | `map.pmtiles` | [Planetiler](https://github.com/onthegomap/planetiler) 0.10.2, OpenMapTiles schema | offline map (MapLibre `pmtiles://`) |
 | `places.sqlite` | `roadto_pipeline places` (pyosmium + SQLite FTS5) | offline address and place search |
 | `style.tar.gz` | `roadto_pipeline style` (OpenFreeMap Liberty, rewritten) | style, sprites and fonts, no network |
-| `routing.tar` | [Valhalla](https://github.com/valhalla/valhalla) 3.9.1 | not yet (valhalla-mobile), optional download |
+| `routing.tar` | [Valhalla](https://github.com/valhalla/valhalla) 3.9.1 | offline routing on Android (valhalla-mobile); optional |
+| `routing.json` | `roadto_pipeline routing-config` | Valhalla config for that graph, paths filled in by the app; optional |
 | `manifest.json` | `roadto_pipeline manifest` | size and SHA-256 of every file |
 | `manifest.json.sig` | `roadto_pipeline sign` | Ed25519 signature of the manifest |
 | `<id>.roadto` | `roadto_pipeline bundle` | the signed package as one file, to embed or import |
