@@ -16,6 +16,8 @@ services:
     volumes:
       - relay-a-db:/app/strfry-db
       - ./router.conf:/etc/roadto-router.conf:ro
+    ulimits:
+      nofile: { soft: 65536, hard: 65536 } # matches relay.nofiles in strfry.conf
     restart: unless-stopped
 
   relay-b:
@@ -27,6 +29,8 @@ services:
       - "7778:7777"
     volumes:
       - relay-b-db:/app/strfry-db
+    ulimits:
+      nofile: { soft: 65536, hard: 65536 } # matches relay.nofiles in strfry.conf
     restart: unless-stopped
 
 volumes:
