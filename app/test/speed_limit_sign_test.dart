@@ -3,8 +3,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:roadto/ui/map_screen.dart';
 
 void main() {
-  Future<void> pump(WidgetTester tester, Widget sign) =>
-      tester.pumpWidget(MaterialApp(home: Scaffold(body: Center(child: sign))));
+  Future<void> pump(WidgetTester tester, Widget sign) => tester.pumpWidget(
+    MaterialApp(
+      home: Scaffold(body: Center(child: sign)),
+    ),
+  );
 
   testWidgets('shows the limit, white inside', (tester) async {
     await pump(tester, const SpeedLimitSign(kph: 50, over: false));
