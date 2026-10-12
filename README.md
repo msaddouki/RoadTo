@@ -72,6 +72,17 @@ PYTHONPATH=pipeline python -m pytest pipeline/tests   # region pipeline
 CI also builds the Android APK and the iOS app (simulator) on every pull
 request; both can be downloaded from the workflow artifacts.
 
+End to end on Android, with the Lyon region embedded: the app installs the
+region, searches and routes on the device, and drives a simulated trip.
+CI runs it on an emulator ("Android emulator" job; screenshots, step timings
+and logcat are in the `roadto-android-emulator-test` artifact). Locally, with
+an emulator or a phone connected:
+
+```bash
+tool/embed_region.sh lyon --with-routing   # needs GH_TOKEN
+tool/run_emulator_test.sh                  # results in build/emulator-test
+```
+
 ## Safety rule
 
 Road tests **always with a passenger** handling the phone. Holding a phone
