@@ -12,6 +12,8 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="${1:-$ROOT/build/emulator-test}"
 APP_ID=org.roadto.roadto
 mkdir -p "$OUT/screens"
+# Absolute: the script changes directory before writing its results.
+OUT="$(cd "$OUT" && pwd)"
 
 adb wait-for-device
 adb logcat -c || true
