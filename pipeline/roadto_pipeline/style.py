@@ -109,9 +109,14 @@ def rewrite_style(style: dict) -> tuple[dict, dict[str, str], list[tuple[str, st
     return out, fonts, sprites
 
 
+# Identify ourselves: CDNs commonly reject urllib's default user agent.
+USER_AGENT = "RoadTo-pipeline/0.1 (+https://github.com/msaddouki/RoadTo)"
+
+
 def _get(url: str) -> bytes | None:
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     try:
-        with urllib.request.urlopen(url, timeout=60) as res:  # noqa: S310 - fixed public URLs
+        with urllib.request.urlopen(req, timeout=60) as res:  # noqa: S310 - fixed public URLs
             return res.read()
     except urllib.error.HTTPError as e:
         if e.code == 404:

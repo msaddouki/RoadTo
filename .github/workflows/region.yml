@@ -42,7 +42,7 @@ jobs:
         run: python -m pytest -q pipeline/tests
         env:
           PYTHONPATH: pipeline
-      - uses: actions/cache@v4
+      - uses: actions/cache/restore@v4
         with:
           path: pipeline/work/cache
           key: region-sources-${{ env.REGION }}-${{ github.run_id }}
@@ -51,6 +51,12 @@ jobs:
         run: pipeline/build_region.sh "$REGION"
         env:
           ROADTO_SIGNING_KEY: ${{ secrets.REGION_SIGNING_KEY }}
+      # Saved even when a later step fails, so a retry skips the big downloads.
+      - uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: pipeline/work/cache
+          key: region-sources-${{ env.REGION }}-${{ github.run_id }}
       - name: Summary
         run: |
           {
