@@ -102,5 +102,4 @@ SpeedLimits parseSpeedLimits(Map<String, dynamic> json) {
 
 /// Over the limit, with the usual margin: 5 km/h up to 100 km/h, 5 % above
 /// (the margin French speed cameras apply).
-bool isOverLimit(double speedKph, int limitKph) =>
-    speedKph > (limitKph <= 100 ? limitKph + 5 : limitKph * 1.05);
+bool isOverLimit(double speedKph, int limitKph) => speedKph > (limitKph <= 100 ? limitKph + 5 : limitKph * 1.05);
