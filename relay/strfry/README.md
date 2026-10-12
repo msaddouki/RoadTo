@@ -18,6 +18,14 @@ address (`ROADTO_RATE_PER_MINUTE`). The limit is kept in memory only and
 the plugin never writes addresses out. Events replicated between our relays
 are not rate limited.
 
+## Logs without client addresses
+
+strfry logs every connection with its address (`Connect from <ip>`). The
+container sends all its output through `redact_logs.py`, which replaces
+IPv4 and IPv6 addresses and the address in connection lines with
+`[address]`. CI starts both relays and fails if any address remains in
+their logs.
+
 ## Layout
 
 | File | Role |
@@ -25,7 +33,8 @@ are not rate limited.
 | `../strfry_policy/` | the plugin (Dart), its tests and `tool/smoke.dart` |
 | `Dockerfile` | strfry image + plugin built with `dart build cli` and the glibc runtime from the Dart image |
 | `strfry.conf` | strfry defaults with the RoadTo changes marked `RoadTo` |
-| `roadto-start.sh` | starts strfry; with `PEER_URL`, reconciles with the peer by negentropy every 5 min |
+| `roadto-start.sh` | starts strfry with its logs filtered; with `PEER_URL`, reconciles with the peer by negentropy every 5 min |
+| `redact_logs.py` | removes client addresses from every log line (strfry logs one per connection) |
 | `router.conf` | live replication to the peer relay, through the same plugin |
 | `docker-compose.yml` | two relays (`7777`, `7778`) replicating each other |
 
@@ -50,9 +59,6 @@ addresses rather than the proxy's.
 
 - Helm chart and Argo CD deployment.
 - Prometheus metrics.
-- **Client addresses in strfry's own logs.** The plugin writes none, but
-  strfry logs every connection with its address
-  (`[Websocket] Connect from <ip>`), as seen in CI. The plan requires logs
-  without IP: filter these lines before they are stored (log driver or
-  shipper), or patch strfry's log line, before running a public relay.
+- Rate-limit evasion by rotating addresses, and abuse reporting, are not
+  handled yet.
 - Load test with a nostr-sdk generator.
