@@ -1,11 +1,26 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
+import 'dart:ui' show PlatformDispatcher;
 
+import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+
+import 'services/crash_reports.dart';
 import 'state/app_controller.dart';
 import 'ui/map_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final app = await AppController.create();
+  // Errors are kept on the phone, scrubbed; nothing is sent (plan J7).
+  final crashes = CrashReports(Directory('${(await getApplicationSupportDirectory()).path}/crashes'));
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    crashes.record(details.exception, details.stack, context: details.context?.toDescription());
+  };
+  PlatformDispatcher.instance.onError = (error, stack) {
+    crashes.record(error, stack);
+    return false;
+  };
+  final app = await AppController.create(crashReports: crashes);
   runApp(RoadToApp(app: app));
   await app.start();
 }

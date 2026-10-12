@@ -8,6 +8,7 @@ import 'package:roadto_core/roadto_core.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../config.dart';
+import '../services/crash_reports.dart';
 import '../services/embedded_region.dart';
 import '../services/identity_store.dart';
 import '../services/location_source.dart';
@@ -65,15 +66,20 @@ class AppController extends ChangeNotifier {
   InstallProgress? installProgress;
   String? regionError;
 
+  /// Errors kept on the phone (Réglages > Rapports d'erreur).
+  CrashReports? crashReports;
+
   AppController._(this.settings, this.identity, this._identityStore, this.regionStore);
 
-  static Future<AppController> create() async {
+  static Future<AppController> create({CrashReports? crashReports}) async {
     final store = IdentityStore();
     final settings = await SettingsStore.load();
     final identity = await store.loadOrCreate();
     final support = await getApplicationSupportDirectory();
     final regions = RegionStore(Directory('${support.path}/regions'), trustedKeys: Defaults.trustedRegionKeys);
-    return AppController._(settings, identity.keys, store, regions)..hasRecoveryPhrase = identity.hasRecoveryPhrase;
+    return AppController._(settings, identity.keys, store, regions)
+      ..hasRecoveryPhrase = identity.hasRecoveryPhrase
+      ..crashReports = crashReports;
   }
 
   bool get navigating => route != null;

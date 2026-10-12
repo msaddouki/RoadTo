@@ -4,6 +4,7 @@ import 'package:roadto_core/roadto_core.dart';
 
 import '../config.dart';
 import '../state/app_controller.dart';
+import 'crash_reports_screen.dart';
 import 'identity_screens.dart';
 import 'regions_screen.dart';
 
@@ -231,6 +232,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
               'Alertes police : ${FeatureFlags.policeAlerts ? 'actives' : 'désactivées (jalon J6)'}.',
               style: text.bodySmall,
             ),
+            if (app.crashReports != null)
+              ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.bug_report_outlined),
+                title: const Text('Rapports d’erreur'),
+                subtitle: const Text('Gardés sur ce téléphone, partagés seulement si vous le choisissez'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (_) => CrashReportsScreen(reports: app.crashReports!))),
+              ),
           ],
         ),
       ),

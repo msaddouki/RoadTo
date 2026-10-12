@@ -33,6 +33,9 @@ once a region is downloaded.
 - Identity generated on the phone (Keystore or Keychain) with a 12-word
   **recovery phrase** (BIP-39, NIP-06) to restore it on another phone; a
   throwaway key per trip signs the alerts.
+- **Error reports stay on the phone** (Réglages > Rapports d’erreur), with
+  positions, keys and network addresses removed. Nothing is sent: the user
+  can read a report and share it, as a file or by copying it, if they want.
 
 ## Repository layout
 
