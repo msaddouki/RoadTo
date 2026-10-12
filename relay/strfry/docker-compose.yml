@@ -1,0 +1,38 @@
+# Two federated RoadTo relays, replicated live (strfry router) and reconciled
+# periodically (negentropy sync).
+#   cd relay/strfry && docker compose up --build
+# The app then uses ws://<host>:7777 and ws://<host>:7778.
+services:
+  relay-a:
+    build:
+      context: ../..
+      dockerfile: relay/strfry/Dockerfile
+    image: roadto-relay:dev
+    ports:
+      - "7777:7777"
+    environment:
+      ROUTER: /etc/roadto-router.conf
+      PEER_URL: ws://relay-b:7777
+    volumes:
+      - relay-a-db:/app/strfry-db
+      - ./router.conf:/etc/roadto-router.conf:ro
+    ulimits:
+      nofile: { soft: 65536, hard: 65536 } # matches relay.nofiles in strfry.conf
+    restart: unless-stopped
+
+  relay-b:
+    build:
+      context: ../..
+      dockerfile: relay/strfry/Dockerfile
+    image: roadto-relay:dev
+    ports:
+      - "7778:7777"
+    volumes:
+      - relay-b-db:/app/strfry-db
+    ulimits:
+      nofile: { soft: 65536, hard: 65536 } # matches relay.nofiles in strfry.conf
+    restart: unless-stopped
+
+volumes:
+  relay-a-db:
+  relay-b-db:

@@ -30,8 +30,9 @@ once a region is downloaded.
   on the route ("Accident dans 800 m").
 - **"Still there?"** when passing an alert: yes or no, and its reliability is
   recomputed. A closed road reported ahead triggers a reroute around it.
-- Identity generated on the phone (Keystore or Keychain); a throwaway key per
-  trip signs the alerts.
+- Identity generated on the phone (Keystore or Keychain) with a 12-word
+  **recovery phrase** (BIP-39, NIP-06) to restore it on another phone; a
+  throwaway key per trip signs the alerts.
 
 ## Repository layout
 
@@ -40,6 +41,8 @@ app/                    Flutter app (Android + iOS)
 packages/roadto_core/   Pure Dart core: geo, geohash, Nostr, alerts, guidance,
                         simulation, offline regions and search
 relay/dev_relay/        Development Nostr relay enforcing the RoadTo write policy
+relay/strfry/           Production relays: strfry + the same policy as a plugin
+relay/strfry_policy/    The strfry write-policy plugin (Dart) and an end-to-end check
 pipeline/               Builds signed offline region packages from OpenStreetMap
 docs/adr/               Architecture decision records
 docs/poc.md             Running and testing the POC

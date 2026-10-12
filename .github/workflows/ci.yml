@@ -2,9 +2,12 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [master]
   pull_request:
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -28,6 +31,7 @@ jobs:
         run: |
           (cd packages/roadto_core && dart pub get)
           (cd relay/dev_relay && dart pub get)
+          (cd relay/strfry_policy && dart pub get)
           (cd app && flutter pub get)
       # After pub get: the formatter reads the line width from analysis_options.yaml.
       - name: Format
@@ -43,6 +47,40 @@ jobs:
         run: |
           dart analyze --fatal-infos
           dart test
+
+  relay-image:
+    name: Relay image (strfry + policy, end to end)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+      - name: Plugin tests
+        working-directory: relay/strfry_policy
+        run: |
+          dart pub get
+          dart analyze --fatal-infos
+          dart test
+      - name: Start two relays
+        working-directory: relay/strfry
+        run: docker compose up -d --build
+      - name: Wait for the relays
+        run: |
+          for i in $(seq 60); do
+            curl -fsS http://localhost:7777 >/dev/null && curl -fsS http://localhost:7778 >/dev/null && exit 0
+            sleep 2
+          done
+          exit 1
+      - name: Publish to one relay, read from the other, check refusals
+        working-directory: relay/strfry_policy
+        run: dart run tool/smoke.dart ws://localhost:7777 ws://localhost:7778
+      - name: Relay logs
+        if: always()
+        working-directory: relay/strfry
+        run: docker compose logs --no-color | tail -100
 
   pipeline:
     name: Region pipeline (Python)
@@ -89,6 +127,10 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
+      - name: Embed the Lyon region
+        run: tool/embed_region.sh lyon
+        env:
+          GH_TOKEN: ${{ github.token }}
       - name: Build
         working-directory: app
         run: |
@@ -116,6 +158,10 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
+      - name: Embed the Lyon region
+        run: tool/embed_region.sh lyon
+        env:
+          GH_TOKEN: ${{ github.token }}
       - name: Build
         working-directory: app
         run: |
