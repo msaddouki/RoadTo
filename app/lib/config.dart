@@ -25,11 +25,13 @@ abstract final class Defaults {
     ),
   ];
 
-  /// Ed25519 public keys (base64) allowed to sign region manifests. Generate
-  /// the pair with `python -m roadto_pipeline keygen`, store the private key
-  /// as the REGION_SIGNING_KEY secret and add the public key here. Until then
-  /// the app refuses every package.
-  static const trustedRegionKeys = <String>[];
+  /// Ed25519 public keys (base64) allowed to sign region manifests; the
+  /// matching private key is the REGION_SIGNING_KEY secret of the repository.
+  /// To rotate: `python -m roadto_pipeline keygen`, replace the secret, add
+  /// the new key here and drop the old one after one release.
+  static const trustedRegionKeys = <String>[
+    '7hKf0Z8kswZm/IeEVc7gHvx7IrW0cMEGYBA704fp8Kc=', // 2026-10-12, POC key
+  ];
 
   /// OpenFreeMap styles: free OSM tiles, no key, no tracking.
   static const mapStyles = {
