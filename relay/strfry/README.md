@@ -50,6 +50,23 @@ cd ../strfry_policy && dart run tool/smoke.dart ws://localhost:7777 ws://localho
 other. It also checks that spam and police alerts are refused. CI runs it
 on every pull request.
 
+## Load test
+
+`tool/load.dart` publishes valid alerts (proof of work included) at a steady
+rate on one relay, over several connections, and times how long each takes
+to reach a subscriber on the other relay:
+
+```bash
+ROADTO_RATE_PER_MINUTE=100000 docker compose up -d --build   # one client address: lift the rate limit
+cd ../strfry_policy
+dart run tool/load.dart --writer ws://localhost:7777 --reader ws://localhost:7778 --rate 30 --seconds 30
+```
+
+It reports refusals, losses and delivery times (p50, p95, max), and fails
+when an alert is refused or lost or when the p95 exceeds `--max-p95` (5 s,
+the plan's target from one phone to the other through two relays). CI runs
+it on every pull request at 30 alerts a second for 30 seconds.
+
 In the app, set both relays in Réglages: `ws://<host>:7777` and
 `ws://<host>:7778`. In production, put them behind TLS (`wss://`); set
 `relay.realIpHeader` in `strfry.conf` so the rate limit sees client
@@ -61,4 +78,5 @@ addresses rather than the proxy's.
 - Prometheus metrics.
 - Rate-limit evasion by rotating addresses, and abuse reporting, are not
   handled yet.
-- Load test with a nostr-sdk generator.
+- Load test from many addresses (the rate limit per address is lifted for
+  the load test, which publishes from one).
