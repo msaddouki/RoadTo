@@ -5,11 +5,17 @@ import 'package:http/http.dart' as http;
 
 import '../geo.dart';
 import 'route.dart';
+import 'speed_limits.dart';
 
 /// Route computation. Implemented online ([ValhallaRouter]), on the device
 /// ([NativeValhallaRouter]), or both with a fallback ([FallbackRouter]).
 abstract interface class RouteEngine {
   Future<TripRoute> route(LatLon from, LatLon to, {double? headingDeg, List<LatLon> avoid = const []});
+}
+
+/// Speed limits along a route computed by the same engine.
+abstract interface class SpeedLimitSource {
+  Future<SpeedLimits> speedLimits(TripRoute route);
 }
 
 class RoutingException implements Exception {
@@ -60,8 +66,8 @@ List<List<double>> _square(LatLon c, double halfM) {
   ];
 }
 
-/// Client of a Valhalla server's /route API.
-class ValhallaRouter implements RouteEngine {
+/// Client of a Valhalla server's /route and /trace_attributes APIs.
+class ValhallaRouter implements RouteEngine, SpeedLimitSource {
   final Uri baseUrl;
   final http.Client _client;
   final String language;
@@ -75,58 +81,83 @@ class ValhallaRouter implements RouteEngine {
       valhallaRouteRequest(from, to, headingDeg: headingDeg, avoid: avoid, language: language);
 
   @override
-  Future<TripRoute> route(LatLon from, LatLon to, {double? headingDeg, List<LatLon> avoid = const []}) async {
-    final body = jsonEncode(buildRequest(from, to, headingDeg: headingDeg, avoid: avoid));
+  Future<TripRoute> route(LatLon from, LatLon to, {double? headingDeg, List<LatLon> avoid = const []}) async =>
+      parseValhallaRoute(await _post('route', buildRequest(from, to, headingDeg: headingDeg, avoid: avoid)));
+
+  @override
+  Future<SpeedLimits> speedLimits(TripRoute route) async =>
+      parseSpeedLimits(await _post('trace_attributes', speedLimitsRequest(route)));
+
+  Future<Map<String, dynamic>> _post(String action, Map<String, dynamic> request) async {
     final http.Response res;
     try {
       res = await _client
-          .post(baseUrl.resolve('route'), headers: {'content-type': 'application/json'}, body: body)
+          .post(baseUrl.resolve(action), headers: {'content-type': 'application/json'}, body: jsonEncode(request))
           .timeout(const Duration(seconds: 20));
     } catch (e) {
       throw RoutingException('Serveur de routage injoignable ($e)');
     }
-    final json = jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
+    final Map<String, dynamic> json;
+    try {
+      json = jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>;
+    } on FormatException {
+      throw RoutingException('Réponse illisible du serveur de routage (${res.statusCode})');
+    }
     if (res.statusCode != 200) {
       throw RoutingException('${json['error'] ?? 'Erreur'} (${res.statusCode})');
     }
-    return parseValhallaRoute(json);
+    return json;
   }
 }
 
 /// Valhalla running on the device (valhalla-mobile), on the graph of an
-/// installed region. [call] sends the request JSON to the platform and
-/// returns the response JSON; the app provides it over a MethodChannel.
-class NativeValhallaRouter implements RouteEngine {
+/// installed region. [call] sends a /route request JSON to the platform and
+/// returns the response JSON, [traceAttributes] the same for
+/// /trace_attributes; the app provides them over a MethodChannel.
+class NativeValhallaRouter implements RouteEngine, SpeedLimitSource {
   final String configPath;
   final Future<String> Function(String configPath, String requestJson) call;
+  final Future<String> Function(String configPath, String requestJson)? traceAttributes;
   final String language;
 
-  NativeValhallaRouter({required this.configPath, required this.call, this.language = 'fr-FR'});
+  NativeValhallaRouter({required this.configPath, required this.call, this.traceAttributes, this.language = 'fr-FR'});
 
   @override
   Future<TripRoute> route(LatLon from, LatLon to, {double? headingDeg, List<LatLon> avoid = const []}) async {
     final request = jsonEncode(
       valhallaRouteRequest(from, to, headingDeg: headingDeg, avoid: avoid, language: language),
     );
+    return parseValhallaRoute(await _run(call, request));
+  }
+
+  @override
+  Future<SpeedLimits> speedLimits(TripRoute route) async {
+    final trace = traceAttributes;
+    if (trace == null) throw RoutingException('Limitations de vitesse indisponibles hors ligne');
+    return parseSpeedLimits(await _run(trace, jsonEncode(speedLimitsRequest(route))));
+  }
+
+  Future<Map<String, dynamic>> _run(
+    Future<String> Function(String configPath, String requestJson) action,
+    String request,
+  ) async {
     final String response;
     try {
-      response = await call(configPath, request);
+      response = await action(configPath, request);
     } catch (e) {
       throw RoutingException('Calcul hors ligne impossible ($e)');
     }
-    final Map<String, dynamic> json;
     try {
-      json = jsonDecode(response) as Map<String, dynamic>;
+      return jsonDecode(response) as Map<String, dynamic>;
     } on FormatException {
       throw RoutingException('Réponse illisible du calcul hors ligne');
     }
-    return parseValhallaRoute(json);
   }
 }
 
 /// Tries [primary] (on the device) and falls back to [fallback] (online) when
 /// it fails, e.g. for a destination outside the installed region.
-class FallbackRouter implements RouteEngine {
+class FallbackRouter implements RouteEngine, SpeedLimitSource {
   final RouteEngine primary;
   final RouteEngine fallback;
 
@@ -143,6 +174,20 @@ class FallbackRouter implements RouteEngine {
       onFallback?.call(e);
       return fallback.route(from, to, headingDeg: headingDeg, avoid: avoid);
     }
+  }
+
+  /// From the primary when it can, else from the fallback.
+  @override
+  Future<SpeedLimits> speedLimits(TripRoute route) async {
+    if (primary case final SpeedLimitSource first) {
+      try {
+        return await first.speedLimits(route);
+      } on RoutingException catch (e) {
+        onFallback?.call(e);
+      }
+    }
+    if (fallback case final SpeedLimitSource second) return second.speedLimits(route);
+    throw RoutingException('Limitations de vitesse indisponibles');
   }
 }
 

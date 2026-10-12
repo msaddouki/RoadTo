@@ -15,8 +15,14 @@ abstract final class DeviceRouting {
 
   /// Runs a Valhalla /route request (JSON) with the given config file and
   /// returns Valhalla's JSON answer.
-  static Future<String> route(String configPath, String requestJson) async {
-    final response = await _channel.invokeMethod<String>('route', {'config': configPath, 'request': requestJson});
+  static Future<String> route(String configPath, String requestJson) => _run('route', configPath, requestJson);
+
+  /// Same for /trace_attributes (speed limits along a route).
+  static Future<String> traceAttributes(String configPath, String requestJson) =>
+      _run('traceAttributes', configPath, requestJson);
+
+  static Future<String> _run(String method, String configPath, String requestJson) async {
+    final response = await _channel.invokeMethod<String>(method, {'config': configPath, 'request': requestJson});
     if (response == null) throw PlatformException(code: 'empty', message: 'no answer from Valhalla');
     return response;
   }

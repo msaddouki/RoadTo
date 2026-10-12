@@ -32,6 +32,15 @@
   submodules). That build belongs in its own CI job, cached and published
   as a release asset, before iOS can route offline.
 
+- **Speed limits** come from the same engine: once a route is computed,
+  its shape is sent to Valhalla's `trace_attributes` with
+  `shape_match: edge_walk` (exact on a shape Valhalla produced), asking only
+  for each edge's `speed_limit` and shape indexes. The answer becomes spans
+  of distance along the route (`SpeedLimits`), looked up from the guidance
+  position. On Android the raw `trace_attributes` call of valhalla-mobile is
+  public, so no model mapping is needed. A route without limits (old
+  graph, server error) simply shows no sign.
+
 ## Consequences
 
 - The Android app grows by the native library and, with the embedded
