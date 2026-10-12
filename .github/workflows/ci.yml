@@ -24,18 +24,22 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
+      - name: Dépendances
+        run: |
+          (cd packages/roadto_core && dart pub get)
+          (cd relay/dev_relay && dart pub get)
+          (cd app && flutter pub get)
+      # Après pub get : le formateur lit la largeur de ligne dans analysis_options.yaml.
       - name: Format
         run: dart format --output=none --set-exit-if-changed packages relay app/lib app/test
       - name: roadto_core
         working-directory: packages/roadto_core
         run: |
-          dart pub get
           dart analyze --fatal-infos
           dart test
       - name: Relais de dev (bout en bout)
         working-directory: relay/dev_relay
         run: |
-          dart pub get
           dart analyze --fatal-infos
           dart test
 
