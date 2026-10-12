@@ -16,5 +16,6 @@ COPY --from=build /runtime/ /
 COPY --from=build /out/bundle/bin/roadto_policy /app/roadto-policy
 COPY relay/strfry/strfry.conf /etc/strfry.conf
 COPY relay/strfry/roadto-start.sh /app/roadto-start.sh
+COPY relay/strfry/redact_logs.py /app/redact_logs.py
 RUN chmod +x /app/roadto-start.sh /app/roadto-policy
 CMD ["/app/roadto-start.sh"]

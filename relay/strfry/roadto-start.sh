@@ -4,6 +4,11 @@
 # using negentropy, so a relay that was down catches up.
 set -euo pipefail
 
+# Every log line, from strfry and from this script, goes through
+# redact_logs.py: strfry logs client addresses on each connection and the
+# plan requires relay logs without IP.
+exec > >(python3 -u /app/redact_logs.py) 2>&1
+
 if [[ -n "${PEER_URL:-}" ]]; then
   (
     sleep 20
