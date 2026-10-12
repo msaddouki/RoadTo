@@ -84,7 +84,7 @@ jobs:
           # Data files first, manifest last: a client never sees a manifest
           # that points at files not uploaded yet.
           data=()
-          for f in style.tar.gz places.sqlite map.pmtiles routing.tar "$REGION.roadto"; do [[ -f "$pkg/$f" ]] && data+=("$pkg/$f"); done
+          for f in style.tar.gz places.sqlite map.pmtiles routing.tar routing.json "$REGION.roadto"; do [[ -f "$pkg/$f" ]] && data+=("$pkg/$f"); done
           gh release upload "$tag" "${data[@]}" --clobber
           gh release upload "$tag" "$pkg/manifest.json" "$pkg/manifest.json.sig" --clobber
       - name: Keep unsigned package

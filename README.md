@@ -21,7 +21,8 @@ once a region is downloaded.
   food), offline: nearest around you, or next ones ahead on the route with
   the distance to them and how far they are from the road.
 - Route from Valhalla, turn-by-turn guidance with French voice prompts,
-  arrival time, rerouting when off route.
+  arrival time, rerouting when off route. **Offline on Android** with the
+  region's graph (valhalla-mobile); online on iOS and outside the region.
 - **Simulated driving** on by default: the trip is replayed along the route,
   so everything can be tested without driving.
 - **One-gesture reporting**: six large tiles, 5 s to cancel. The police

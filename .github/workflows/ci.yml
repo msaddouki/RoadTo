@@ -131,6 +131,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # The release build with the embedded region and routing graph (and
+      # Valhalla for four ABIs) runs out of the runner's disk. Toolchains the
+      # build never uses are removed first.
+      - name: Free disk space
+        run: tool/free_ci_disk.sh
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -140,8 +145,8 @@ jobs:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
           cache: true
-      - name: Embed the Lyon region
-        run: tool/embed_region.sh lyon
+      - name: Embed the Lyon region (with the routing graph)
+        run: tool/embed_region.sh lyon --with-routing
         env:
           GH_TOKEN: ${{ github.token }}
       - name: Build
@@ -149,6 +154,9 @@ jobs:
         run: |
           flutter pub get
           flutter build apk --release
+      - name: Disk usage
+        if: always()
+        run: df -h / && du -sh app/build ~/.gradle 2>/dev/null || true
       - name: No trackers in the build
         working-directory: app/android
         run: |

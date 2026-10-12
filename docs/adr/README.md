@@ -5,7 +5,7 @@ One major decision per file, reviewed at the end of each milestone.
 | # | Topic | Status |
 | --- | --- | --- |
 | 0001 | Map: MapLibre + PMTiles | to write after spike A (see 0009 for the package format) |
-| 0002 | Routing: Valhalla; public FOSSGIS server in the POC, valhalla-mobile target (J2) | to write after spike B |
+| [0002](0002-routing.md) | Routing: Valhalla on the device (Android, valhalla-mobile), online fallback; iOS online for now | accepted (POC) |
 | 0003 | Guidance: in-house Dart engine (POC) or Ferrostar | to write after spike C |
 | [0004](0004-flutter-cross-platform.md) | One Flutter app for Android and iOS, Dart core | accepted (POC) |
 | [0005](0005-nostr-alerts.md) | Alerts over Nostr, federated relays | accepted (POC) |
