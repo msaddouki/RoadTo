@@ -71,6 +71,12 @@ void main() {
     expect(distanceM(destination.position, const LatLon(45.7605, 4.8597)), lessThan(1500));
     step('search_app');
 
+    final fuel = driverCategories.firstWhere((c) => c.id == 'fuel');
+    final stations = app.searchCategory(fuel)!;
+    expect(stations, isNotEmpty);
+    expect(stations.first.distanceM, lessThan(5000));
+    step('search_category');
+
     // Valhalla on the device, on the region's graph.
     final native = NativeValhallaRouter(configPath: region.routingConfigPath, call: DeviceRouting.route);
     final city = await native.route(_bellecour, destination.position);
@@ -100,6 +106,12 @@ void main() {
     );
     expect(app.guidance!.offRoute, isFalse);
     step('navigate_drive');
+
+    // While navigating, categories are searched ahead on the route.
+    final ahead = app.searchCategory(driverCategories.firstWhere((c) => c.id == 'parking'))!;
+    expect(ahead, isNotEmpty);
+    expect(ahead.every((p) => p.aheadM != null), isTrue);
+    step('search_category_ahead');
     await _pumpFor(tester, const Duration(seconds: 5));
 
     app.stopNavigation();
