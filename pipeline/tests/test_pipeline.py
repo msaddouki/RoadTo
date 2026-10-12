@@ -63,6 +63,22 @@ def test_poi_keeps_its_own_city_and_skips_benches(index):
     assert index.execute("SELECT count(*) FROM place WHERE name = 'Banc nommé'").fetchone()[0] == 0
 
 
+def test_driver_places_are_indexed_without_a_name(index):
+    rows = index.execute(
+        "SELECT kind, name FROM place WHERE kind IN ('amenity=fuel', 'amenity=parking', 'amenity=charging_station')"
+        " ORDER BY kind, name"
+    ).fetchall()
+    assert rows == [
+        ("amenity=charging_station", "Izivia"),          # operator as label
+        ("amenity=fuel", "Station du Méridien"),
+        ("amenity=fuel", "TotalEnergies"),               # brand as label
+        ("amenity=parking", None),                       # public, unnamed; the private one is skipped
+    ]
+    plan = " ".join(r[-1] for r in index.execute(
+        "EXPLAIN QUERY PLAN SELECT * FROM place WHERE kind = 'amenity=fuel' AND lat BETWEEN 45 AND 46"))
+    assert "place_kind" in plan
+
+
 def test_building_address_uses_way_centroid(index):
     lat, lon = index.execute("SELECT lat, lon FROM place WHERE street = 'Chemin des Cerisiers'").fetchone()
     assert lat == pytest.approx(45.77015, abs=1e-4)

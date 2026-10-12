@@ -174,6 +174,38 @@ void main() {
       expect(nearEcully.first.label, '3 bis Chemin des Cerisiers, Écully');
     });
 
+    test('nearest fuel station, unnamed ones labelled by brand', () {
+      final fuel = driverCategories.firstWhere((c) => c.id == 'fuel');
+      final found = geocoder.nearby(fuel, const LatLon(45.7648, 4.8395));
+      expect(found.first.place.name, 'TotalEnergies');
+      expect(found.first.distanceM, lessThan(100));
+      expect(found.map((n) => n.place.name), contains('Station du Méridien'));
+      expect(geocoder.nearby(fuel, const LatLon(45.7648, 4.8395), radiusM: 500), hasLength(1));
+    });
+
+    test('unnamed car park: found by category with a generic label, not by text', () {
+      final parking = driverCategories.firstWhere((c) => c.id == 'parking');
+      expect(geocoder.nearby(parking, const LatLon(45.766, 4.841)).single.place.name, 'Parking');
+      expect(geocoder.searchSync('parking'), isEmpty);
+    });
+
+    test('charging stations ahead on the route, in route order', () {
+      // East-west route through Lyon, passing 1.5 km north of the Izivia station.
+      final route = TripRoute(
+        shape: const [LatLon(45.754, 4.80), LatLon(45.754, 4.95)],
+        maneuvers: const [],
+        lengthM: 11700,
+        timeS: 900,
+      );
+      final charging = driverCategories.firstWhere((c) => c.id == 'charging');
+      expect(geocoder.alongRoute(charging, route, 0, maxOffRouteM: 1000), isEmpty);
+      final ahead = geocoder.alongRoute(charging, route, 0, maxOffRouteM: 2000);
+      expect(ahead.single.place.name, 'Izivia');
+      expect(ahead.single.aheadM, closeTo(7800, 300));
+      expect(ahead.single.offRouteM, closeTo(1560, 100));
+      expect(geocoder.alongRoute(charging, route, 9000, maxOffRouteM: 2000), isEmpty, reason: 'already passed');
+    });
+
     test('empty or symbol-only queries return nothing', () {
       expect(geocoder.searchSync(''), isEmpty);
       expect(geocoder.searchSync('" * -'), isEmpty);

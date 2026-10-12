@@ -192,6 +192,16 @@ class AppController extends ChangeNotifier {
     return _onlineGeocoder.search(query, near: position);
   }
 
+  /// Places of [category] ahead on the route when navigating, around the
+  /// position otherwise. Null when no offline region is installed.
+  List<NearbyPlace>? searchCategory(PlaceCategory category) {
+    final offline = _offlineGeocoder;
+    if (offline == null) return null;
+    final r = route, g = guidance;
+    if (r != null && g != null) return offline.alongRoute(category, r, g.projection.alongM);
+    return offline.nearby(category, position, radiusM: 10000);
+  }
+
   List<LatLon> get _blockedPoints => [
     for (final a in alerts.visible())
       if (a.type.blocksRoad) a.position,

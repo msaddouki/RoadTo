@@ -16,6 +16,13 @@ manifest. Regions are defined in `regions/<id>.json`; the first one is
 | `manifest.json` | `roadto_pipeline manifest` | size and SHA-256 of every file |
 | `manifest.json.sig` | `roadto_pipeline sign` | Ed25519 signature of the manifest |
 
+The search index holds addresses, streets, settlements and named places.
+Places drivers look for by category (fuel, charging, parking, toilets, rest
+areas) are indexed even without a name, labelled by brand or operator when
+there is one; private ones (`access=private|no`) are left out. An index on
+`(kind, lat, lon)` serves category search; it is additive, so older apps
+read new packages unchanged.
+
 File URLs in the manifest are relative to it, so a package can be served
 from any static host. The schema of `places.sqlite` is
 [`schema/places.sql`](schema/places.sql).
