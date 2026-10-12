@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:roadto_core/roadto_core.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../config.dart';
+import '../services/embedded_region.dart';
 import '../services/identity_store.dart';
 import '../services/location_source.dart';
 import '../services/settings_store.dart';
@@ -94,6 +96,7 @@ class AppController extends ChangeNotifier {
 
   Future<void> start() async {
     await _reloadRegions();
+    unawaited(_installEmbeddedRegions());
     _ownKeys
       ..add(identity.publicKey)
       ..add(tripKeys.publicKey);
@@ -360,23 +363,55 @@ class AppController extends ChangeNotifier {
     activeRegion = active;
   }
 
-  Future<void> installRegion(RegionSource source) async {
+  /// Installs the regions shipped in the app when missing, or when the app
+  /// carries a newer package than the installed one.
+  Future<void> _installEmbeddedRegions() async {
+    for (final id in Defaults.embeddedRegions) {
+      final source = AssetPackageSource(id);
+      final embedded = await source.peekManifest();
+      if (embedded == null) continue;
+      final installed = regions.where((r) => r.id == id).firstOrNull;
+      if (installed != null && !embedded.createdAt.isAfter(installed.manifest.createdAt)) continue;
+      await _runInstall(id, source, done: 'Carte hors ligne ${embedded.regionName} prête');
+    }
+  }
+
+  Future<void> installRegion(RegionSource source) =>
+      _runInstall(source.id, HttpPackageSource(Uri.parse(source.manifestUrl)), done: 'Région ${source.name} installée');
+
+  /// Lets the user pick a `.roadto` file (USB, AirDrop, Files…) and installs it.
+  Future<void> importRegionFile() async {
+    final picked = await FilePicker.pickFile(dialogTitle: 'Fichier de région (.roadto)');
+    if (picked == null) return;
+    var path = picked.path;
+    if (path == null) {
+      // Content URI (Android): copy it to a file the reader can seek in.
+      final tmp = File('${(await getTemporaryDirectory()).path}/import.roadto');
+      final sink = tmp.openWrite();
+      await sink.addStream(picked.readAsByteStream());
+      await sink.close();
+      path = tmp.path;
+    }
+    await _runInstall(picked.name, BundlePackageSource(File(path)), done: 'Région importée');
+  }
+
+  Future<void> _runInstall(String label, PackageSource source, {required String done}) async {
     if (installingRegion != null) return;
-    installingRegion = source.id;
+    installingRegion = label;
     installProgress = null;
     regionError = null;
     notifyListeners();
     try {
-      await for (final p in regionStore.install(Uri.parse(source.manifestUrl))) {
+      await for (final p in regionStore.install(source)) {
         installProgress = p;
         notifyListeners();
       }
-      // The map reopens on the new files.
+      // The map and search reopen on the new files.
       _offlineGeocoder?.close();
       _offlineGeocoder = null;
       activeRegion = null;
       await _reloadRegions();
-      _say('Région ${source.name} installée', speak: false);
+      _say(done, speak: false);
     } on RegionException catch (e) {
       regionError = e.message;
     } catch (e) {

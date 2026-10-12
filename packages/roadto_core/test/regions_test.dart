@@ -94,7 +94,7 @@ void main() {
     });
 
     test('installs, verifies and writes the offline style', () async {
-      final stages = await store.install(server.manifestUrl).map((p) => p.stage).toList();
+      final stages = await store.installFromUrl(server.manifestUrl).map((p) => p.stage).toList();
       expect(stages.first, InstallStage.manifest);
       expect(stages.last, InstallStage.done);
 
@@ -112,17 +112,17 @@ void main() {
     });
 
     test('an update only downloads changed files', () async {
-      await store.install(server.manifestUrl).drain<void>();
+      await store.installFromUrl(server.manifestUrl).drain<void>();
       server.requests.clear();
-      await store.install(server.manifestUrl).drain<void>();
+      await store.installFromUrl(server.manifestUrl).drain<void>();
       expect(server.requests, ['manifest.json', 'manifest.json.sig']);
     });
 
     test('a corrupted file is refused and the installed version kept', () async {
-      await store.install(server.manifestUrl).drain<void>();
+      await store.installFromUrl(server.manifestUrl).drain<void>();
       await File('${root.path}/test/map.pmtiles').writeAsString('fake MAP'); // forces a re-download
       server.overrides['map.pmtiles'] = utf8.encode('evil map');
-      await expectLater(store.install(server.manifestUrl).drain<void>(), throwsA(isA<RegionException>()));
+      await expectLater(store.installFromUrl(server.manifestUrl).drain<void>(), throwsA(isA<RegionException>()));
       expect(Directory('${root.path}/.staging-test').existsSync(), isFalse);
       expect(await store.load('test'), isNotNull);
     });
@@ -131,19 +131,60 @@ void main() {
       server.overrides['manifest.json'] = utf8.encode(
         File('${fixtures.path}/manifest.json').readAsStringSync().replaceFirst('2026-10-12', '2026-10-13'),
       );
-      await expectLater(store.install(server.manifestUrl).drain<void>(), throwsA(isA<RegionException>()));
+      await expectLater(store.installFromUrl(server.manifestUrl).drain<void>(), throwsA(isA<RegionException>()));
 
       final untrusting = RegionStore(root, trustedKeys: [base64.encode(List.filled(32, 1))]);
       server.overrides.clear();
-      await expectLater(untrusting.install(server.manifestUrl).drain<void>(), throwsA(isA<RegionException>()));
+      await expectLater(untrusting.installFromUrl(server.manifestUrl).drain<void>(), throwsA(isA<RegionException>()));
       expect(await store.installed(), isEmpty);
     });
 
     test('a tampered install is not loaded', () async {
-      await store.install(server.manifestUrl).drain<void>();
+      await store.installFromUrl(server.manifestUrl).drain<void>();
       final m = File('${root.path}/test/manifest.json');
       m.writeAsStringSync(m.readAsStringSync().replaceFirst('Région de test', 'X'));
       expect(await store.load('test'), isNull);
+    });
+  });
+
+  group('package sources', () {
+    late Directory root;
+    late RegionStore store;
+
+    setUp(() async {
+      root = await Directory.systemTemp.createTemp('regions');
+      store = RegionStore(root, trustedKeys: const [rfc8032PublicKey]);
+    });
+
+    tearDown(() => root.delete(recursive: true));
+
+    test('installs from a .roadto file produced by the pipeline', () async {
+      await store.install(BundlePackageSource(File('test/fixtures/test.roadto'))).drain<void>();
+      final region = (await store.load('test'))!;
+      expect(File(region.mapPath).readAsStringSync(), 'fake map');
+      expect(File(region.stylePath).existsSync(), isTrue);
+    });
+
+    test('a tampered .roadto file is refused', () async {
+      final bytes = File('test/fixtures/test.roadto').readAsBytesSync();
+      final i = String.fromCharCodes(bytes).indexOf('fake map');
+      bytes[i] = 'F'.codeUnitAt(0);
+      final copy = File('${root.path}/tampered.roadto')..writeAsBytesSync(bytes);
+      await expectLater(store.install(BundlePackageSource(copy)).drain<void>(), throwsA(isA<RegionException>()));
+      expect(await store.installed(), isEmpty);
+    });
+
+    test('a file that is not a region is refused with a clear message', () async {
+      final junk = File('${root.path}/photo.jpg')..writeAsBytesSync(List.filled(2048, 7));
+      await expectLater(
+        store.install(BundlePackageSource(junk)).drain<void>(),
+        throwsA(isA<RegionException>().having((e) => e.message, 'message', contains('région'))),
+      );
+    });
+
+    test('installs from an unpacked folder', () async {
+      await store.install(DirectoryPackageSource(fixtures)).drain<void>();
+      expect((await store.installed()).single.id, 'test');
     });
   });
 

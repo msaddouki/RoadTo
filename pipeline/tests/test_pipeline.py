@@ -7,7 +7,9 @@ from pathlib import Path
 
 import pytest
 
-from roadto_pipeline import manifest, places, signing, style
+import tarfile
+
+from roadto_pipeline import bundle, manifest, places, signing, style
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -177,3 +179,28 @@ def test_sign_without_key_fails(monkeypatch):
         monkeypatch.delenv(var, raising=False)
     with pytest.raises(signing.SigningError):
         signing.sign(b"x")
+
+
+# --- bundle ---------------------------------------------------------------
+
+def test_bundle_packs_signed_package_manifest_first(tmp_path):
+    (tmp_path / "pkg").mkdir()
+    pkg = _package(tmp_path / "pkg", with_routing=True)
+    m = manifest.build_manifest(REGION, pkg, version="v")
+    (pkg / "manifest.json").write_bytes(manifest.encode(m))
+    (pkg / "manifest.json.sig").write_text("sig\n")
+    out = tmp_path / "test.roadto"
+    names = bundle.build_bundle(pkg, out)
+    assert names == ["manifest.json", "manifest.json.sig", "style.tar.gz", "places.sqlite", "map.pmtiles"]
+    with tarfile.open(out) as tar:
+        assert tar.getnames() == names
+        assert all(t.isfile() and t.mtime == 0 for t in tar.getmembers())
+        assert tar.extractfile("map.pmtiles").read() == b"map.pmtiles"
+    assert "routing.tar" in bundle.build_bundle(pkg, out, include_optional=True)
+
+
+def test_bundle_refuses_unsigned_package(tmp_path):
+    pkg = _package(tmp_path)
+    (pkg / "manifest.json").write_bytes(manifest.encode(manifest.build_manifest(REGION, pkg, version="v")))
+    with pytest.raises(FileNotFoundError):
+        bundle.build_bundle(pkg, tmp_path / "x.roadto")
