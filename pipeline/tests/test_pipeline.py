@@ -102,6 +102,18 @@ def test_style_is_rewritten_for_offline_use():
     assert src["sources"]["openmaptiles"]["url"] == "https://tiles.example.org/planet"
 
 
+def test_glyph_ranges_are_limited_to_latin_scripts():
+    jobs = style.glyph_jobs({"Noto Sans Regular": "Noto_Sans_Regular"}, "https://x/{fontstack}/{range}.pbf",
+                            style.LATIN_GLYPH_STARTS)
+    paths = [p for p, _ in jobs]
+    assert len(paths) == len(style.LATIN_GLYPH_STARTS) == 9
+    assert "fonts/Noto_Sans_Regular/0-255.pbf" in paths          # basic Latin, French accents
+    assert "fonts/Noto_Sans_Regular/1024-1279.pbf" in paths      # Cyrillic
+    assert "fonts/Noto_Sans_Regular/8192-8447.pbf" in paths      # punctuation, euro sign
+    assert not any("19968" in p for p in paths)                  # no CJK
+    assert jobs[0][1] == "https://x/Noto%20Sans%20Regular/0-255.pbf"
+
+
 def test_style_without_vector_source_is_rejected():
     with pytest.raises(ValueError):
         style.rewrite_style({"sources": {}, "layers": []})
