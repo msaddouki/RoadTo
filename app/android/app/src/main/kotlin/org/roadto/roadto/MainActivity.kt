@@ -37,7 +37,11 @@ class MainActivity : FlutterActivity() {
                             }
                             val response = valhalla!!.routeRaw(request)
                             main.post { result.success(response) }
-                        } catch (e: Exception) {
+                        } catch (e: Throwable) {
+                            // Throwable, not Exception: a native library that fails to load
+                            // (UnsatisfiedLinkError) must still answer, or Dart waits forever.
+                            valhalla = null
+                            valhallaConfig = null
                             main.post { result.error("valhalla", e.message ?: e.toString(), null) }
                         }
                     }
