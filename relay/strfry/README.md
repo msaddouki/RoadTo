@@ -62,6 +62,13 @@ cd ../strfry_policy
 dart run tool/load.dart --writer ws://localhost:7777 --reader ws://localhost:7778 --rate 30 --seconds 30
 ```
 
+The first run found the bottleneck: the plugin checked each signature
+again in Dart (about 17 ms, and strfry runs the plugin one event at a time),
+although strfry had already checked it in C++. At 30 alerts a second the
+p95 delivery reached 7.4 s. The plugin now trusts strfry for id and
+signature (0.003 ms per event); the dev relay, which has no other check,
+still verifies.
+
 It reports refusals, losses and delivery times (p50, p95, max), and fails
 when an alert is refused or lost or when the p95 exceeds `--max-p95` (5 s,
 the plan's target from one phone to the other through two relays). CI runs
