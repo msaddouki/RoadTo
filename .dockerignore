@@ -1,0 +1,7 @@
+# Only the relay image is built with Docker; it needs the core and the plugin.
+**/.dart_tool
+**/build
+.git
+app
+pipeline
+docs

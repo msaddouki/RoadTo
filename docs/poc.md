@@ -81,7 +81,7 @@ The same scenario runs automatically in `relay/dev_relay/test/`.
 | Routing | public FOSSGIS Valhalla server | valhalla-mobile on the phone (J2); the graph is already in the package |
 | Search | offline SQLite FTS5 index, Photon online as fallback | offline only, plus categories (J5) |
 | Guidance | in-house Dart engine | in-house or Ferrostar (spike C) |
-| Relay | in-memory dev relay | strfry + plugin, two synchronized relays (J3) |
+| Relay | in-memory dev relay, or two strfry relays (`relay/strfry`, Docker) | Helm chart, metrics, TLS (J3) |
 | Identity | key in Keystore / Keychain | + BIP-39 recovery phrase (J3) |
 | Android location | geolocator, LocationManager forced | plugin without Google services (J2) |
 | Car | — | Android Auto (J4), CarPlay (after Apple's approval) |
