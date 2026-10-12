@@ -45,4 +45,19 @@
     <tag k="addr:housenumber" v="3 bis"/>
     <tag k="addr:street" v="Chemin des Cerisiers"/>
   </way>
+  <node id="12" lat="45.7650" lon="4.8400" version="1">
+    <tag k="amenity" v="fuel"/>
+    <tag k="brand" v="TotalEnergies"/>
+  </node>
+  <node id="13" lat="45.7660" lon="4.8410" version="1">
+    <tag k="amenity" v="parking"/>
+  </node>
+  <node id="14" lat="45.7661" lon="4.8411" version="1">
+    <tag k="amenity" v="parking"/>
+    <tag k="access" v="private"/>
+  </node>
+  <node id="15" lat="45.7400" lon="4.9000" version="1">
+    <tag k="amenity" v="charging_station"/>
+    <tag k="operator" v="Izivia"/>
+  </node>
 </osm>

@@ -1,6 +1,6 @@
 {
   "attribution": "© OpenStreetMap contributors (ODbL) · © OpenMapTiles · Style © OpenFreeMap",
-  "created_at": "2026-10-12T12:20:45Z",
+  "created_at": "2026-10-12T13:41:14Z",
   "files": [
     {
       "kind": "style",
@@ -14,8 +14,8 @@
       "kind": "places",
       "name": "places.sqlite",
       "required": true,
-      "sha256": "b08f515cde5e9cb5c2727f1c11423effc59fc4ad3c01d2f4ba7baec87814ed92",
-      "size": 32768,
+      "sha256": "d0782eced92d98f5bda238030ca5354e84f924e527c0b764f36849f7f9879f34",
+      "size": 36864,
       "url": "places.sqlite"
     },
     {

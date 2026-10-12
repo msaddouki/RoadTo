@@ -170,7 +170,7 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> _openSearch() async {
     final place = await Navigator.of(context).push<Place>(
       MaterialPageRoute(
-        builder: (_) => SearchScreen(search: app.search, from: app.position),
+        builder: (_) => SearchScreen(search: app.search, from: app.position, searchCategory: app.searchCategory),
       ),
     );
     if (place != null) {

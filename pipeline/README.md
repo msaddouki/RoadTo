@@ -24,6 +24,13 @@ text plus punctuation and currency symbols (`LATIN_GLYPH_STARTS` in
 bundle 59 MB for no benefit in France; a region with other scripts must pass
 its own ranges.
 
+The search index holds addresses, streets, settlements and named places.
+Places drivers look for by category (fuel, charging, parking, toilets, rest
+areas) are indexed even without a name, labelled by brand or operator when
+there is one; private ones (`access=private|no`) are left out. An index on
+`(kind, lat, lon)` serves category search; it is additive, so older apps
+read new packages unchanged.
+
 File URLs in the manifest are relative to it, so a package can be served
 from any static host. The schema of `places.sqlite` is
 [`schema/places.sql`](schema/places.sql).
