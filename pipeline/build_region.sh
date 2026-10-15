@@ -49,7 +49,10 @@ OSM_TIMESTAMP=$(osmium fileinfo -g header.option.osmosis_replication_timestamp "
 echo "OSM data as of: ${OSM_TIMESTAMP:-unknown}"
 
 step "Crop to bbox $BBOX"
-osmium extract --bbox "$BBOX" --strategy smart --set-bounds --overwrite -o "$WORK/region.osm.pbf" "$SRC"
+# Boundary relations are completed too, so communes cut by the bbox keep their
+# full outline (search results get their commune from it).
+osmium extract --bbox "$BBOX" --strategy smart -S types=multipolygon,boundary --set-bounds --overwrite \
+  -o "$WORK/region.osm.pbf" "$SRC"
 
 step "Map tiles (Planetiler $PLANETILER_VERSION)"
 docker run --rm --user "$DOCKER_USER" -e JAVA_TOOL_OPTIONS="-Xmx4g" \
@@ -70,6 +73,7 @@ if [[ "${SKIP_ROUTING:-0}" != 1 ]]; then
     valhalla_build_admins -c /data/valhalla.json /data/region.osm.pbf
     valhalla_build_tiles -c /data/valhalla.json /data/region.osm.pbf
     valhalla_build_extract -c /data/valhalla.json -v'
+  python3 -m roadto_pipeline routing-config --src "$WORK/valhalla.json" --out "$OUT/routing.json"
 fi
 
 step "Search index"
@@ -89,7 +93,8 @@ if [[ -n "${ROADTO_SIGNING_KEY:-}" || ( -n "${VAULT_ADDR:-}" && -n "${ROADTO_VAU
   step "Signature"
   python3 -m roadto_pipeline sign --file "$OUT/manifest.json"
   step "Single-file bundle"
-  python3 -m roadto_pipeline bundle --dir "$OUT" --out "$OUT/$REGION_ID.roadto"
+  # Optional files included: Android routes offline with the Valhalla graph.
+  python3 -m roadto_pipeline bundle --dir "$OUT" --out "$OUT/$REGION_ID.roadto" --include-optional
 else
   echo "WARNING: no signing key configured, manifest left unsigned (the app will refuse it)." >&2
 fi

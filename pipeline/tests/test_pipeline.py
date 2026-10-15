@@ -9,7 +9,7 @@ import pytest
 
 import tarfile
 
-from roadto_pipeline import bundle, manifest, night, places, signing, style
+from roadto_pipeline import bundle, manifest, night, places, routing, signing, style
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -41,12 +41,24 @@ def search(db: sqlite3.Connection, query: str) -> list[tuple]:
 
 def test_settlements_are_indexed(index):
     rows = index.execute("SELECT kind, name FROM place WHERE kind LIKE 'place=%' ORDER BY name").fetchall()
-    assert rows == [("place=city", "Lyon"), ("place=town", "Écully")]
+    assert rows == [("place=city", "Lyon"), ("place=city", "Villeurbanne"), ("place=town", "Écully")]
 
 
 def test_address_gets_nearest_city(index):
     rows = search(index, "12 republique")
     assert ("address", None, "12", "Rue de la République", "Lyon") in rows
+
+
+def test_city_comes_from_the_commune_boundary(index):
+    city = dict(index.execute("SELECT name, city FROM place WHERE name IN ('Gare Part-Dieu', 'Izivia')").fetchall())
+    # Closer to Villeurbanne's centre, but inside Lyon (boundary relation).
+    assert city["Gare Part-Dieu"] == "Lyon"
+    # Inside Villeurbanne (boundary drawn as a closed way).
+    assert city["Izivia"] == "Villeurbanne"
+
+
+def test_city_falls_back_to_nearest_settlement_outside_boundaries(index):
+    assert index.execute("SELECT city FROM place WHERE street = 'Chemin des Cerisiers'").fetchone() == ("Écully",)
 
 
 def test_search_ignores_accents_and_accepts_prefixes(index):
@@ -85,6 +97,15 @@ def test_building_address_uses_way_centroid(index):
     lat, lon = index.execute("SELECT lat, lon FROM place WHERE street = 'Chemin des Cerisiers'").fetchone()
     assert lat == pytest.approx(45.77015, abs=1e-4)
     assert lon == pytest.approx(4.78015, abs=1e-4)
+
+
+def test_index_stats(index, tmp_path_factory):
+    path = index.execute("PRAGMA database_list").fetchone()[2]
+    text = places.index_stats(path, ["Gare Part-Dieu", "Nowhere"])
+    assert "without a commune" in text
+    assert "| Lyon |" in text
+    assert "- Gare Part-Dieu: Lyon" in text
+    assert "- Nowhere: not found" in text
 
 
 def test_meta(index):
@@ -294,3 +315,30 @@ def test_bundle_refuses_unsigned_package(tmp_path):
     (pkg / "manifest.json").write_bytes(manifest.encode(manifest.build_manifest(REGION, pkg, version="v")))
     with pytest.raises(FileNotFoundError):
         bundle.build_bundle(pkg, tmp_path / "x.roadto")
+
+
+# --- routing config -------------------------------------------------------
+
+def test_routing_config_points_at_the_region_and_drops_build_paths():
+    built = {
+        "mjolnir": {
+            "tile_dir": "/data/valhalla_tiles",
+            "tile_extract": "/data/package/routing.tar",
+            "admin": "/data/valhalla_tiles/admins.sqlite",
+            "timezone": "/data/valhalla_tiles/timezones.sqlite",
+            "traffic_extract": "/data/traffic.tar",
+            "max_cache_size": 1000000000,
+            "logging": {"type": "std_out"},
+        },
+        "additional_data": {"elevation": "/data/elevation/"},
+        "service_limits": {"auto": {"max_distance": 5000000.0}},
+        "loki": {"actions": ["route", "locate"]},
+    }
+    out = routing.offline_config(built)
+    assert out["mjolnir"]["tile_extract"] == "@ROADTO_REGION_DIR@/routing.tar"
+    assert out["mjolnir"]["tile_dir"] == ""
+    assert out["mjolnir"]["admin"] == out["mjolnir"]["timezone"] == out["mjolnir"]["traffic_extract"] == ""
+    assert out["additional_data"]["elevation"] == ""
+    assert out["service_limits"] == built["service_limits"]
+    assert out["loki"]["actions"] == ["route", "locate"]
+    assert built["mjolnir"]["admin"].startswith("/data/"), "input left untouched"

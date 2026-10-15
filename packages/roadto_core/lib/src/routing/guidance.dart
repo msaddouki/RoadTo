@@ -109,10 +109,14 @@ class GuidanceEngine {
       // Annonce proche : ~8 s avant, au moins 60 m, au plus 250 m.
       final nearM = (speedMps * 8).clamp(60.0, 250.0);
       if (distanceToNext <= nearM) {
-        if (_announced.add('$nextIdx:pre')) say = next.verbalPre ?? next.instruction;
+        // The arrival is said once, when the car is there (above), not also
+        // as the close announcement of the arrival maneuver.
+        if (!next.isArrival && _announced.add('$nextIdx:pre')) say = next.verbalPre ?? next.instruction;
       } else if (distanceToNext <= 600 && distanceToNext > nearM + 150) {
         if (_announced.add('$nextIdx:alert')) {
-          final text = next.verbalAlert ?? next.instruction;
+          // Valhalla often has no alert text for the arrival, and its
+          // instruction ("Vous êtes arrivé") would read wrong after "Dans 500 m".
+          final text = next.verbalAlert ?? (next.isArrival ? 'vous arrivez à destination' : next.instruction);
           say = 'Dans ${_roundDistance(distanceToNext)}, ${_lowerFirst(text)}';
         }
       }

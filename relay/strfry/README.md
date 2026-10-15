@@ -33,10 +33,11 @@ their logs.
 | `../strfry_policy/` | the plugin (Dart), its tests and `tool/smoke.dart` |
 | `Dockerfile` | strfry image + plugin built with `dart build cli` and the glibc runtime from the Dart image |
 | `strfry.conf` | strfry defaults with the RoadTo changes marked `RoadTo` |
-| `roadto-start.sh` | starts strfry with its logs filtered; with `PEER_URL`, reconciles with the peer by negentropy every 5 min |
+| `roadto-start.sh` | starts strfry with its logs filtered; with `PEERS` (or `ROUTER` + `PEER_URL`), replicates live with the other relays and reconciles with each by negentropy every 5 min; `REAL_IP_HEADER` behind a proxy |
 | `redact_logs.py` | removes client addresses from every log line (strfry logs one per connection) |
 | `router.conf` | live replication to the peer relay, through the same plugin |
 | `docker-compose.yml` | two relays (`7777`, `7778`) replicating each other |
+| `../../deploy/helm/roadto-relay/` | Helm chart: N relays on Kubernetes, ingress, Prometheus metrics, Argo CD example |
 
 ## Running
 
@@ -55,10 +56,16 @@ In the app, set both relays in Réglages: `ws://<host>:7777` and
 `relay.realIpHeader` in `strfry.conf` so the rate limit sees client
 addresses rather than the proxy's.
 
+## Kubernetes and metrics
+
+The Helm chart in `deploy/helm/roadto-relay` runs N relays replicating each
+other, with an optional ingress and the plugin's Prometheus counters
+(decisions by class, never an address); see its README, which also has an
+Argo CD Application. CI installs it on kind with two relays and runs
+`smoke.dart` across them.
+
 ## Still to do (milestone J3)
 
-- Helm chart and Argo CD deployment.
-- Prometheus metrics.
 - Rate-limit evasion by rotating addresses, and abuse reporting, are not
   handled yet.
 - Load test with a nostr-sdk generator.

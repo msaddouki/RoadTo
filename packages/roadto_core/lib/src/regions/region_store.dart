@@ -25,7 +25,7 @@ class InstallProgress {
   final InstallStage stage;
   final String? file;
 
-  /// Bytes downloaded so far over all required files (reused files count as
+  /// Bytes copied so far over all files installed (reused files count as
   /// downloaded).
   final int received;
   final int total;
@@ -43,7 +43,15 @@ class InstalledRegion {
   /// The style bundle has a night variant (packages built since it exists).
   final bool hasNightStyle;
 
-  const InstalledRegion(this.manifest, this.dir, {this.hasNightStyle = false});
+  /// The routing graph and its Valhalla config are installed.
+  final bool hasOfflineRouting;
+
+  const InstalledRegion(
+    this.manifest,
+    this.dir, {
+    this.hasNightStyle = false,
+    this.hasOfflineRouting = false,
+  });
 
   String get id => manifest.regionId;
   String get name => manifest.regionName;
@@ -58,6 +66,10 @@ class InstalledRegion {
 
   /// Night variant of [stylePath], when [hasNightStyle].
   String get nightStylePath => '${dir.path}/style/style-night.offline.json';
+
+  /// Valhalla config pointing at this install's graph, regenerated at each
+  /// load for the same reason as [stylePath].
+  String get routingConfigPath => '${dir.path}/routing.offline.json';
 
   bool contains(double lat, double lon) {
     final b = manifest.bbox;
@@ -118,12 +130,21 @@ class RegionStore {
     for (final f in manifest.requiredFiles.where((f) => wantedKinds.contains(f.kind))) {
       if (!await File('${dir.path}/${f.name}').exists()) return null;
     }
+    final routing = manifest.file('routing'), routingConfig = manifest.file('routing_config');
+    final hasRouting =
+        wantedKinds.containsAll(['routing', 'routing_config']) &&
+        routing != null &&
+        routingConfig != null &&
+        await File('${dir.path}/${routing.name}').exists() &&
+        await File('${dir.path}/${routingConfig.name}').exists();
     final region = InstalledRegion(
       manifest,
       dir,
       hasNightStyle: await File('${dir.path}/style/style-night.json').exists(),
+      hasOfflineRouting: hasRouting,
     );
     await _writeOfflineStyle(region);
+    if (hasRouting) await _writeRoutingConfig(region, routingConfig);
     return region;
   }
 
@@ -154,11 +175,13 @@ class RegionStore {
   Stream<InstallProgress> install(PackageSource source) async* {
     yield const InstallProgress(InstallStage.manifest);
     final (manifest, manifestBytes, signature) = await verifiedManifest(source);
+    // Required files, plus optional ones this platform uses (the routing
+    // graph on Android). An optional file missing from the source is skipped.
     final files = [
-      for (final f in manifest.requiredFiles)
+      for (final f in manifest.files)
         if (wantedKinds.contains(f.kind)) f,
     ];
-    final total = files.fold<int>(0, (s, f) => s + f.size);
+    var total = files.fold<int>(0, (s, f) => s + f.size);
 
     await root.create(recursive: true);
     final id = manifest.regionId;
@@ -179,7 +202,15 @@ class RegionStore {
           yield InstallProgress(InstallStage.download, file: f.name, received: received, total: total);
           continue;
         }
-        await for (final n in _copyChecked(await source.open(f), target, f)) {
+        final Stream<List<int>> data;
+        try {
+          data = await source.open(f);
+        } on RegionException {
+          if (f.required) rethrow;
+          total -= f.size;
+          continue;
+        }
+        await for (final n in _copyChecked(data, target, f)) {
           yield InstallProgress(InstallStage.download, file: f.name, received: received + n, total: total);
         }
         received += f.size;
@@ -252,6 +283,15 @@ class RegionStore {
       await out.parent.create(recursive: true);
       await out.writeAsBytes(entry.content);
     }
+  }
+
+  /// Writes the Valhalla config with this install's absolute paths (plain
+  /// paths: Valhalla does not take URLs).
+  static Future<void> _writeRoutingConfig(InstalledRegion r, RegionFile template) async {
+    final config = (await File(
+      '${r.dir.path}/${template.name}',
+    ).readAsString()).replaceAll('@ROADTO_REGION_DIR@', r.dir.absolute.path.replaceFirst(RegExp(r'/$'), ''));
+    await File(r.routingConfigPath).writeAsString(config);
   }
 
   /// Writes the styles (day, and night when present) with this install's

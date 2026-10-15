@@ -1,0 +1,38 @@
+# Clients: any relay will do, they replicate each other.
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "roadto-relay.fullname" . }}
+  labels:
+    {{- include "roadto-relay.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    {{- include "roadto-relay.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: relay
+      port: {{ .Values.service.port }}
+      targetPort: relay
+---
+# Peers: one stable name per relay, resolvable before it is ready, so the
+# relays find each other while they start.
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "roadto-relay.headless" . }}
+  labels:
+    {{- include "roadto-relay.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  publishNotReadyAddresses: true
+  selector:
+    {{- include "roadto-relay.selectorLabels" . | nindent 4 }}
+  ports:
+    - name: relay
+      port: 7777
+      targetPort: relay
+    {{- if .Values.metrics.enabled }}
+    - name: metrics
+      port: {{ .Values.metrics.port }}
+      targetPort: metrics
+    {{- end }}
