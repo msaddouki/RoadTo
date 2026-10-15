@@ -46,12 +46,7 @@ class InstalledRegion {
   /// The routing graph and its Valhalla config are installed.
   final bool hasOfflineRouting;
 
-  const InstalledRegion(
-    this.manifest,
-    this.dir, {
-    this.hasNightStyle = false,
-    this.hasOfflineRouting = false,
-  });
+  const InstalledRegion(this.manifest, this.dir, {this.hasNightStyle = false, this.hasOfflineRouting = false});
 
   String get id => manifest.regionId;
   String get name => manifest.regionName;
