@@ -4,7 +4,8 @@ name: Region packages
 # and, when the REGION_SIGNING_KEY secret is set, signs it and publishes it
 # to the rolling GitHub Release `region-<id>`: app builds embed it from there
 # (tool/embed_region.sh) and `<id>.roadto` can be imported in the app from a
-# file. Without the secret, the unsigned package is kept as a workflow artifact.
+# file. Without the secret, or when started with "publish" unticked (to try a
+# pipeline change from a branch), the package is kept as a workflow artifact.
 
 on:
   workflow_dispatch:
@@ -13,6 +14,10 @@ on:
         description: Region id (pipeline/regions/<id>.json)
         default: lyon
         required: true
+      publish:
+        description: Publish to the release (untick to only keep the package as an artifact)
+        type: boolean
+        default: true
   schedule:
     - cron: "17 3 1 * *" # monthly refresh of the OSM data
 
@@ -29,6 +34,9 @@ jobs:
     timeout-minutes: 120
     env:
       REGION: ${{ inputs.region || 'lyon' }}
+      # The monthly run has no inputs and publishes. (Not `inputs.publish !=
+      # false`: the expressions treat null as equal to false.)
+      PUBLISH: ${{ github.event_name != 'workflow_dispatch' || inputs.publish }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -59,20 +67,26 @@ jobs:
           path: pipeline/work/cache
           key: region-sources-${{ env.REGION }}-${{ github.run_id }}
       - name: Summary
+        env:
+          PYTHONPATH: pipeline
         run: |
           {
             echo "### Region package: $REGION"
             echo '```'
             ls -lh "pipeline/work/$REGION/package"
             echo '```'
-            if [[ -f "pipeline/work/$REGION/package/manifest.json.sig" ]]; then
+            python3 -m roadto_pipeline places-stats --db "pipeline/work/$REGION/package/places.sqlite" \
+              --region "pipeline/regions/$REGION.json" | tee /dev/stderr
+            if [[ -f "pipeline/work/$REGION/package/manifest.json.sig" && "$PUBLISH" == true ]]; then
               echo "Signed and published to release \`region-$REGION\`."
+            elif [[ -f "pipeline/work/$REGION/package/manifest.json.sig" ]]; then
+              echo "Signed, **not published** (publish unticked): see the workflow artifact."
             else
               echo "**Unsigned**: add the \`REGION_SIGNING_KEY\` secret to publish (see pipeline/README.md)."
             fi
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Publish
-        if: hashFiles(format('pipeline/work/{0}/package/manifest.json.sig', env.REGION)) != ''
+        if: env.PUBLISH == 'true' && hashFiles(format('pipeline/work/{0}/package/manifest.json.sig', env.REGION)) != ''
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -84,13 +98,13 @@ jobs:
           # Data files first, manifest last: a client never sees a manifest
           # that points at files not uploaded yet.
           data=()
-          for f in style.tar.gz places.sqlite map.pmtiles routing.tar "$REGION.roadto"; do [[ -f "$pkg/$f" ]] && data+=("$pkg/$f"); done
+          for f in style.tar.gz places.sqlite map.pmtiles routing.tar routing.json "$REGION.roadto"; do [[ -f "$pkg/$f" ]] && data+=("$pkg/$f"); done
           gh release upload "$tag" "${data[@]}" --clobber
           gh release upload "$tag" "$pkg/manifest.json" "$pkg/manifest.json.sig" --clobber
-      - name: Keep unsigned package
-        if: hashFiles(format('pipeline/work/{0}/package/manifest.json.sig', env.REGION)) == ''
+      - name: Keep the package as an artifact
+        if: env.PUBLISH != 'true' || hashFiles(format('pipeline/work/{0}/package/manifest.json.sig', env.REGION)) == ''
         uses: actions/upload-artifact@v4
         with:
-          name: region-${{ env.REGION }}-unsigned
+          name: region-${{ env.REGION }}-package
           path: pipeline/work/${{ env.REGION }}/package
           retention-days: 7

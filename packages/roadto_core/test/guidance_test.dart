@@ -61,6 +61,52 @@ void main() {
     });
   });
 
+  group('on-device routing', () {
+    final fixture = jsonEncode(_fixture('valhalla_lyon.json'));
+
+    test('sends the Valhalla request to the platform and parses the answer', () async {
+      String? sentConfig, sentRequest;
+      final router = NativeValhallaRouter(
+        configPath: '/regions/lyon/routing.offline.json',
+        call: (config, request) async {
+          sentConfig = config;
+          sentRequest = request;
+          return fixture;
+        },
+      );
+      final r = await router.route(const LatLon(45.7578, 4.832), const LatLon(45.7676, 4.859), headingDeg: 90);
+      expect(r.maneuvers, hasLength(4));
+      expect(sentConfig, '/regions/lyon/routing.offline.json');
+      final body = jsonDecode(sentRequest!) as Map<String, dynamic>;
+      expect(body['costing'], 'auto');
+      expect((body['locations'] as List).first['heading'], 90);
+    });
+
+    test('Valhalla errors become RoutingException', () async {
+      final router = NativeValhallaRouter(
+        configPath: 'x',
+        call: (_, _) async => '{"error_code":171,"error":"No suitable edges near location","status_code":400}',
+      );
+      expect(
+        router.route(const LatLon(0, 0), const LatLon(1, 1)),
+        throwsA(isA<RoutingException>().having((e) => e.message, 'message', contains('No suitable edges'))),
+      );
+    });
+
+    test('falls back to the online engine outside the region', () async {
+      RoutingException? reason;
+      final offline = NativeValhallaRouter(configPath: 'x', call: (_, _) async => throw StateError('outside'));
+      final online = NativeValhallaRouter(configPath: 'y', call: (_, _) async => fixture);
+      final r = await FallbackRouter(
+        offline,
+        online,
+        onFallback: (e) => reason = e,
+      ).route(const LatLon(48.85, 2.35), const LatLon(45.76, 4.86));
+      expect(r.maneuvers, hasLength(4));
+      expect(reason, isNotNull);
+    });
+  });
+
   group('Photon', () {
     test('lecture des résultats', () {
       final places = parsePhoton(_fixture('photon_lyon.json'));
