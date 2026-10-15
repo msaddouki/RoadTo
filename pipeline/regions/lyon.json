@@ -2,5 +2,6 @@
   "id": "lyon",
   "name": "Lyon et sa périphérie",
   "geofabrik": "europe/france/rhone-alpes",
-  "bbox": [4.55, 45.5, 5.25, 46.05]
+  "bbox": [4.55, 45.5, 5.25, 46.05],
+  "search_probes": ["Gare Part-Dieu - Vivier Merle", "Clinique Part-Dieu", "Place Bellecour"]
 }

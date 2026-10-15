@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "roadto-relay.fullname" . }}
+  labels:
+    {{- include "roadto-relay.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "roadto-relay.headless" . }}
+  replicas: {{ .Values.replicaCount }}
+  # Relays start independently; each catches up with the others by sync.
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels:
+      {{- include "roadto-relay.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "roadto-relay.selectorLabels" . | nindent 8 }}
+      annotations:
+        {{- if .Values.metrics.enabled }}
+        prometheus.io/scrape: "true"
+        prometheus.io/port: {{ .Values.metrics.port | quote }}
+        prometheus.io/path: /metrics
+        {{- end }}
+        {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: relay
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: SELF_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: PEERS
+              value: {{ include "roadto-relay.peers" . | quote }}
+            - name: SYNC_INTERVAL_SECONDS
+              value: {{ .Values.syncIntervalSeconds | quote }}
+            - name: ROADTO_RATE_PER_MINUTE
+              value: {{ .Values.ratePerMinute | quote }}
+            {{- if .Values.realIpHeader }}
+            - name: REAL_IP_HEADER
+              value: {{ .Values.realIpHeader | quote }}
+            {{- end }}
+            {{- if .Values.metrics.enabled }}
+            - name: ROADTO_METRICS_PORT
+              value: {{ .Values.metrics.port | quote }}
+            {{- end }}
+          ports:
+            - name: relay
+              containerPort: 7777
+            {{- if .Values.metrics.enabled }}
+            - name: metrics
+              containerPort: {{ .Values.metrics.port }}
+            {{- end }}
+          readinessProbe:
+            tcpSocket:
+              port: relay
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: relay
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          volumeMounts:
+            - name: data
+              mountPath: /app/strfry-db
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        {{- if .Values.persistence.storageClass }}
+        storageClassName: {{ .Values.persistence.storageClass | quote }}
+        {{- end }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.size }}

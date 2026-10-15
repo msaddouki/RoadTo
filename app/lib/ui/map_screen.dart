@@ -298,6 +298,10 @@ class _MapScreenState extends State<MapScreen> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
+                      if (app.navigating && app.speedLimit?.kph != null) ...[
+                        SpeedLimitSign(kph: app.speedLimit!.kph!, over: app.overSpeed),
+                        const SizedBox(width: 12),
+                      ],
                       if (!_follow)
                         FloatingActionButton.small(
                           heroTag: 'recenter',
@@ -528,6 +532,42 @@ class _StillThereCard extends StatelessWidget {
               ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Round speed limit sign, as on the road; filled red when over the limit.
+class SpeedLimitSign extends StatelessWidget {
+  final int kph;
+  final bool over;
+
+  const SpeedLimitSign({super.key, required this.kph, required this.over});
+
+  @override
+  Widget build(BuildContext context) {
+    const red = Color(0xFFD32F2F);
+    return Semantics(
+      label: 'Limitée à $kph km/h${over ? ', vitesse dépassée' : ''}',
+      excludeSemantics: true,
+      child: Container(
+        width: 68,
+        height: 68,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: over ? red : Colors.white,
+          border: Border.all(color: red, width: 7),
+          boxShadow: const [BoxShadow(blurRadius: 6, color: Colors.black45)],
+        ),
+        child: Text(
+          '$kph',
+          style: TextStyle(
+            fontSize: kph >= 100 ? 22 : 26,
+            fontWeight: FontWeight.w900,
+            color: over ? Colors.white : Colors.black,
+          ),
         ),
       ),
     );

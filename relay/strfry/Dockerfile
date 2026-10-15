@@ -17,5 +17,8 @@ COPY --from=build /out/bundle/bin/roadto_policy /app/roadto-policy
 COPY relay/strfry/strfry.conf /etc/strfry.conf
 COPY relay/strfry/roadto-start.sh /app/roadto-start.sh
 COPY relay/strfry/redact_logs.py /app/redact_logs.py
-RUN chmod +x /app/roadto-start.sh /app/roadto-policy
+# The router (replication) starts its own plugin instance: same rules, but it
+# must not try to serve the metrics port the relay's instance already holds.
+RUN printf '#!/bin/sh\nunset ROADTO_METRICS_PORT\nexec /app/roadto-policy "$@"\n' > /app/roadto-policy-peer \
+ && chmod +x /app/roadto-start.sh /app/roadto-policy /app/roadto-policy-peer
 CMD ["/app/roadto-start.sh"]

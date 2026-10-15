@@ -23,7 +23,11 @@ once a region is downloaded.
 - **Favourites** (Maison, Travail…) stored on the phone only: star a search
   result, or long-press the map; they are listed before you type.
 - Route from Valhalla, turn-by-turn guidance with French voice prompts,
-  arrival time, rerouting when off route.
+  arrival time, rerouting when off route. **Offline on Android** with the
+  region's graph (valhalla-mobile); online on iOS and outside the region.
+- **Speed limits** from OSM on the navigation screen, red when over the
+  limit (5 km/h margin, 5 % above 100 km/h); from the region's graph on
+  Android, from the routing server otherwise.
 - **Simulated driving** on by default: the trip is replayed along the route,
   so everything can be tested without driving.
 - **One-gesture reporting**: six large tiles, 5 s to cancel. The police
@@ -33,8 +37,9 @@ once a region is downloaded.
 - **"Still there?"** when passing an alert: yes or no, and its reliability is
   recomputed. A closed road reported ahead triggers a reroute around it.
 - Identity generated on the phone (Keystore or Keychain) with a 12-word
-  **recovery phrase** (BIP-39, NIP-06) to restore it on another phone; a
-  throwaway key per trip signs the alerts.
+  **recovery phrase** (BIP-39, NIP-06) to restore it on another phone, or a
+  **password-encrypted backup** file (NIP-49, `ncryptsec`); a throwaway key
+  per trip signs the alerts.
 
 ## Repository layout
 
@@ -67,11 +72,17 @@ Offline region packages: [pipeline/README.md](pipeline/README.md).
 ## Tests
 
 ```bash
-cd packages/roadto_core && dart test   # geo, Nostr, alerts, policy, guidance, regions, offline search
+cd packages/roadto_core && dart test   # geo, Nostr, alerts, policy, guidance and GPX replay, regions, offline search
 cd relay/dev_relay && dart test        # end to end: publish, receive in < 5 s, expiry, rate limit
 cd app && flutter test                 # report sheet, map layers
 PYTHONPATH=pipeline python -m pytest pipeline/tests   # region pipeline
 ```
+
+Guidance is replayed over ten reference drives of a Lyon route (GPS noise,
+outliers, a tunnel, a red light, 0.5 to 2 s fixes, 12 to 70 km/h): none may
+declare a false off-route, miss an announcement or the arrival. Real drives
+recorded on the road go in `packages/roadto_core/test/fixtures/gpx/` with
+their route and are replayed the same way.
 
 CI also builds the Android APK and the iOS app (simulator) on every pull
 request; both can be downloaded from the workflow artifacts.

@@ -21,6 +21,10 @@ import 'dart:convert';
 
 import 'package:roadto_core/roadto_core.dart';
 
+import 'metrics.dart';
+
+export 'metrics.dart';
+
 class WritePolicyPlugin {
   /// Events accepted per client address and per minute.
   final int ratePerMinute;
@@ -28,10 +32,27 @@ class WritePolicyPlugin {
 
   final _windows = <String, (int, int)>{}; // address -> (minute, count)
 
-  WritePolicyPlugin({this.ratePerMinute = 30, this.policeAllowed = FeatureFlags.policeAlerts});
+  /// Decision counters, served on /metrics by the entry point.
+  final PolicyMetrics metrics = PolicyMetrics();
+
+  WritePolicyPlugin({this.ratePerMinute = 30, this.policeAllowed = FeatureFlags.policeAlerts}) {
+    metrics.rateLimitedSources = () => _windows.length;
+  }
 
   /// Answers one strfry request.
   Map<String, Object?> handle(Map<String, dynamic> request, {DateTime? now}) {
+    final answer = _decide(request, now: now);
+    final event = request['event'];
+    metrics.record(
+      accepted: answer['action'] == 'accept',
+      msg: answer['msg'] as String?,
+      sourceType: request['sourceType'],
+      kind: event is Map ? event['kind'] : null,
+    );
+    return answer;
+  }
+
+  Map<String, Object?> _decide(Map<String, dynamic> request, {DateTime? now}) {
     final t = now ?? DateTime.now();
     final eventJson = request['event'];
     final id = eventJson is Map ? eventJson['id'] : null;

@@ -7,12 +7,19 @@ import json
 import sys
 from pathlib import Path
 
-from . import bundle, manifest, places, signing, style
+from . import bundle, manifest, places, routing, signing, style
 
 
 def _cmd_places(a: argparse.Namespace) -> None:
     n = places.build(a.osm, a.out, region_id=a.region_id, osm_timestamp=a.osm_timestamp)
     print(f"places: {n} rows -> {a.out}")
+
+
+def _cmd_places_stats(a: argparse.Namespace) -> None:
+    probes = list(a.probe or [])
+    if a.region:
+        probes += json.loads(Path(a.region).read_text(encoding="utf-8")).get("search_probes", [])
+    print(places.index_stats(a.db, probes), end="")
 
 
 def _cmd_style(a: argparse.Namespace) -> None:
@@ -35,6 +42,11 @@ def _cmd_sign(a: argparse.Namespace) -> None:
     sig, public = signing.sign(path.read_bytes())
     Path(f"{path}.sig").write_text(sig + "\n", encoding="ascii")
     print(f"signed {path} with public key {public}")
+
+
+def _cmd_routing_config(a: argparse.Namespace) -> None:
+    routing.write_offline_config(Path(a.src), Path(a.out))
+    print(f"routing config -> {a.out}")
 
 
 def _cmd_bundle(a: argparse.Namespace) -> None:
@@ -69,6 +81,12 @@ def main(argv: list[str] | None = None) -> None:
     s.add_argument("--osm-timestamp")
     s.set_defaults(func=_cmd_places)
 
+    s = sub.add_parser("places-stats", help="summarize a built search index (markdown)")
+    s.add_argument("--db", required=True)
+    s.add_argument("--region", help="region definition; its search_probes are looked up")
+    s.add_argument("--probe", action="append", help="exact place name to look up (repeatable)")
+    s.set_defaults(func=_cmd_places_stats)
+
     s = sub.add_parser("style", help="build the offline style bundle")
     s.add_argument("--out", required=True)
     s.add_argument("--style-url", default=style.DEFAULT_STYLE_URL)
@@ -85,6 +103,11 @@ def main(argv: list[str] | None = None) -> None:
     s = sub.add_parser("sign", help="sign a file (writes <file>.sig)")
     s.add_argument("--file", required=True)
     s.set_defaults(func=_cmd_sign)
+
+    s = sub.add_parser("routing-config", help="write the Valhalla config shipped with the package")
+    s.add_argument("--src", required=True, help="config written by valhalla_build_config")
+    s.add_argument("--out", required=True)
+    s.set_defaults(func=_cmd_routing_config)
 
     s = sub.add_parser("bundle", help="pack a signed package into a single .roadto file")
     s.add_argument("--dir", required=True)
