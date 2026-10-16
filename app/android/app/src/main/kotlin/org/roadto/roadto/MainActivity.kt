@@ -12,6 +12,7 @@ import com.valhalla.valhalla.ValhallaResponse
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import org.roadto.roadto.car.CarBridge
 import java.io.File
 import java.util.concurrent.Executors
 import org.json.JSONObject
@@ -32,6 +33,7 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         location = DeviceLocation(this, flutterEngine.dartExecutor.binaryMessenger)
+        CarBridge.shared.attach(flutterEngine.dartExecutor.binaryMessenger)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "org.roadto/valhalla").setMethodCallHandler { call, result ->
             when (call.method) {
                 "route", "traceAttributes" -> {
@@ -118,6 +120,7 @@ class MainActivity : FlutterActivity() {
     override fun onDestroy() {
         location?.dispose()
         location = null
+        CarBridge.shared.detach()
         routingThread.execute { valhalla?.close(); valhalla = null }
         routingThread.shutdown()
         super.onDestroy()
