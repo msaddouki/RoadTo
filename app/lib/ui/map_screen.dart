@@ -336,6 +336,10 @@ class _MapScreenState extends State<MapScreen> {
               styleString: app.mapStyle,
               initialCameraPosition: CameraPosition(target: LatLng(app.position.lat, app.position.lon), zoom: 13),
               compassEnabled: false,
+              // The app draws its own GeoJSON layers. The plugin's annotation
+              // managers would add theirs asynchronously on every new map,
+              // and fail on a map replaced meanwhile (embedded region install).
+              annotationOrder: const [],
               onMapCreated: (c) {
                 _map = c;
                 _mapKey = mapKey;
