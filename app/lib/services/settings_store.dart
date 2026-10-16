@@ -2,6 +2,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config.dart';
 
+/// When the offline map switches to its night colours.
+enum NightMap {
+  /// Between sunset and sunrise where the car is.
+  auto,
+  always,
+  never;
+
+  static NightMap parse(String? s) => values.firstWhere((v) => v.name == s, orElse: () => auto);
+}
+
 /// Réglages modifiables par l'utilisateur, stockés sur l'appareil seulement.
 class AppSettings {
   final String mapStyle;
@@ -15,6 +25,8 @@ class AppSettings {
   /// Use the installed region's offline map instead of online tiles.
   final bool offlineMap;
 
+  final NightMap nightMap;
+
   const AppSettings({
     required this.mapStyle,
     required this.routingUrl,
@@ -24,6 +36,7 @@ class AppSettings {
     required this.simulationSpeedKmh,
     required this.voice,
     required this.offlineMap,
+    this.nightMap = NightMap.auto,
   });
 
   factory AppSettings.defaults() => AppSettings(
@@ -35,6 +48,7 @@ class AppSettings {
     simulationSpeedKmh: Defaults.simulationSpeedKmh,
     voice: true,
     offlineMap: true,
+    nightMap: NightMap.auto,
   );
 
   AppSettings copyWith({
@@ -46,6 +60,7 @@ class AppSettings {
     double? simulationSpeedKmh,
     bool? voice,
     bool? offlineMap,
+    NightMap? nightMap,
   }) => AppSettings(
     mapStyle: mapStyle ?? this.mapStyle,
     routingUrl: routingUrl ?? this.routingUrl,
@@ -55,6 +70,7 @@ class AppSettings {
     simulationSpeedKmh: simulationSpeedKmh ?? this.simulationSpeedKmh,
     voice: voice ?? this.voice,
     offlineMap: offlineMap ?? this.offlineMap,
+    nightMap: nightMap ?? this.nightMap,
   );
 }
 
@@ -73,6 +89,7 @@ class SettingsStore {
         simulationSpeedKmh: p.getDouble('simulationSpeedKmh') ?? d.simulationSpeedKmh,
         voice: p.getBool('voice') ?? d.voice,
         offlineMap: p.getBool('offlineMap') ?? d.offlineMap,
+        nightMap: NightMap.parse(p.getString('nightMap')),
       );
     } catch (_) {
       return d;
@@ -89,5 +106,6 @@ class SettingsStore {
     await p.setDouble('simulationSpeedKmh', s.simulationSpeedKmh);
     await p.setBool('voice', s.voice);
     await p.setBool('offlineMap', s.offlineMap);
+    await p.setString('nightMap', s.nightMap.name);
   }
 }

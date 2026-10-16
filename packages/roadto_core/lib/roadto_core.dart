@@ -27,3 +27,4 @@ export 'src/routing/valhalla.dart';
 export 'src/search/categories.dart';
 export 'src/search/geocoder.dart';
 export 'src/search/offline_geocoder.dart';
+export 'src/sun.dart';

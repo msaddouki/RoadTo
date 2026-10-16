@@ -40,10 +40,13 @@ class InstalledRegion {
   final RegionManifest manifest;
   final Directory dir;
 
+  /// The style bundle has a night variant (packages built since it exists).
+  final bool hasNightStyle;
+
   /// The routing graph and its Valhalla config are installed.
   final bool hasOfflineRouting;
 
-  const InstalledRegion(this.manifest, this.dir, {this.hasOfflineRouting = false});
+  const InstalledRegion(this.manifest, this.dir, {this.hasNightStyle = false, this.hasOfflineRouting = false});
 
   String get id => manifest.regionId;
   String get name => manifest.regionName;
@@ -55,6 +58,9 @@ class InstalledRegion {
   /// Style with absolute `file://` paths for this install, regenerated at
   /// each load because iOS may move the app's data folder on updates.
   String get stylePath => '${dir.path}/style/style.offline.json';
+
+  /// Night variant of [stylePath], when [hasNightStyle].
+  String get nightStylePath => '${dir.path}/style/style-night.offline.json';
 
   /// Valhalla config pointing at this install's graph, regenerated at each
   /// load for the same reason as [stylePath].
@@ -126,7 +132,12 @@ class RegionStore {
         routingConfig != null &&
         await File('${dir.path}/${routing.name}').exists() &&
         await File('${dir.path}/${routingConfig.name}').exists();
-    final region = InstalledRegion(manifest, dir, hasOfflineRouting: hasRouting);
+    final region = InstalledRegion(
+      manifest,
+      dir,
+      hasNightStyle: await File('${dir.path}/style/style-night.json').exists(),
+      hasOfflineRouting: hasRouting,
+    );
     await _writeOfflineStyle(region);
     if (hasRouting) await _writeRoutingConfig(region, routingConfig);
     return region;
@@ -269,7 +280,6 @@ class RegionStore {
     }
   }
 
-  /// Writes the style with this install's absolute paths.
   /// Writes the Valhalla config with this install's absolute paths (plain
   /// paths: Valhalla does not take URLs).
   static Future<void> _writeRoutingConfig(InstalledRegion r, RegionFile template) async {
@@ -279,14 +289,18 @@ class RegionStore {
     await File(r.routingConfigPath).writeAsString(config);
   }
 
+  /// Writes the styles (day, and night when present) with this install's
+  /// absolute paths.
   static Future<void> _writeOfflineStyle(InstalledRegion r) async {
-    final template = File('${r.dir.path}/style/style.json');
-    if (!await template.exists()) return;
     final regionUrl = _fileUrl(r.dir);
-    final style = (await template.readAsString())
-        .replaceAll('@ROADTO_REGION_DIR@', regionUrl)
-        .replaceAll('@ROADTO_STYLE_DIR@', '$regionUrl/style');
-    await File(r.stylePath).writeAsString(style);
+    for (final (name, out) in [('style.json', r.stylePath), ('style-night.json', r.nightStylePath)]) {
+      final template = File('${r.dir.path}/style/$name');
+      if (!await template.exists()) continue;
+      final style = (await template.readAsString())
+          .replaceAll('@ROADTO_REGION_DIR@', regionUrl)
+          .replaceAll('@ROADTO_STYLE_DIR@', '$regionUrl/style');
+      await File(out).writeAsString(style);
+    }
   }
 
   /// `file:///abs/path`, without trailing slash.
