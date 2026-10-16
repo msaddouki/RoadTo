@@ -24,6 +24,10 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   MapLibreMapController? _map;
+  // Key of the MapLibreMap that [_map] belongs to. A new style or region
+  // rebuilds the map under a new key: until its onMapCreated, [_map] still
+  // points at the disposed one, whose platform channel is gone.
+  String? _mapKey;
   bool _styleReady = false;
   bool _follow = true;
   StreamSubscription<String>? _messages;
@@ -31,6 +35,8 @@ class _MapScreenState extends State<MapScreen> {
   String? _lastRouteKey;
 
   AppController get app => widget.app;
+
+  String get _currentMapKey => '${app.mapStyle}@${app.activeRegion?.version}';
 
   @override
   void initState() {
@@ -124,7 +130,18 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> _syncMap() async {
     final map = _map;
-    if (map == null || !_styleReady) return;
+    if (map == null || !_styleReady || _mapKey != _currentMapKey) return;
+    try {
+      await _writeMap(map);
+    } on Exception {
+      // The map was replaced (new style or region) while this sync was still
+      // writing to it: its native side is gone. The new map syncs once its
+      // style is loaded.
+      if (identical(map, _map) && _mapKey == _currentMapKey) rethrow;
+    }
+  }
+
+  Future<void> _writeMap(MapLibreMapController map) async {
     final g = app.guidance;
     final routeKey = '${identityHashCode(app.route)}:${((g?.projection.alongM ?? 0) / 25).floor()}';
     if (routeKey != _lastRouteKey) {
@@ -284,6 +301,7 @@ class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     final g = app.guidance;
+    final mapKey = _currentMapKey;
     final navigating = app.navigating && g != null;
     return Scaffold(
       body: Stack(
@@ -296,12 +314,13 @@ class _MapScreenState extends State<MapScreen> {
             // use its Play Services engine, which the Android build excludes.
             // The position layer is drawn from DeviceLocation instead.
             child: MapLibreMap(
-              key: ValueKey('${app.mapStyle}@${app.activeRegion?.version}'),
+              key: ValueKey(mapKey),
               styleString: app.mapStyle,
               initialCameraPosition: CameraPosition(target: LatLng(app.position.lat, app.position.lon), zoom: 13),
               compassEnabled: false,
               onMapCreated: (c) {
                 _map = c;
+                _mapKey = mapKey;
                 _styleReady = false;
               },
               onStyleLoadedCallback: _onStyleLoaded,
