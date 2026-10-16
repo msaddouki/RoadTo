@@ -14,6 +14,10 @@ class Maneuver {
 
   /// Annonce vocale après la manœuvre (« continuez sur 2 km »).
   final String? verbalPost;
+
+  /// [verbalPre] enchaîne déjà la manœuvre suivante, trop proche pour être
+  /// annoncée seule (« Tournez à droite. Ensuite, prenez la sortie »).
+  final bool verbalMultiCue;
   final List<String> streetNames;
 
   /// Indice, dans la géométrie de l'itinéraire, du point où commence la manœuvre.
@@ -30,6 +34,7 @@ class Maneuver {
     this.verbalAlert,
     this.verbalPre,
     this.verbalPost,
+    this.verbalMultiCue = false,
     this.streetNames = const [],
   });
 

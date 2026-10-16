@@ -1,0 +1,334 @@
+{
+ "trip": {
+  "locations": [
+   {
+    "type": "break",
+    "lat": 45.74,
+    "lon": 4.817,
+    "side_of_street": "right",
+    "original_index": 0
+   },
+   {
+    "type": "break",
+    "lat": 45.525,
+    "lon": 4.874,
+    "side_of_street": "left",
+    "original_index": 1
+   }
+  ],
+  "legs": [
+   {
+    "maneuvers": [
+     {
+      "type": 2,
+      "instruction": "Conduisez vers le sud-est sur Rue Paul Montrochet.",
+      "verbal_succinct_transition_instruction": "Conduisez vers le sud-est. Ensuite, Tournez à droite dans Cours Charlemagne.",
+      "verbal_pre_transition_instruction": "Conduisez vers le sud-est sur Rue Paul Montrochet. Ensuite, Tournez à droite dans Cours Charlemagne.",
+      "verbal_post_transition_instruction": "Continuez pendant 100 mètres.",
+      "street_names": [
+       "Rue Paul Montrochet"
+      ],
+      "bearing_after": 119,
+      "time": 14.893,
+      "length": 0.095,
+      "cost": 16.364,
+      "begin_shape_index": 0,
+      "end_shape_index": 5,
+      "verbal_multi_cue": true,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 10,
+      "instruction": "Tournez à droite dans Cours Charlemagne.",
+      "verbal_transition_alert_instruction": "Tournez à droite dans Cours Charlemagne.",
+      "verbal_succinct_transition_instruction": "Tournez à droite.",
+      "verbal_pre_transition_instruction": "Tournez à droite dans Cours Charlemagne.",
+      "verbal_post_transition_instruction": "Continuez pendant 600 mètres.",
+      "street_names": [
+       "Cours Charlemagne"
+      ],
+      "bearing_before": 126,
+      "bearing_after": 207,
+      "time": 87.252,
+      "length": 0.644,
+      "cost": 108.953,
+      "begin_shape_index": 5,
+      "end_shape_index": 28,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 16,
+      "instruction": "Serrez à gauche pour rester sur Cours Charlemagne.",
+      "verbal_transition_alert_instruction": "Serrez à gauche pour rester sur Cours Charlemagne.",
+      "verbal_succinct_transition_instruction": "Serrez à gauche. Ensuite, Tournez à droite dans Quai Perrache.",
+      "verbal_pre_transition_instruction": "Serrez à gauche pour rester sur Cours Charlemagne. Ensuite, Tournez à droite dans Quai Perrache.",
+      "verbal_post_transition_instruction": "Continuez pendant 40 mètres.",
+      "street_names": [
+       "Cours Charlemagne"
+      ],
+      "bearing_before": 172,
+      "bearing_after": 153,
+      "time": 5.584,
+      "length": 0.041,
+      "cost": 8.863,
+      "begin_shape_index": 28,
+      "end_shape_index": 35,
+      "verbal_multi_cue": true,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 10,
+      "instruction": "Tournez à droite dans Quai Perrache.",
+      "verbal_transition_alert_instruction": "Tournez à droite dans Quai Perrache.",
+      "verbal_succinct_transition_instruction": "Tournez à droite.",
+      "verbal_pre_transition_instruction": "Tournez à droite dans Quai Perrache.",
+      "verbal_post_transition_instruction": "Continuez pendant 5 kilomètres.",
+      "street_names": [
+       "Quai Perrache"
+      ],
+      "bearing_before": 129,
+      "bearing_after": 210,
+      "time": 249.686,
+      "length": 5.276,
+      "cost": 297.021,
+      "begin_shape_index": 35,
+      "end_shape_index": 174,
+      "highway": true,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 24,
+      "instruction": "Gardez la gauche vers Marseille/Genève/Grenoble.",
+      "verbal_transition_alert_instruction": "Gardez la gauche vers Marseille.",
+      "verbal_pre_transition_instruction": "Gardez la gauche vers Marseille, Genève.",
+      "verbal_post_transition_instruction": "Continuez pendant 19 kilomètres.",
+      "street_names": [
+       "A 7",
+       "Autoroute du Soleil"
+      ],
+      "bearing_before": 129,
+      "bearing_after": 120,
+      "time": 725.55,
+      "length": 19.183,
+      "cost": 744.289,
+      "begin_shape_index": 174,
+      "end_shape_index": 515,
+      "highway": true,
+      "sign": {},
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 20,
+      "instruction": "Prenez la sortie 9 vers Vienne-Centre/Valence/Grenoble.",
+      "verbal_transition_alert_instruction": "Prenez la sortie 9.",
+      "verbal_pre_transition_instruction": "Prenez la sortie 9 vers Vienne-Centre, Valence.",
+      "verbal_post_transition_instruction": "Continuez pendant 3 kilomètres.",
+      "street_names": [
+       "D 1407",
+       "Boulevard du Rhône"
+      ],
+      "bearing_before": 107,
+      "bearing_after": 137,
+      "time": 235.44,
+      "length": 3.154,
+      "cost": 266.218,
+      "begin_shape_index": 515,
+      "end_shape_index": 570,
+      "sign": {
+       "exit_number_elements": [
+        {
+         "text": "9"
+        }
+       ],
+       "exit_toward_elements": [
+        {
+         "text": "Vienne-Centre"
+        },
+        {
+         "text": "Valence"
+        },
+        {
+         "text": "Grenoble"
+        }
+       ]
+      },
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 9,
+      "instruction": "Serrez à droite dans Rue du Jeu de Paume.",
+      "verbal_transition_alert_instruction": "Serrez à droite dans Rue du Jeu de Paume.",
+      "verbal_succinct_transition_instruction": "Serrez à droite.",
+      "verbal_pre_transition_instruction": "Serrez à droite dans Rue du Jeu de Paume.",
+      "verbal_post_transition_instruction": "Continuez pendant 400 mètres.",
+      "street_names": [
+       "Rue du Jeu de Paume"
+      ],
+      "bearing_before": 189,
+      "bearing_after": 231,
+      "time": 84.054,
+      "length": 0.412,
+      "cost": 137.828,
+      "begin_shape_index": 570,
+      "end_shape_index": 595,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 15,
+      "instruction": "Tournez à gauche dans Rue Tony Zacharie.",
+      "verbal_transition_alert_instruction": "Tournez à gauche dans Rue Tony Zacharie.",
+      "verbal_succinct_transition_instruction": "Tournez à gauche.",
+      "verbal_pre_transition_instruction": "Tournez à gauche dans Rue Tony Zacharie.",
+      "verbal_post_transition_instruction": "Continuez pendant 90 mètres.",
+      "street_names": [
+       "Rue Tony Zacharie"
+      ],
+      "bearing_before": 197,
+      "bearing_after": 97,
+      "time": 24.203,
+      "length": 0.089,
+      "cost": 41.135,
+      "begin_shape_index": 595,
+      "end_shape_index": 602,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 15,
+      "instruction": "Tournez à gauche dans Rue Vaucanson.",
+      "verbal_transition_alert_instruction": "Tournez à gauche dans Rue Vaucanson.",
+      "verbal_succinct_transition_instruction": "Tournez à gauche.",
+      "verbal_pre_transition_instruction": "Tournez à gauche dans Rue Vaucanson.",
+      "verbal_post_transition_instruction": "Continuez pendant 100 mètres.",
+      "street_names": [
+       "Rue Vaucanson"
+      ],
+      "bearing_before": 86,
+      "bearing_after": 6,
+      "time": 29.489,
+      "length": 0.127,
+      "cost": 49.305,
+      "begin_shape_index": 602,
+      "end_shape_index": 608,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 10,
+      "instruction": "Tournez à droite dans Rue Maurice Faure.",
+      "verbal_transition_alert_instruction": "Tournez à droite dans Rue Maurice Faure.",
+      "verbal_succinct_transition_instruction": "Tournez à droite. Ensuite, Tournez à droite dans Place Charles de Gaulle.",
+      "verbal_pre_transition_instruction": "Tournez à droite dans Rue Maurice Faure. Ensuite, Tournez à droite dans Place Charles de Gaulle.",
+      "verbal_post_transition_instruction": "Continuez pendant 40 mètres.",
+      "street_names": [
+       "Rue Maurice Faure"
+      ],
+      "bearing_before": 351,
+      "bearing_after": 62,
+      "time": 9.382,
+      "length": 0.043,
+      "cost": 19.045,
+      "begin_shape_index": 608,
+      "end_shape_index": 611,
+      "verbal_multi_cue": true,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 10,
+      "instruction": "Tournez à droite dans Place Charles de Gaulle.",
+      "verbal_transition_alert_instruction": "Tournez à droite dans Place Charles de Gaulle.",
+      "verbal_succinct_transition_instruction": "Tournez à droite.",
+      "verbal_pre_transition_instruction": "Tournez à droite dans Place Charles de Gaulle.",
+      "verbal_post_transition_instruction": "Continuez pendant 70 mètres.",
+      "street_names": [
+       "Place Charles de Gaulle"
+      ],
+      "bearing_before": 84,
+      "bearing_after": 183,
+      "time": 17.003,
+      "length": 0.07,
+      "cost": 24.849,
+      "begin_shape_index": 611,
+      "end_shape_index": 614,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 12,
+      "instruction": "Faites demi-tour à droite dans Rue Joseph Brenier.",
+      "verbal_transition_alert_instruction": "Faites demi-tour à droite dans Rue Joseph Brenier.",
+      "verbal_succinct_transition_instruction": "Faites demi-tour à droite un demi-tour. Ensuite, Votre destination sera sur la gauche.",
+      "verbal_pre_transition_instruction": "Faites demi-tour à droite dans Rue Joseph Brenier. Ensuite, Votre destination sera sur la gauche.",
+      "verbal_post_transition_instruction": "Continuez pendant 50 mètres.",
+      "street_names": [
+       "Rue Joseph Brenier"
+      ],
+      "bearing_before": 93,
+      "bearing_after": 269,
+      "time": 12.817,
+      "length": 0.045,
+      "cost": 19.537,
+      "begin_shape_index": 614,
+      "end_shape_index": 617,
+      "verbal_multi_cue": true,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 6,
+      "instruction": "Votre destination est sur la gauche.",
+      "verbal_transition_alert_instruction": "Votre destination sera sur la gauche.",
+      "verbal_pre_transition_instruction": "Votre destination est sur la gauche.",
+      "bearing_before": 269,
+      "time": 0.0,
+      "length": 0.0,
+      "cost": 0.0,
+      "begin_shape_index": 617,
+      "end_shape_index": 617,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     }
+    ],
+    "summary": {
+     "has_time_restrictions": false,
+     "has_toll": false,
+     "has_highway": true,
+     "has_ferry": false,
+     "min_lat": 45.524513,
+     "min_lon": 4.795845,
+     "max_lat": 45.740193,
+     "max_lon": 4.874321,
+     "time": 1495.358,
+     "length": 29.18,
+     "cost": 1733.411
+    },
+    "shape": "ciwfvA_o_eHb@{AjUov@Rq@j@}At@kBnCfB`e@b^`e@l_@`FfDxRvIfJ~Cn@Rt@VpB^fEx@VDpJfAbId@|H@~ILzHc@~MiBhNmCvMkEtLiE|z@q\\vOeErQyBrCkA`CwA`A{AhAkCDA~@uB`AwBl@f@xAhA`D`C`E|CtOdNrb@z[vHvFbGnEhGhDx`@~R`At@pa@n\\`NnKtKpIlF|ClDdB~B`ArBp@`Cd@dBVjBTvBJlB@tBI|BOjBUrBc@dBe@nBo@vAq@nVwMhCmArKcF~B_AdFiB~E_BfIoBvOaDpgAmSlQeDriBy\\d^mG`^kGf}@iOvb@eG~rC}_@`TiDdMkCxLsC|LoDxLwDxG}BvHsCrY}Ln_DuuAh[iNxSoJzH}DlHwDhI{EtH}E`EiC~PyLxJyHlKwIxMyL`M{LzNyO~H_J|FoHtGiIpFwHfGqIpDqFrEcHpHeMtHwMbHqMjHsNvGqNdGcN`GwNtGuPxt@gpBfEuKdCmGrCuGjC{FzFeLnHoM|HaMnIeLdGiH~FmG`K_KvJeJ|q@kp@fcCe_Cf}A}yAjWuVjE{DrD{C`DgCxEkDdEuChEmC~EsChEyBzEwBdHsClFkBpPcFdTyDnWoD|aAiMts@gJlKuApIuAfLwCpMgE~JsDnKiF`IoExGaEbHoEdHsFlGsF`GyF|FkGjFoGxFoHjFsHhFmInEwH~MiXtFkJjEaJbaBaiDboAejC~ByH~IsNfFmHrE}FvDiEnMsMhFmEtEoDrGyElG{D`EgCtEeCtFcChPsFxFcB`FwAxKaC`IsAdJqAbjHkfA`g@oH|ZgEph@uFnh@}Dj~D_YpbDgUxN}@vS_AdNi@jSe@pRMbIEtM?xNPzNV~Sj@zT`AzO`AdSzAvWdCtXnDr[bFvPrCzQtDj\\xHl^vJ|PnFxSdHfTzHpPzGfP`HryA|o@xq@xZzq@|Y`TxIpSnIbk@~T`e@dQne@zP|p@lUd[lKpi@|P~i@rPnfArZtp@|Q|b@xLpb@tMvTnHdTtHnWrJjW|Jlh@vTxSpJjSvJpPjIbPnIxRlK`P|IdOtIbMxHhOfJt_@rVfX`RhTpO|S|OhStOpXhTxXbUbXlTnXbU`b@z]bb@h^lp@dl@r^f\\nf@fd@jr@tp@`k@hj@v_@x_@~l@|m@`z@||@`LzLri@|l@~~@hdA`WrX`W`XbXjXtMrM`NzMnP`P`NpMze@dc@rg@hc@`RtOxQfOjc@h]j^xXra@bZ~LvIrMhJxXhRpYbRvY|QvYpQtY|PjZ~Plr@t_@|mAtn@j\\bPn\\`Phc@bS|c@`S~`@bQ|c@fRpg@lS|i@tSnh@pR|eAn_@xzA|h@zo@`Vpo@|VhZ|LhZ`MvYbMvYnMrg@nUzf@xU|f@nV|_@|Rjf@jWh`@dT|^vSt_@xT~^tThRlLdRvLzUzO`UvO~WvRdW~R|]zYr]xZhb@t`@nVfVbWjWtLdMhMlNvO~P`PvQne@jj@jVvZrYh_@xTjZ~X|`@fn@x}@dSnYlQhWnS|XpTxXlOdRhPnRzOhQjPbQrV~UbNtLbHfG~JhI`LbIpQjL|L|G|KtFjL`F`LnEfMnEtSdGtHnBfIbBnKhBbL|A`LjAvE^|E`@dLf@nL\\jEFvE@rKExUg@p]iAfj@uCvh@kDph@{D~i@oFfaAuKzd@kGvc@{G~a@uGza@mHtb@mIlg@eKby@eRraAkWjdAsZptAcc@xZmKzwAuj@~VmIta@qPff@kSp_A{`@hZ}MjN_Gpe@uThu@_^~b@}Shb@wS`[}On`@kS~LiGrOaJpKqGvMgJhJcH~ImH`HeGfLmKfKkKrPoRzO_SfL_PzIiMbH_LpNgVhOqYvNc[zLkZ~M}^|Xix@`GoPzKoXjLwXjHmPvHuOtMiWjOyXrM}TvJuObKmOdJ}MxJ}MpT_YfPmRnOuPlQmQlQeQlRyPvQaOvP_MrTaOtR_MjRmKdWuMtLuFnU}JpPwGt]aNbYeLtOaH`P{HpXuNvY}Prb@mX|SmNhToO`d@c\\pn@ce@by@ao@ldAuy@p`@k\\ld@k`@dd@o`@~x@it@fq@an@bg@ue@|v@{u@n[u[rZi[rd@if@b[i]hZi]n]qa@x\\ab@dW}[`Vm[fZka@bZ{a@tZ{c@lQiXpP_XxZgh@xUgb@rRg^vQg^vPg^h]_v@rDoIpIqSdQsc@jNi_@|GyRxFiPdPqf@`HoUlLwa@fNmi@vMqi@bGyX~FaYzDkTfB_L|AuJdEk\\~DcGh]ofCzf@coDxQ{qA~Icn@hVyfBtL{{@tGsi@fBuJjKcy@xScvAtr@imE~c@azBxOoo@pk@c~BfXadAnZ_bA`Uan@rOu^|Pga@|AmDbHsMlj@_bAlYeb@zJmMn@aAtF{HjP_QjPcPjNaM~IaHlQ{LtJyFfL{FdMiFhHgCfHwB|KuClBa@lDw@`F_AtFy@lGc@vDCjGNra@pC|j@bExT`Avn@tCb_@nDdK`AjDZtCX|En@dEj@fEsB~AuAx@}CjAeEnFaE`B~EvJpJhFpAbBP`G|@jG|@|@HjAPzTrDlGfA`HjAtLdDvNzFx@\\hTtI|BdBhMpDjS|HvDpAhH`CLiB|@uYFcDB}KCkAYsOEeCiBOsCSoF_@aRNm@`@}a@|FgBkFWsBs@oTvWv@zBuBLgMhJM@bBDbP"
+   }
+  ],
+  "summary": {
+   "has_time_restrictions": false,
+   "has_toll": false,
+   "has_highway": true,
+   "has_ferry": false,
+   "min_lat": 45.524513,
+   "min_lon": 4.795845,
+   "max_lat": 45.740193,
+   "max_lon": 4.874321,
+   "time": 1495.358,
+   "length": 29.18,
+   "cost": 1733.411
+  },
+  "status_message": "Found route between points",
+  "status": 0,
+  "units": "kilometers",
+  "language": "fr-FR"
+ }
+}

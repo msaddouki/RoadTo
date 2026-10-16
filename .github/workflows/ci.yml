@@ -176,6 +176,49 @@ jobs:
           PYTHONPATH: pipeline
       - run: bash -n pipeline/build_region.sh
 
+  dependencies:
+    name: Dependencies (known vulnerabilities, SBOM)
+    runs-on: ubuntu-latest
+    env:
+      OSV_SCANNER: v2.6.0
+      SYFT: 1.52.0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Tools, checked against their published checksums
+        run: |
+          mkdir -p "$RUNNER_TEMP/bin" && cd "$RUNNER_TEMP/bin"
+          base=https://github.com/google/osv-scanner/releases/download/$OSV_SCANNER
+          curl -fsSL -o osv-scanner_linux_amd64 "$base/osv-scanner_linux_amd64"
+          curl -fsSL "$base/osv-scanner_SHA256SUMS" | grep ' osv-scanner_linux_amd64$' | sha256sum -c -
+          mv osv-scanner_linux_amd64 osv-scanner && chmod +x osv-scanner
+          base=https://github.com/anchore/syft/releases/download/v$SYFT
+          curl -fsSL -o "syft_${SYFT}_linux_amd64.tar.gz" "$base/syft_${SYFT}_linux_amd64.tar.gz"
+          curl -fsSL "$base/syft_${SYFT}_checksums.txt" | grep " syft_${SYFT}_linux_amd64.tar.gz$" | sha256sum -c -
+          tar -xzf "syft_${SYFT}_linux_amd64.tar.gz" syft
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      # Lockfiles as committed (Dart: app and relays; the core is resolved in
+      # the app's lockfile). No resolution of ranges: it would guess the
+      # oldest versions allowed, not the ones installed.
+      - name: Known vulnerabilities in the lockfiles
+        run: osv-scanner scan source --recursive --no-resolve .
+      # requirements.txt pins only direct dependencies: check what pip
+      # actually installs.
+      - name: Known vulnerabilities in the installed pipeline packages
+        run: |
+          pip install -q -r pipeline/requirements.txt
+          pip freeze > "$RUNNER_TEMP/requirements-installed.txt" # packages only, not pip itself
+          osv-scanner scan source --no-resolve --lockfile "requirements.txt:$RUNNER_TEMP/requirements-installed.txt"
+      - name: SBOM (SPDX)
+        run: syft scan dir:. --quiet -o spdx-json=sbom.spdx.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: roadto-sbom
+          path: sbom.spdx.json
+          retention-days: 30
+
   app:
     name: Flutter app (analyze and test)
     runs-on: ubuntu-latest

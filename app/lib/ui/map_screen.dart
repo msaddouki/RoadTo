@@ -60,9 +60,28 @@ class _MapScreenState extends State<MapScreen> {
 
   // --- Carte ------------------------------------------------------------
 
+  /// [map] is still the map on screen: a new style or region replaces the
+  /// map, and the old one's native side goes away.
+  bool _isCurrent(MapLibreMapController map) => identical(map, _map) && _mapKey == _currentMapKey;
+
   Future<void> _onStyleLoaded() async {
     final map = _map;
-    if (map == null) return;
+    if (map == null || !_isCurrent(map)) return;
+    try {
+      await _addLayers(map);
+    } on Exception {
+      // The map was replaced while its layers were being added (installing
+      // the embedded region at first start): the new map adds its own.
+      if (_isCurrent(map)) rethrow;
+      return;
+    }
+    if (!_isCurrent(map)) return;
+    _styleReady = true;
+    _lastRouteKey = null;
+    await _syncMap();
+  }
+
+  Future<void> _addLayers(MapLibreMapController map) async {
     await map.addGeoJsonSource('route', routeGeoJson(null));
     await map.addGeoJsonSource('alerts', alertsGeoJson(const []));
     await map.addGeoJsonSource('destination', pointGeoJson(null));
@@ -123,21 +142,18 @@ class _MapScreenState extends State<MapScreen> {
         circleStrokeColor: '#FFFFFF',
       ),
     );
-    _styleReady = true;
-    _lastRouteKey = null;
-    await _syncMap();
   }
 
   Future<void> _syncMap() async {
     final map = _map;
-    if (map == null || !_styleReady || _mapKey != _currentMapKey) return;
+    if (map == null || !_styleReady || !_isCurrent(map)) return;
     try {
       await _writeMap(map);
     } on Exception {
       // The map was replaced (new style or region) while this sync was still
       // writing to it: its native side is gone. The new map syncs once its
       // style is loaded.
-      if (identical(map, _map) && _mapKey == _currentMapKey) rethrow;
+      if (_isCurrent(map)) rethrow;
     }
   }
 

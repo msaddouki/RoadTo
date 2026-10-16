@@ -1,0 +1,314 @@
+{
+ "trip": {
+  "locations": [
+   {
+    "type": "break",
+    "lat": 45.777,
+    "lon": 4.777,
+    "side_of_street": "left",
+    "original_index": 0
+   },
+   {
+    "type": "break",
+    "lat": 45.806,
+    "lon": 4.757,
+    "original_index": 1
+   }
+  ],
+  "legs": [
+   {
+    "maneuvers": [
+     {
+      "type": 3,
+      "instruction": "Conduisez vers l'est.",
+      "verbal_succinct_transition_instruction": "Conduisez vers l'est. Ensuite, dans 90 mètres, Serrez à droite dans Place de la Libération.",
+      "verbal_pre_transition_instruction": "Conduisez vers l'est. Ensuite, dans 90 mètres, Serrez à droite dans Place de la Libération.",
+      "verbal_post_transition_instruction": "Continuez pendant 90 mètres.",
+      "bearing_after": 112,
+      "time": 31.786,
+      "length": 0.088,
+      "cost": 37.029,
+      "begin_shape_index": 0,
+      "end_shape_index": 6,
+      "verbal_multi_cue": true,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 9,
+      "instruction": "Serrez à droite dans Place de la Libération.",
+      "verbal_transition_alert_instruction": "Serrez à droite dans Place de la Libération.",
+      "verbal_succinct_transition_instruction": "Serrez à droite.",
+      "verbal_pre_transition_instruction": "Serrez à droite dans Place de la Libération.",
+      "verbal_post_transition_instruction": "Continuez pendant 70 mètres.",
+      "street_names": [
+       "Place de la Libération"
+      ],
+      "bearing_before": 119,
+      "bearing_after": 147,
+      "time": 38.178,
+      "length": 0.074,
+      "cost": 525.243,
+      "begin_shape_index": 6,
+      "end_shape_index": 17,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 15,
+      "instruction": "Tournez à gauche dans Avenue Édouard Aynard.",
+      "verbal_transition_alert_instruction": "Tournez à gauche dans Avenue Édouard Aynard.",
+      "verbal_succinct_transition_instruction": "Tournez à gauche.",
+      "verbal_pre_transition_instruction": "Tournez à gauche dans Avenue Édouard Aynard.",
+      "verbal_post_transition_instruction": "Continuez pendant 100 mètres.",
+      "street_names": [
+       "Avenue Édouard Aynard"
+      ],
+      "bearing_before": 98,
+      "bearing_after": 356,
+      "time": 22.64,
+      "length": 0.122,
+      "cost": 53.834,
+      "begin_shape_index": 17,
+      "end_shape_index": 24,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 15,
+      "instruction": "Tournez à gauche dans Chemin de Charrière Blanche.",
+      "verbal_transition_alert_instruction": "Tournez à gauche dans Chemin de Charrière Blanche.",
+      "verbal_succinct_transition_instruction": "Tournez à gauche.",
+      "verbal_pre_transition_instruction": "Tournez à gauche dans Chemin de Charrière Blanche.",
+      "verbal_post_transition_instruction": "Continuez pendant 200 mètres.",
+      "street_names": [
+       "Chemin de Charrière Blanche"
+      ],
+      "bearing_before": 1,
+      "bearing_after": 272,
+      "time": 39.055,
+      "length": 0.236,
+      "cost": 74.413,
+      "begin_shape_index": 24,
+      "end_shape_index": 43,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 26,
+      "instruction": "Entrez dans le rond-point et prenez la 1er sortie dans Chemin de Charrière Blanche.",
+      "verbal_transition_alert_instruction": "Entrez dans le rond-point et prenez la 1er sortie dans Chemin de Charrière Blanche.",
+      "verbal_succinct_transition_instruction": "Entrez dans le rond-point et prenez la 1er sortie.",
+      "verbal_pre_transition_instruction": "Entrez dans le rond-point et prenez la 1er sortie dans Chemin de Charrière Blanche.",
+      "bearing_before": 288,
+      "bearing_after": 309,
+      "time": 1.646,
+      "length": 0.009,
+      "cost": 9.141,
+      "begin_shape_index": 43,
+      "end_shape_index": 47,
+      "roundabout_exit_count": 1,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 27,
+      "instruction": "Quittez le rond-point dans Chemin de Charrière Blanche.",
+      "verbal_succinct_transition_instruction": "Quittez le rond-point.",
+      "verbal_pre_transition_instruction": "Quittez le rond-point dans Chemin de Charrière Blanche.",
+      "verbal_post_transition_instruction": "Continuez pendant 700 mètres.",
+      "street_names": [
+       "Chemin de Charrière Blanche"
+      ],
+      "bearing_before": 309,
+      "bearing_after": 316,
+      "time": 90.376,
+      "length": 0.674,
+      "cost": 127.113,
+      "begin_shape_index": 47,
+      "end_shape_index": 90,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 10,
+      "instruction": "Tournez à droite dans Avenue Guy de Collongue.",
+      "verbal_transition_alert_instruction": "Tournez à droite dans Avenue Guy de Collongue.",
+      "verbal_succinct_transition_instruction": "Tournez à droite.",
+      "verbal_pre_transition_instruction": "Tournez à droite dans Avenue Guy de Collongue.",
+      "verbal_post_transition_instruction": "Continuez pendant 2.5 kilomètres.",
+      "street_names": [
+       "Avenue Guy de Collongue"
+      ],
+      "bearing_before": 245,
+      "bearing_after": 324,
+      "time": 313.189,
+      "length": 2.421,
+      "cost": 373.536,
+      "begin_shape_index": 90,
+      "end_shape_index": 241,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 26,
+      "instruction": "Entrez dans le rond-point et prenez la 2e sortie dans Route d'Écully.",
+      "verbal_transition_alert_instruction": "Entrez dans le rond-point et prenez la 2e sortie dans Route d'Écully.",
+      "verbal_succinct_transition_instruction": "Entrez dans le rond-point et prenez la 2e sortie.",
+      "verbal_pre_transition_instruction": "Entrez dans le rond-point et prenez la 2e sortie dans Route d'Écully.",
+      "bearing_before": 339,
+      "bearing_after": 1,
+      "time": 4.686,
+      "length": 0.024,
+      "cost": 10.114,
+      "begin_shape_index": 241,
+      "end_shape_index": 248,
+      "roundabout_exit_count": 2,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 27,
+      "instruction": "Quittez le rond-point dans Route d'Écully.",
+      "verbal_succinct_transition_instruction": "Quittez le rond-point.",
+      "verbal_pre_transition_instruction": "Quittez le rond-point dans Route d'Écully.",
+      "verbal_post_transition_instruction": "Continuez pendant 300 mètres.",
+      "street_names": [
+       "Route d'Écully"
+      ],
+      "bearing_before": 291,
+      "bearing_after": 312,
+      "time": 42.139,
+      "length": 0.327,
+      "cost": 52.095,
+      "begin_shape_index": 248,
+      "end_shape_index": 268,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 26,
+      "instruction": "Entrez dans le rond-point et prenez la 2e sortie dans Route d'Écully.",
+      "verbal_transition_alert_instruction": "Entrez dans le rond-point et prenez la 2e sortie dans Route d'Écully.",
+      "verbal_succinct_transition_instruction": "Entrez dans le rond-point et prenez la 2e sortie.",
+      "verbal_pre_transition_instruction": "Entrez dans le rond-point et prenez la 2e sortie dans Route d'Écully.",
+      "bearing_before": 356,
+      "bearing_after": 49,
+      "time": 7.638,
+      "length": 0.033,
+      "cost": 12.098,
+      "begin_shape_index": 268,
+      "end_shape_index": 281,
+      "roundabout_exit_count": 2,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 27,
+      "instruction": "Quittez le rond-point dans Route d'Écully.",
+      "verbal_succinct_transition_instruction": "Quittez le rond-point.",
+      "verbal_pre_transition_instruction": "Quittez le rond-point dans Route d'Écully.",
+      "verbal_post_transition_instruction": "Continuez pendant 200 mètres.",
+      "street_names": [
+       "Route d'Écully"
+      ],
+      "bearing_before": 319,
+      "bearing_after": 337,
+      "time": 30.809,
+      "length": 0.23,
+      "cost": 41.095,
+      "begin_shape_index": 281,
+      "end_shape_index": 289,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 10,
+      "instruction": "Tournez à droite dans Allée des Vignes.",
+      "verbal_transition_alert_instruction": "Tournez à droite dans Allée des Vignes.",
+      "verbal_succinct_transition_instruction": "Tournez à droite.",
+      "verbal_pre_transition_instruction": "Tournez à droite dans Allée des Vignes.",
+      "verbal_post_transition_instruction": "Continuez pendant 200 mètres.",
+      "street_names": [
+       "Allée des Vignes"
+      ],
+      "bearing_before": 347,
+      "bearing_after": 50,
+      "time": 34.022,
+      "length": 0.166,
+      "cost": 47.234,
+      "begin_shape_index": 289,
+      "end_shape_index": 311,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 10,
+      "instruction": "Tournez à droite pour rester sur Allée des Vignes.",
+      "verbal_transition_alert_instruction": "Tournez à droite pour rester sur Allée des Vignes.",
+      "verbal_succinct_transition_instruction": "Tournez à droite.",
+      "verbal_pre_transition_instruction": "Tournez à droite pour rester sur Allée des Vignes.",
+      "verbal_post_transition_instruction": "Continuez pendant 40 mètres.",
+      "street_names": [
+       "Allée des Vignes"
+      ],
+      "bearing_before": 306,
+      "bearing_after": 33,
+      "time": 21.356,
+      "length": 0.038,
+      "cost": 98.931,
+      "begin_shape_index": 311,
+      "end_shape_index": 319,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 4,
+      "instruction": "Vous êtes arrivé à votre destination.",
+      "verbal_transition_alert_instruction": "Vous arriverez à votre destination.",
+      "verbal_pre_transition_instruction": "Vous êtes arrivé à votre destination.",
+      "bearing_before": 2,
+      "time": 0.0,
+      "length": 0.0,
+      "cost": 0.0,
+      "begin_shape_index": 319,
+      "end_shape_index": 319,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     }
+    ],
+    "summary": {
+     "has_time_restrictions": false,
+     "has_toll": false,
+     "has_highway": false,
+     "has_ferry": false,
+     "min_lat": 45.775968,
+     "min_lon": 4.755541,
+     "max_lat": 45.804721,
+     "max_lon": 4.778919,
+     "time": 677.526,
+     "length": 4.444,
+     "cost": 1461.883
+    },
+    "shape": "uh~hvA{jqbHGaBt@cBlNil@dBA`@yCz@uAb@^p@Fj@o@p@eDXwAEeCScCr@wEvCsTD]LuD}G^gDHyLCgE?_IIiKMuJKEvFc@fBoE~LuDhIoFpL_CrFsCnH}CxKuLrb@iBnGo@|ByApFQp@St@I^q@xCiAlFi@nDk@|Dc@\\]h@Ur@Kv@_BdCoD|HgEhJkDtGiCzEy[n\\eClCmCjDaB|DqAfEiAnGU|BQtDSnYEbGGbTAlD?~Gf@jWf@dW@lESdE}@hGoDxGsQ`UmCtDwBpCeCbDsBbDcAdBwAxDkHfa@}@xEuBbUiBpQmAzWqAlMkAhJg@hFG`CPjBd@fC`@rAwD`E_DxHcBvE{@vDoChQe@|C{B`O{@pFa@tBcBbHcC`HqEvLkBjEgBjDqCtCoChB{@b@_HlDwGtBa\\|HmCd@cFA}C^sDjAoCr@eD|@uGfBsD`AuHpBgLlCsCt@sCv@gGxA}G`C}DrAev@hR{Av@sCbA{I|B}@Tee@zLcLjCuEnAuYpHyEp@cEd@_DLeB?kF@}c@D}GCuFKsFGqLTiGViDd@wEl@_NhB_ALqIdAeF_@kF\\cJjBwJrB_I|Cyz@zKkg@vGsJhDyDnB{AjBqB`CcAnAuGrIwD~EqFlGaF~D{EvCuDfBiF|AyE|@uDNcIKgE]uFi@{Lm@qCEkDRwEr@}G|BsHdDcY~NeLzFsEtBcDlAiDp@oBNyD@aD]sIwC}HmDgCs@gA[sBc@mBDmAV_Bb@{Az@qAnAkArBmCnIiDpOoAdE_CfEoCbCmAr@sClA_En@}D@yGSoF]eQuAuC@sDXkDx@{EjCmEfE_BtCmAdD{AzHk@nKs@lMe@pMS~E]rLEhEOzFu@b\\k@xLs@|OeArO_AnFoBtM]lBKp@gAzEyCfL_J|TiDvGoExCmCjBkALu@Gs@DcA`@y@x@m@lAYdAMjAyCvFsH~HeF`C}At@gGfBgH`BeJdB{PnD}R`Ek]vGyFfAsFdA{FtA{KpBuDZc@BgET]BgADs@BUg@Wc@a@c@e@Ye@Oi@Eq@Dq@Rk@`@e@n@]x@U`AKdA_ClAyFnDqCh@}oAhWqDr@eCl@oFbAeJpBy@cB[i@qAiB_Cs@cEJeDhA{Dr@oGpAy@DcCN_Cw@_AeAm@mBWaAg@aDEwMDsCLaKkFC}@Hk@f@a@`Ag@_@y@iAw@w@{@i@mAo@}BWoAC}B?"
+   }
+  ],
+  "summary": {
+   "has_time_restrictions": false,
+   "has_toll": false,
+   "has_highway": false,
+   "has_ferry": false,
+   "min_lat": 45.775968,
+   "min_lon": 4.755541,
+   "max_lat": 45.804721,
+   "max_lon": 4.778919,
+   "time": 677.526,
+   "length": 4.444,
+   "cost": 1461.883
+  },
+  "status_message": "Found route between points",
+  "status": 0,
+  "units": "kilometers",
+  "language": "fr-FR"
+ }
+}
