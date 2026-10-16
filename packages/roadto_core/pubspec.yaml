@@ -15,7 +15,7 @@ dependencies:
   pointycastle: ^4.0.0
   sqlite3: ^3.7.0
   # NFKC for NIP-49 passwords. Pinned: 0.3.3 is days old.
-  unorm_dart: 0.3.2
+  unorm_dart: 0.3.3
   web_socket_channel: ^3.0.3
 
 dev_dependencies:
