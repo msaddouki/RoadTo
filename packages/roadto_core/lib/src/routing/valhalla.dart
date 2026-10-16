@@ -213,6 +213,7 @@ TripRoute parseValhallaRoute(Map<String, dynamic> json) {
           verbalAlert: m['verbal_transition_alert_instruction'] as String?,
           verbalPre: m['verbal_pre_transition_instruction'] as String?,
           verbalPost: m['verbal_post_transition_instruction'] as String?,
+          verbalMultiCue: m['verbal_multi_cue'] as bool? ?? false,
           streetNames: [for (final s in (m['street_names'] as List? ?? const [])) '$s'],
           beginShapeIndex: offset + (m['begin_shape_index'] as int),
           lengthM: ((m['length'] as num?) ?? 0) * 1000,

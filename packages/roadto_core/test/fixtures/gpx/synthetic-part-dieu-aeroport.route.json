@@ -1,0 +1,620 @@
+{
+ "trip": {
+  "locations": [
+   {
+    "type": "break",
+    "lat": 45.7605,
+    "lon": 4.859,
+    "side_of_street": "right",
+    "original_index": 0
+   },
+   {
+    "type": "break",
+    "lat": 45.723,
+    "lon": 5.081,
+    "original_index": 1
+   }
+  ],
+  "legs": [
+   {
+    "maneuvers": [
+     {
+      "type": 2,
+      "instruction": "Conduisez vers le nord sur Tunnel de Vivier-Merle.",
+      "verbal_succinct_transition_instruction": "Conduisez vers le nord.",
+      "verbal_pre_transition_instruction": "Conduisez vers le nord sur Tunnel de Vivier-Merle.",
+      "verbal_post_transition_instruction": "Continuez pendant 900 mètres.",
+      "street_names": [
+       "Tunnel de Vivier-Merle"
+      ],
+      "bearing_after": 356,
+      "time": 161.464,
+      "length": 0.895,
+      "cost": 219.844,
+      "begin_shape_index": 0,
+      "end_shape_index": 50,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 10,
+      "instruction": "Tournez à droite dans Rue des Émeraudes.",
+      "verbal_transition_alert_instruction": "Tournez à droite dans Rue des Émeraudes.",
+      "verbal_succinct_transition_instruction": "Tournez à droite.",
+      "verbal_pre_transition_instruction": "Tournez à droite dans Rue des Émeraudes.",
+      "verbal_post_transition_instruction": "Continuez pendant 200 mètres.",
+      "street_names": [
+       "Rue des Émeraudes"
+      ],
+      "bearing_before": 0,
+      "bearing_after": 53,
+      "time": 46.223,
+      "length": 0.244,
+      "cost": 84.605,
+      "begin_shape_index": 50,
+      "end_shape_index": 63,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 15,
+      "instruction": "Tournez à gauche vers Toutes directions/Porte de Saint-Clair/Villeurbanne Tonkin.",
+      "verbal_transition_alert_instruction": "Tournez à gauche vers Toutes directions.",
+      "verbal_succinct_transition_instruction": "Tournez à gauche vers Toutes directions, Porte de Saint-Clair.",
+      "verbal_pre_transition_instruction": "Tournez à gauche vers Toutes directions, Porte de Saint-Clair.",
+      "verbal_post_transition_instruction": "Continuez pendant 80 mètres.",
+      "street_names": [
+       "Avenue Thiers"
+      ],
+      "bearing_before": 54,
+      "bearing_after": 359,
+      "time": 14.959,
+      "length": 0.077,
+      "cost": 42.285,
+      "begin_shape_index": 63,
+      "end_shape_index": 67,
+      "sign": {},
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 15,
+      "instruction": "Tournez à gauche dans Cours Vitton.",
+      "verbal_transition_alert_instruction": "Tournez à gauche dans Cours Vitton.",
+      "verbal_succinct_transition_instruction": "Tournez à gauche.",
+      "verbal_pre_transition_instruction": "Tournez à gauche dans Cours Vitton.",
+      "verbal_post_transition_instruction": "Continuez pendant 200 mètres.",
+      "street_names": [
+       "Cours Vitton"
+      ],
+      "bearing_before": 359,
+      "bearing_after": 263,
+      "time": 35.432,
+      "length": 0.163,
+      "cost": 67.794,
+      "begin_shape_index": 67,
+      "end_shape_index": 79,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 10,
+      "instruction": "Tournez à droite dans Voie Nouvelle Stalingrad Vitton.",
+      "verbal_transition_alert_instruction": "Tournez à droite dans Voie Nouvelle Stalingrad Vitton.",
+      "verbal_succinct_transition_instruction": "Tournez à droite.",
+      "verbal_pre_transition_instruction": "Tournez à droite dans Voie Nouvelle Stalingrad Vitton.",
+      "verbal_post_transition_instruction": "Continuez pendant 2 kilomètres.",
+      "street_names": [
+       "Voie Nouvelle Stalingrad Vitton"
+      ],
+      "bearing_before": 263,
+      "bearing_after": 336,
+      "time": 354.096,
+      "length": 1.904,
+      "cost": 458.713,
+      "begin_shape_index": 79,
+      "end_shape_index": 133,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 20,
+      "instruction": "Prenez la sortie vers Marseille/Genève/Grenoble/Périphérique Est.",
+      "verbal_transition_alert_instruction": "Prenez la sortie vers Marseille.",
+      "verbal_pre_transition_instruction": "Prenez la sortie vers Marseille, Genève.",
+      "street_names": [
+       "Bretelle 2 - La Pape"
+      ],
+      "bearing_before": 4,
+      "bearing_after": 27,
+      "time": 39.68,
+      "length": 0.277,
+      "cost": 59.454,
+      "begin_shape_index": 133,
+      "end_shape_index": 154,
+      "sign": {
+       "exit_toward_elements": [
+        {
+         "text": "Marseille"
+        },
+        {
+         "text": "Genève"
+        },
+        {
+         "text": "Grenoble"
+        },
+        {
+         "text": "Périphérique Est"
+        },
+        {
+         "text": "Rillieux"
+        },
+        {
+         "text": "Miribel"
+        }
+       ]
+      },
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 24,
+      "instruction": "Gardez la gauche pour prendre Boulevard Périphérique Nord.",
+      "verbal_transition_alert_instruction": "Gardez la gauche pour prendre Boulevard Périphérique Nord.",
+      "verbal_pre_transition_instruction": "Gardez la gauche pour prendre Boulevard Périphérique Nord.",
+      "verbal_post_transition_instruction": "Continuez pendant 3 kilomètres.",
+      "street_names": [
+       "Boulevard Périphérique Nord"
+      ],
+      "bearing_before": 64,
+      "bearing_after": 53,
+      "time": 183.166,
+      "length": 2.917,
+      "cost": 237.603,
+      "begin_shape_index": 154,
+      "end_shape_index": 234,
+      "toll": true,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 18,
+      "instruction": "Prenez la bretelle A 42 vers Genève/Saint-Exupéry/vers N 346.",
+      "verbal_transition_alert_instruction": "Prenez la bretelle A 42.",
+      "verbal_pre_transition_instruction": "Prenez la bretelle A 42 vers Genève, Saint-Exupéry.",
+      "verbal_post_transition_instruction": "Continuez pendant 3 kilomètres.",
+      "street_names": [
+       "A 42",
+       "E 611"
+      ],
+      "bearing_before": 148,
+      "bearing_after": 162,
+      "time": 146.739,
+      "length": 3.303,
+      "cost": 170.149,
+      "begin_shape_index": 234,
+      "end_shape_index": 320,
+      "highway": true,
+      "sign": {
+       "exit_branch_elements": [
+        {
+         "text": "A 42",
+         "consecutive_count": 1
+        }
+       ],
+       "exit_toward_elements": [
+        {
+         "text": "Genève"
+        },
+        {
+         "text": "Saint-Exupéry"
+        },
+        {
+         "text": "vers N 346"
+        }
+       ]
+      },
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 20,
+      "instruction": "Prenez la sortie N 346 vers Marseille/Grenoble.",
+      "verbal_transition_alert_instruction": "Prenez la sortie N 346.",
+      "verbal_pre_transition_instruction": "Prenez la sortie N 346 vers Marseille, Grenoble.",
+      "verbal_post_transition_instruction": "Continuez pendant 8 kilomètres.",
+      "street_names": [
+       "N 346",
+       "E 15",
+       "Rocade Est"
+      ],
+      "bearing_before": 71,
+      "bearing_after": 86,
+      "time": 370.465,
+      "length": 8.134,
+      "cost": 388.504,
+      "begin_shape_index": 320,
+      "end_shape_index": 480,
+      "sign": {
+       "exit_branch_elements": [
+        {
+         "text": "N 346",
+         "consecutive_count": 1
+        }
+       ],
+       "exit_toward_elements": [
+        {
+         "text": "Marseille"
+        },
+        {
+         "text": "Grenoble"
+        }
+       ]
+      },
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 20,
+      "instruction": "Prenez la sortie 7.1 vers Pont-de-Chéruy/Pusignan/Zone Industrielle Meyzieu-Jonage.",
+      "verbal_transition_alert_instruction": "Prenez la sortie 7.1.",
+      "verbal_pre_transition_instruction": "Prenez la sortie 7.1 vers Pont-de-Chéruy, Pusignan.",
+      "bearing_before": 178,
+      "bearing_after": 213,
+      "time": 69.854,
+      "length": 0.95,
+      "cost": 71.543,
+      "begin_shape_index": 480,
+      "end_shape_index": 532,
+      "sign": {
+       "exit_number_elements": [
+        {
+         "text": "7.1"
+        }
+       ],
+       "exit_toward_elements": [
+        {
+         "text": "Pont-de-Chéruy"
+        },
+        {
+         "text": "Pusignan"
+        },
+        {
+         "text": "Zone Industrielle Meyzieu-Jonage"
+        }
+       ]
+      },
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 16,
+      "instruction": "Serrez à gauche dans D 302.",
+      "verbal_transition_alert_instruction": "Serrez à gauche dans D 302.",
+      "verbal_succinct_transition_instruction": "Serrez à gauche.",
+      "verbal_pre_transition_instruction": "Serrez à gauche dans D 302.",
+      "verbal_post_transition_instruction": "Continuez pendant 2 kilomètres.",
+      "street_names": [
+       "D 302"
+      ],
+      "bearing_before": 113,
+      "bearing_after": 98,
+      "time": 99.908,
+      "length": 2.246,
+      "cost": 117.684,
+      "begin_shape_index": 532,
+      "end_shape_index": 588,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 26,
+      "instruction": "Entrez dans le rond-point et prenez la 1er sortie vers D 147/Genas/Saint-Bonnet-de-Mure.",
+      "verbal_transition_alert_instruction": "Entrez dans le rond-point et prenez la 1er sortie vers D 147.",
+      "verbal_succinct_transition_instruction": "Entrez dans le rond-point et prenez la 1er sortie vers D 147, Genas.",
+      "verbal_pre_transition_instruction": "Entrez dans le rond-point et prenez la 1er sortie vers D 147, Genas.",
+      "bearing_before": 103,
+      "bearing_after": 135,
+      "time": 2.759,
+      "length": 0.021,
+      "cost": 8.599,
+      "begin_shape_index": 588,
+      "end_shape_index": 591,
+      "roundabout_exit_count": 1,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 27,
+      "instruction": "Quittez le rond-point vers D 147/Genas/Saint-Bonnet-de-Mure.",
+      "verbal_succinct_transition_instruction": "Quittez le rond-point vers D 147, Genas.",
+      "verbal_pre_transition_instruction": "Quittez le rond-point vers D 147, Genas.",
+      "verbal_post_transition_instruction": "Continuez pendant 1 kilomètre.",
+      "street_names": [
+       "D 147"
+      ],
+      "bearing_before": 135,
+      "bearing_after": 160,
+      "time": 122.582,
+      "length": 1.184,
+      "cost": 130.479,
+      "begin_shape_index": 591,
+      "end_shape_index": 605,
+      "sign": {},
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 26,
+      "instruction": "Entrez dans Rond-Point Jean Mermoz et prenez la 2e sortie dans D 147.",
+      "verbal_transition_alert_instruction": "Entrez dans Rond-Point Jean Mermoz et prenez la 2e sortie dans D 147.",
+      "verbal_succinct_transition_instruction": "Entrez dans le rond-point et prenez la 2e sortie.",
+      "verbal_pre_transition_instruction": "Entrez dans Rond-Point Jean Mermoz et prenez la 2e sortie dans D 147.",
+      "street_names": [
+       "Rond-Point Jean Mermoz"
+      ],
+      "bearing_before": 173,
+      "bearing_after": 209,
+      "time": 8.691,
+      "length": 0.052,
+      "cost": 13.509,
+      "begin_shape_index": 605,
+      "end_shape_index": 613,
+      "roundabout_exit_count": 2,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 27,
+      "instruction": "Quittez le rond-point dans D 147.",
+      "verbal_succinct_transition_instruction": "Quittez le rond-point.",
+      "verbal_pre_transition_instruction": "Quittez le rond-point dans D 147.",
+      "verbal_post_transition_instruction": "Continuez pendant 2 kilomètres.",
+      "street_names": [
+       "D 147"
+      ],
+      "bearing_before": 111,
+      "bearing_after": 155,
+      "time": 140.265,
+      "length": 1.751,
+      "cost": 141.035,
+      "begin_shape_index": 613,
+      "end_shape_index": 635,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 26,
+      "instruction": "Entrez dans Rond-Point Antoine de Saint-Exupéry et prenez la 3ème sortie dans Rue de la Fraternité/D 29.",
+      "verbal_transition_alert_instruction": "Entrez dans Rond-Point Antoine de Saint-Exupéry et prenez la 3ème sortie dans Rue de la Fraternité.",
+      "verbal_succinct_transition_instruction": "Entrez dans le rond-point et prenez la 3ème sortie.",
+      "verbal_pre_transition_instruction": "Entrez dans Rond-Point Antoine de Saint-Exupéry et prenez la 3ème sortie dans Rue de la Fraternité, D 29.",
+      "street_names": [
+       "Rond-Point Antoine de Saint-Exupéry"
+      ],
+      "bearing_before": 200,
+      "bearing_after": 229,
+      "time": 14.017,
+      "length": 0.075,
+      "cost": 16.753,
+      "begin_shape_index": 635,
+      "end_shape_index": 647,
+      "roundabout_exit_count": 3,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 27,
+      "instruction": "Quittez le rond-point dans Rue de la Fraternité/D 29. Continuez sur D 29.",
+      "verbal_succinct_transition_instruction": "Quittez le rond-point.",
+      "verbal_pre_transition_instruction": "Quittez le rond-point pour Rue de la Fraternité, D 29.",
+      "verbal_post_transition_instruction": "Continuez vers D 29 pendant 3 kilomètres.",
+      "street_names": [
+       "D 29"
+      ],
+      "begin_street_names": [
+       "Rue de la Fraternité",
+       "D 29"
+      ],
+      "bearing_before": 63,
+      "bearing_after": 92,
+      "time": 268.179,
+      "length": 3.35,
+      "cost": 252.038,
+      "begin_shape_index": 647,
+      "end_shape_index": 684,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 26,
+      "instruction": "Entrez dans Rond-Point de l'Europe et prenez la 2e sortie dans Rue d'Irlande.",
+      "verbal_transition_alert_instruction": "Entrez dans Rond-Point de l'Europe et prenez la 2e sortie dans Rue d'Irlande.",
+      "verbal_succinct_transition_instruction": "Entrez dans le rond-point et prenez la 2e sortie.",
+      "verbal_pre_transition_instruction": "Entrez dans Rond-Point de l'Europe et prenez la 2e sortie dans Rue d'Irlande.",
+      "street_names": [
+       "Rond-Point de l'Europe"
+      ],
+      "bearing_before": 112,
+      "bearing_after": 139,
+      "time": 12.658,
+      "length": 0.081,
+      "cost": 18.042,
+      "begin_shape_index": 684,
+      "end_shape_index": 699,
+      "roundabout_exit_count": 2,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 27,
+      "instruction": "Quittez le rond-point dans Rue d'Irlande.",
+      "verbal_succinct_transition_instruction": "Quittez le rond-point. Ensuite, Tournez à gauche dans Rue d'Italie.",
+      "verbal_pre_transition_instruction": "Quittez le rond-point dans Rue d'Irlande. Ensuite, Tournez à gauche dans Rue d'Italie.",
+      "verbal_post_transition_instruction": "Continuez pendant 40 mètres.",
+      "street_names": [
+       "Rue d'Irlande"
+      ],
+      "bearing_before": 45,
+      "bearing_after": 63,
+      "time": 5.037,
+      "length": 0.039,
+      "cost": 9.763,
+      "begin_shape_index": 699,
+      "end_shape_index": 706,
+      "verbal_multi_cue": true,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 15,
+      "instruction": "Tournez à gauche dans Rue d'Italie.",
+      "verbal_transition_alert_instruction": "Tournez à gauche dans Rue d'Italie.",
+      "verbal_succinct_transition_instruction": "Tournez à gauche. Ensuite, Tournez à droite dans Rue du Luxembourg.",
+      "verbal_pre_transition_instruction": "Tournez à gauche dans Rue d'Italie. Ensuite, Tournez à droite dans Rue du Luxembourg.",
+      "verbal_post_transition_instruction": "Continuez pendant 40 mètres.",
+      "street_names": [
+       "Rue d'Italie"
+      ],
+      "bearing_before": 109,
+      "bearing_after": 49,
+      "time": 6.69,
+      "length": 0.038,
+      "cost": 23.141,
+      "begin_shape_index": 706,
+      "end_shape_index": 713,
+      "verbal_multi_cue": true,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 10,
+      "instruction": "Tournez à droite dans Rue du Luxembourg.",
+      "verbal_transition_alert_instruction": "Tournez à droite dans Rue du Luxembourg.",
+      "verbal_succinct_transition_instruction": "Tournez à droite. Ensuite, dans 50 mètres, Tournez à droite pour rester sur Rue du Luxembourg.",
+      "verbal_pre_transition_instruction": "Tournez à droite dans Rue du Luxembourg. Ensuite, dans 50 mètres, Tournez à droite pour rester sur Rue du Luxembourg.",
+      "verbal_post_transition_instruction": "Continuez pendant 50 mètres.",
+      "street_names": [
+       "Rue du Luxembourg"
+      ],
+      "bearing_before": 31,
+      "bearing_after": 106,
+      "time": 11.133,
+      "length": 0.048,
+      "cost": 19.156,
+      "begin_shape_index": 713,
+      "end_shape_index": 717,
+      "verbal_multi_cue": true,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 10,
+      "instruction": "Tournez à droite pour rester sur Rue du Luxembourg.",
+      "verbal_transition_alert_instruction": "Tournez à droite pour rester sur Rue du Luxembourg.",
+      "verbal_succinct_transition_instruction": "Tournez à droite.",
+      "verbal_pre_transition_instruction": "Tournez à droite pour rester sur Rue du Luxembourg.",
+      "verbal_post_transition_instruction": "Continuez pendant 100 mètres.",
+      "street_names": [
+       "Rue du Luxembourg"
+      ],
+      "bearing_before": 103,
+      "bearing_after": 196,
+      "time": 22.971,
+      "length": 0.097,
+      "cost": 24.014,
+      "begin_shape_index": 717,
+      "end_shape_index": 720,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 15,
+      "instruction": "Tournez à gauche pour rester sur Rue du Luxembourg.",
+      "verbal_transition_alert_instruction": "Tournez à gauche pour rester sur Rue du Luxembourg.",
+      "verbal_succinct_transition_instruction": "Tournez à gauche.",
+      "verbal_pre_transition_instruction": "Tournez à gauche pour rester sur Rue du Luxembourg.",
+      "verbal_post_transition_instruction": "Continuez pendant 80 mètres.",
+      "street_names": [
+       "Rue du Luxembourg"
+      ],
+      "bearing_before": 196,
+      "bearing_after": 106,
+      "time": 22.216,
+      "length": 0.08,
+      "cost": 23.594,
+      "begin_shape_index": 720,
+      "end_shape_index": 721,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 15,
+      "instruction": "Tournez à gauche pour rester sur Rue du Luxembourg.",
+      "verbal_transition_alert_instruction": "Tournez à gauche pour rester sur Rue du Luxembourg.",
+      "verbal_succinct_transition_instruction": "Tournez à gauche.",
+      "verbal_pre_transition_instruction": "Tournez à gauche pour rester sur Rue du Luxembourg.",
+      "verbal_post_transition_instruction": "Continuez pendant 1.5 kilomètres.",
+      "street_names": [
+       "Rue du Luxembourg"
+      ],
+      "bearing_before": 106,
+      "bearing_after": 14,
+      "time": 863.331,
+      "length": 1.42,
+      "cost": 1974.37,
+      "begin_shape_index": 721,
+      "end_shape_index": 839,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 4,
+      "instruction": "Vous êtes arrivé à votre destination.",
+      "verbal_transition_alert_instruction": "Vous arriverez à votre destination.",
+      "verbal_pre_transition_instruction": "Vous êtes arrivé à votre destination.",
+      "bearing_before": 325,
+      "time": 0.0,
+      "length": 0.0,
+      "cost": 0.0,
+      "begin_shape_index": 839,
+      "end_shape_index": 839,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     }
+    ],
+    "summary": {
+     "has_time_restrictions": false,
+     "has_toll": true,
+     "has_highway": true,
+     "has_ferry": false,
+     "min_lat": 45.71606,
+     "min_lon": 4.85783,
+     "max_lat": 45.796901,
+     "max_lon": 5.081563,
+     "time": 3022.528,
+     "length": 29.347,
+     "cost": 4572.681
+    },
+    "shape": "i|~gvAqtogHsBHk[vAgu@xGwv@xHcMn@gEUuEg@gFsAoF{BwCmAe@SoAm@}EsAsAg@UM_@WgCy@eA_@kHmCwGaCyGuCeIkDsD}AiEgBq`@_QsCmAiCiAuB}@_Bq@oX_MqEo@oJXsABy@@oA@cAB{EDiAB}S^kFDoHNsB@{QZcA@aFF_Yd@uFoAiFHgCE_F?mS{e@{IsRO[mDuH[s@aB{Da@w@kA{BoGwOwGsQqMg[mAuCkBqEaFBm[PkA@}CBTbGh@fMlA`\\Dz@FdBn@nPl@zOZzH\\jJBb@FlBf@~LoEgA_MzI}AhAyLfGeSvFgWnG]FsMhC_GtAoJzBmEWad@aCwBMoDUmFWe|@gDu_@mBeBDgABo`AgGch@aDuVsAuAIwBKe@Cet@aE}O}@gKm@moAaHm@GyE_@gE]_AKaDUiMgAeEdCsLs@kj@sBaWgAaOw@eDQuGe@mUcA_QaAgX{AyNu@uOu@ok@gDseA{Fy^{BiBIsFYw|@_F_Kc@uDyEeLm@sAWq@g@q@_AeB}CcBqEeAeEu@kHMuG@k[?o@@wv@EyDQiEWwEi@uFw@uFm@cDwA{G{AwFaBwDaB_EeDcHcHyNsGgNuCuHuAcGsAwIyBuP_AiIcG{h@cDcR}@gFu@uDgCmKaMq[yGgNoKoQ}h@_y@aUq[wFsGuEeFeJ}HmBgByA}AgDoEqBqC_CsDgCiEyAkDiAcD}AqFcCoIoO}m@_GmUiDwNcCeKcAeF{AcH}Sou@{EmPq@}BqFgRqFqLsIq\\oJm`@gC_LuBgLqC_QqCeU_CyXwA}Yg@_U@uT^gWdAoVl@uJv@uJ`AiJdAmJdDwUbEeThCaLzCqLrFiQrEgMxEyKbLsVtOoZhOkYtW{c@v[ef@p]gd@vhC{xCnz@mbAjFkFllAouAxsAi~AzkA}eAxGyF|C?dMwIhMwHbHsDrB_AvA]rB_@dCB|Br@dBjAbAhAv@lAn@~Aj@lB\\lBVtBH|AArBOhCe@nCk@pBaA~Bq@jAcAfAoAx@}Ad@_BRoA@oAE{AQwAW{@g@yA}@mBmB}BwCyCoEqByDyGyOyCqJmCkJaB{GmA_GyDoVe@sJsPsgAqFe^iDuReBaJiDiOsCwKaEmM}EoOiHoQyCgHsIcQoLgSaJeNoJoMoLwNiCcDcVyXkPcQit@}t@oZe\\sOaRkLcNqMcRaL_RcLwSyIqQsIgTeIiW_GaS{DiPeEsSkDgTqCkScRksAyPclAuSiyA}kAwoImxBohOwJyt@{P{iAgRwnAkFi]HyLoRssA_DyTeCyU_CkX{AoV}@{Uo@_^QiZIaLEgFDm`@SeTiByKSwVs@kTyAcXwBgVqD{Y}DkWoH}a@wHo^oNmq@gGe[gF}[aD_V_E_`@oCo`@{Am\\s@}Z_@o\\Hy[LeN^qVt@_VfAqVrA_StAuQ~AqQhFmf@rC{ThDkVnFa]`Lsm@xJaf@rRmz@vMoi@vS_x@bc@_bBhLec@|Mme@rN_e@hIeV~IoVfGqOnJgTvJiSfIoO`LyQhLmPrHwJfIiJnLcMhLoKlHkGhHoFnQwLhRgKpOcHbJmD`JwCzOkEdPiDvNyBpNqAjNq@tPGvXf@t]fBb_@jCd_@fBtKVzKFrSO~TaA~R}A|XuDt]iHhUkGhU}Hh[aNjNeH~PkK`RiMxKkIlLqJzNuMnXmYjPiSlS}X|Ry[bHmMhQq^tPe`@jGaPnTop@xGwVlIo^bFqVlJuj@pGgj@nE_f@~Cqd@dDml@lEk_AjGgtAxHmaB`Eq|@hHa|AbMojCzL}jCvFgjAhCmc@xC}^nDk[lDkV|D}R|EoSdG}SjJ_XhI{RjImP`KcQbMuQnNuPhNcNxKgJxKyH`QqJ~N{GnMgExQgFpN{B`JkA~MiAtb@{Arr@iAhm@cAjeAgBteAaBlz@sAvd@s@nnCkE|cDgFreHyKr\\q@jv@oAhk@aA|RUjRYhC~Bb]YbcA[|GT|CZvCh@hDhAjDvAbDtBvCvBvBpBlClDzB`DvEtHdE~GhCvCpBtBpBzAvBhApBl@bBRdBLvCI~AS|A_@tAc@fAe@jAq@|@w@z@{@`AeAjAeBpAeCv@wBlAoDbAqDdA_FbA}FjNc~@vLiq@zE_VdFcTfHoZtDsR`A}EbFwY|CeUvByPhCoVzCs\\lByYx@cEtGmrAfKcuBdHetArAo\\f@iQZoSf@sWPs[Iwc@i@ye@uAmf@iCsi@uBk]_CiZoDo`@aEs^{CoU}CsTsEuYmEqVsDqRmBuJmBeIgEwQoGuVqHkYsG_WuLmb@cSor@oLka@eLka@uGuUcH{UcGgTuF{RoFqSuHwZiKsc@sGu]iFsYmFi_@qGgd@sB{PoAsNsDyf@}Ac`@u@oUi@iW]_]AeVLg`@^eoAZwNRmFLmCXgBlB}AxAaC`A{CzB}A`FyAlY_ApPsEpOuHvM{ElzEgeBx|Aqi@bpAi^tgByf@fBWlh@sKfEe@l@GhA~B~AvAnBf@pBMnBcAvAsBr@aCVsCdF{Cf]mKpC_CbEqA|FaBdnE_nAzQoF|OcF`QeHpP_IfmCavA`[sNzcAi]v|FqpBjMyD`IoBbMeBrRAhNJ|UbCdHhCvBfAj@|ClA~BbBtAfBb@jBIbBu@tA{A~@_C`@sCB{Ce@kDiAoCTmXll@wcD~p@ozDH_@lMas@bq@yxDrdCybJ`a@{}AtYwrBdTkuAjUw{Ap]}{B|Co[~JohBxLw`ClQ{|Cd@}GngAuoLdIqm@fByLfDuNtBqGbCyFxBeEfMuS`CuElBaF~@aDr@gDb@aDRgCNcCHiBLkAR}A^yA`A}CnA}@`AaAbAyAp@yAdAaD`@aCPaD@cCIsBY_Cg@_Cs@_C}@eBmAgBoAaAmA}Dg@kCOeBE_CHwB`@aCl@}BqBoDYo@m@qAy@cBeAuAgA}@}BaBZaBh@uFFy@~ByW`AZ`^nKrRzFrKs|@mSiFkM{CuFiBgD{HqAyNn@{Et@iCt@sB|@}Ap@aApAsAbIkHzBuCdA_B`AmB`AuB|@sCj@qCXoCTeDLsDnCs~@rAu^EmBQqAY}Ag@qAsBmE_@eA[kAQmB?uBb@iIj@iI\\iCj@gCpAiE~@mEj@kDb@}EZiGFqEEgEMeDUcD_AeHaA}E{AcFsBaFqDiG}BgCeDwCmFeEkJmByEEmAAsFr@sGzB{ExD}JpKyMuXo@qFmAgHaBaHgBeGcC{FsD{Hk@{@{BkDcAoA{@eAqCeCiEuDyCeBcDeB}CiAiEaAuCo@sDYqCKqCC_DBiCZ{Dh@}Cz@kDnAiCtAqAn@_ANkAEeAY_l@ePSGwBu@kCiA}AkAcBkDwBuF_CkFcDuFsDaGqEkFgFaFeGiDwFkC_IkBuG_AiIUeCIwBkA}Gj@mF~AoFjBsKtHcE`CuFtE_G~EcArA"
+   }
+  ],
+  "summary": {
+   "has_time_restrictions": false,
+   "has_toll": true,
+   "has_highway": true,
+   "has_ferry": false,
+   "min_lat": 45.71606,
+   "min_lon": 4.85783,
+   "max_lat": 45.796901,
+   "max_lon": 5.081563,
+   "time": 3022.528,
+   "length": 29.347,
+   "cost": 4572.681
+  },
+  "status_message": "Found route between points",
+  "status": 0,
+  "units": "kilometers",
+  "language": "fr-FR"
+ }
+}

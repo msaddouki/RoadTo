@@ -76,6 +76,17 @@ ReplayReport replayTrace(TripRoute route, List<TracePoint> trace, {GuidanceEngin
       } else if (m != null && m > 0 && text == (route.maneuvers[m].verbalPre ?? route.maneuvers[m].instruction)) {
         preAt.putIfAbsent(m, () => state.distanceToNextM);
       }
+      // A multi-cue announcement ("Turn right. Then take the exit") also
+      // announces the maneuver right after the one it is about: the departure
+      // (said before the car reaches maneuver 1) or the next maneuver [m].
+      for (final k in [?m, if (m != null) m - 1]) {
+        final said = route.maneuvers[k];
+        if (k + 1 > last || !said.verbalMultiCue || text != (said.verbalPre ?? said.instruction)) continue;
+        if (!route.maneuvers[k + 1].isArrival) {
+          preAt.putIfAbsent(k + 1, () => route.maneuverStartM(k + 1) - state.projection.alongM);
+        }
+        break;
+      }
     }
     if (state.offRoute && !wasOff) offRouteAt.add(i);
     wasOff = state.offRoute;
