@@ -12,7 +12,9 @@ dependencies:
   roadto_core:
     path: ../packages/roadto_core
   maplibre_gl: ^0.27.1
-  geolocator: ^14.1.1
+  # Apple implementation only: geolocator_android would add Google Play
+  # Services; Android uses its LocationManager (DeviceLocation.kt).
+  geolocator_apple: ^2.3.14
   flutter_tts: ^4.2.5
   flutter_secure_storage: ^11.2.0
   shared_preferences: ^2.5.6

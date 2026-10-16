@@ -37,10 +37,15 @@ New requirement: target Android and iOS from the start.
   plugin (FFI or MethodChannel): to be measured in spike B.
 - Rust remains possible later for a specific piece (crypto, Valhalla) through
   `flutter_rust_bridge`, if a measurement justifies it.
-- Known debt: `geolocator` ships `play-services-location` on Android. The app
-  forces the platform LocationManager (no call to Google services at run
-  time), but CI flags it. To be replaced in J2 by a small LocationManager /
-  CoreLocation plugin.
+- Location without Google: on Android the app reads Android's
+  LocationManager through its own channel (`DeviceLocation.kt`, GPS with
+  network as a stopgap), because `geolocator_android` ships
+  `play-services-location`. iOS keeps geolocator's Apple implementation
+  (Core Location) only. maplibre_gl also declares Play Services for an
+  optional location engine of its own; the app excludes them in Gradle and
+  never enables MapLibre's location component, which is the only user of
+  that engine. CI fails the build if any `com.google.android.gms` library
+  comes back (`tool/check_no_trackers.sh`).
 
 ## Alternatives considered
 
