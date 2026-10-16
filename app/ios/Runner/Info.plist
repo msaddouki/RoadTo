@@ -68,6 +68,13 @@
 	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>RoadTo utilise votre position pour vous guider et vous montrer les alertes sur votre route. Elle ne quitte pas votre téléphone, sauf la maille d’environ 150 m d’un signalement que vous envoyez.</string>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<!-- While navigating only (lib/state/app_controller.dart): guidance, voice and the Live Activity go on with the screen locked. -->
+		<string>location</string>
+	</array>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Pendant les tests, RoadTo se connecte au relais de développement de votre réseau local.</string>
 	<key>NSAppTransportSecurity</key>

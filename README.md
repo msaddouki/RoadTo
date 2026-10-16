@@ -50,6 +50,9 @@ once a region is downloaded.
 - **Android Auto** (first version, to test on the desktop head unit): the
   car screen shows the phone's guidance on its own map, with a one-tap report
   grid and "Still there?" as a car alert. See [docs/android-auto.md](docs/android-auto.md).
+- **iPhone lock screen and Dynamic Island** (iOS 16.2 and later): the next
+  maneuver, arrival time and the alert ahead while navigating, updated by the
+  phone itself, without a push server. See [docs/ios-live-activity.md](docs/ios-live-activity.md).
 - **Error reports stay on the phone** (Réglages > Rapports d’erreur), with
   positions, keys and network addresses removed. Nothing is sent: the user
   can read a report and share it, as a file or by copying it, if they want.

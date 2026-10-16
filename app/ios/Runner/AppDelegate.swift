@@ -4,6 +4,7 @@ import UIKit
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
   private var filesChannel: FlutterMethodChannel?
+  private var liveActivityChannel: FlutterMethodChannel?
 
   override func application(
     _ application: UIApplication,
@@ -18,6 +19,11 @@ import UIKit
       let channel = FlutterMethodChannel(name: "org.roadto/files", binaryMessenger: registrar.messenger())
       channel.setMethodCallHandler(AppDelegate.handleFiles)
       filesChannel = channel
+    }
+    if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "RoadToLiveActivity") {
+      let channel = FlutterMethodChannel(name: "org.roadto/live_activity", binaryMessenger: registrar.messenger())
+      channel.setMethodCallHandler(GuidanceActivity.handle)
+      liveActivityChannel = channel
     }
   }
 
