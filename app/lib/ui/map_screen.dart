@@ -131,6 +131,17 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> _syncMap() async {
     final map = _map;
     if (map == null || !_styleReady || _mapKey != _currentMapKey) return;
+    try {
+      await _writeMap(map);
+    } on Exception {
+      // The map was replaced (new style or region) while this sync was still
+      // writing to it: its native side is gone. The new map syncs once its
+      // style is loaded.
+      if (identical(map, _map) && _mapKey == _currentMapKey) rethrow;
+    }
+  }
+
+  Future<void> _writeMap(MapLibreMapController map) async {
     final g = app.guidance;
     final routeKey = '${identityHashCode(app.route)}:${((g?.projection.alongM ?? 0) / 25).floor()}';
     if (routeKey != _lastRouteKey) {
