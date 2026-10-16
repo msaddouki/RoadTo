@@ -47,6 +47,12 @@ abstract final class Defaults {
   /// Photon (Komoot) : géocodage OSM.
   static const geocoderUrl = 'https://photon.komoot.io/';
 
+  /// Fuel prices and charging points of a region (official open data),
+  /// rebuilt every 3 hours by the Stations workflow and signed with the
+  /// region key. The whole file of the region is downloaded.
+  static String stationsUrl(String regionId) =>
+      'https://github.com/msaddouki/RoadTo/releases/download/stations-$regionId/stations.json.gz';
+
   /// Relais de dev lancé sur le poste (relay/dev_relay). L'émulateur Android
   /// voit le poste en 10.0.2.2, le simulateur iOS en 127.0.0.1. Sur un vrai
   /// téléphone, mettre l'adresse IP du poste dans les réglages.

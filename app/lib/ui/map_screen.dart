@@ -194,6 +194,8 @@ class _MapScreenState extends State<MapScreen> {
           from: app.position,
           searchCategory: app.searchCategory,
           favorites: app.favorites,
+          fuel: app.settings.fuel,
+          onFuelChanged: (f) => app.updateSettings(app.settings.copyWith(fuel: f)),
         ),
       ),
     );

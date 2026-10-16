@@ -74,10 +74,16 @@ class AppController extends ChangeNotifier {
   InstallProgress? installProgress;
   String? regionError;
 
+  // Fuel prices and charging points of the active region, refreshed in the
+  // background while the app runs.
+  final StationsStore stationsStore;
+  Stations? stations;
+  DateTime _stationsTriedAt = DateTime.fromMillisecondsSinceEpoch(0);
+
   /// Errors kept on the phone (Réglages > Rapports d'erreur).
   CrashReports? crashReports;
 
-  AppController._(this.settings, this.identity, this._identityStore, this.regionStore);
+  AppController._(this.settings, this.identity, this._identityStore, this.regionStore, this.stationsStore);
 
   static Future<AppController> create({CrashReports? crashReports}) async {
     final store = IdentityStore();
@@ -90,7 +96,8 @@ class AppController extends ChangeNotifier {
       wantedKinds: {'map', 'places', 'style', if (DeviceRouting.supported) ...DeviceRouting.kinds},
     );
     final favorites = await Favorites.load();
-    return AppController._(settings, identity.keys, store, regions)
+    final stations = StationsStore(Directory('${support.path}/stations'), trustedKeys: Defaults.trustedRegionKeys);
+    return AppController._(settings, identity.keys, store, regions, stations)
       ..hasRecoveryPhrase = identity.hasRecoveryPhrase
       ..favorites = favorites
       ..crashReports = crashReports;
@@ -153,6 +160,7 @@ class AppController extends ChangeNotifier {
     _alertSub = pool.subscribe([alertFilter(const [])], id: 'alerts').listen(_onAlertEvent);
     unawaited(pool.connect());
     _housekeeping = Timer.periodic(const Duration(seconds: 15), (_) {
+      unawaited(_refreshStations());
       alerts.purge();
       _refreshAhead();
       notifyListeners();
@@ -249,8 +257,8 @@ class AppController extends ChangeNotifier {
     final offline = _offlineGeocoder;
     if (offline == null) return null;
     final r = route, g = guidance;
-    if (r != null && g != null) return offline.alongRoute(category, r, g.projection.alongM);
-    return offline.nearby(category, position, radiusM: 10000);
+    if (r != null && g != null) return offline.alongRoute(category, r, g.projection.alongM, stations: stations);
+    return offline.nearby(category, position, radiusM: 10000, stations: stations);
   }
 
   List<LatLon> get _blockedPoints => [
@@ -446,7 +454,38 @@ class AppController extends ChangeNotifier {
         }
       }
     }
+    final changed = active?.id != activeRegion?.id;
     activeRegion = active;
+    if (changed) unawaited(_loadStations());
+  }
+
+  // --- Fuel prices and charging points ------------------------------------
+
+  Future<void> _loadStations() async {
+    final r = activeRegion;
+    stations = r == null ? null : await stationsStore.load(r.id);
+    _stationsTriedAt = DateTime.fromMillisecondsSinceEpoch(0);
+    notifyListeners();
+    await _refreshStations();
+  }
+
+  /// Downloads the region's stations file when the stored one is more than
+  /// 3 hours old, at most every 15 minutes; offline, the stored one stays.
+  Future<void> _refreshStations() async {
+    final r = activeRegion;
+    final now = DateTime.now();
+    if (r == null || now.difference(_stationsTriedAt) < const Duration(minutes: 15)) return;
+    final current = stations;
+    if (current != null && now.difference(current.generated) < const Duration(hours: 3)) return;
+    _stationsTriedAt = now;
+    try {
+      final fresh = await stationsStore.refresh(r.id, Uri.parse(Defaults.stationsUrl(r.id)));
+      if (activeRegion?.id != r.id) return;
+      stations = fresh;
+      notifyListeners();
+    } on Exception {
+      // No network, or not published yet: prices stay as they were.
+    }
   }
 
   /// Installs the regions shipped in the app when missing, or when the app
