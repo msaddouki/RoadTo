@@ -9,7 +9,7 @@ import pytest
 
 import tarfile
 
-from roadto_pipeline import bundle, manifest, places, routing, signing, style
+from roadto_pipeline import bundle, manifest, night, places, routing, signing, style
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -139,6 +139,80 @@ def test_style_is_rewritten_for_offline_use():
     ]
     # The source style is left untouched.
     assert src["sources"]["openmaptiles"]["url"] == "https://tiles.example.org/planet"
+
+
+def _lightness(color: str) -> float:
+    import colorsys
+    r, g, b, _ = night.parse_color(color)
+    return colorsys.rgb_to_hls(r, g, b)[1]
+
+
+def test_colour_forms_are_parsed():
+    assert night.parse_color("#fff") == (1.0, 1.0, 1.0, 1.0)
+    assert night.parse_color("#00000080")[3] == pytest.approx(0.5, abs=0.01)
+    assert night.parse_color("rgba(255, 0, 0, 0.5)") == (1.0, 0.0, 0.0, 0.5)
+    r, g, b, _ = night.parse_color("hsl(120, 100%, 50%)")
+    assert (r, g, b) == pytest.approx((0, 1, 0))
+    assert night.parse_color("motorway") is None
+    assert night.parse_color("#zzz") is None
+
+
+def test_night_colours_invert_lightness_and_keep_hue():
+    import colorsys
+    assert _lightness(night.night_color("#ffffff")) < 0.1        # light ground -> dark
+    assert _lightness(night.night_color("#222222")) > 0.7        # dark labels -> light
+    water_day, water_night = night.parse_color("#a0c8f0"), night.parse_color(night.night_color("#a0c8f0"))
+    hue = lambda c: colorsys.rgb_to_hls(*c[:3])[0]  # noqa: E731
+    assert hue(water_night) == pytest.approx(hue(water_day), abs=0.02)
+    assert night.night_color("rgba(0,0,0,0.3)").endswith(",0.3)")  # alpha kept
+
+
+def test_night_roads_stay_lighter_than_the_ground_in_order():
+    ground = _lightness(night.night_color("#f8f4f0"))
+    fill = _lightness(night.night_color("#ffffff", road=True))
+    casing = _lightness(night.night_color("#cfcdca", road=True))
+    assert ground < casing < fill < 0.5
+
+
+def test_night_style_converts_colours_in_expressions_only():
+    day = {
+        "name": "liberty",
+        "layers": [
+            {"id": "bg", "type": "background", "paint": {"background-color": "#f8f4f0"}},
+            {
+                "id": "road", "type": "line", "source": "openmaptiles", "source-layer": "transportation",
+                "filter": ["==", ["get", "class"], "motorway"],
+                "paint": {
+                    "line-color": ["match", ["get", "class"], "motorway", "#fc8", "#ffffff"],
+                    "line-width": ["interpolate", ["linear"], ["zoom"], 5, 1, 18, 20],
+                },
+            },
+            {"id": "label", "type": "symbol", "paint": {"text-color": "#333", "text-halo-color": "#fff"}},
+        ],
+    }
+    out = night.night_style(day)
+    assert day["layers"][0]["paint"]["background-color"] == "#f8f4f0"  # input untouched
+    road = out["layers"][1]
+    assert road["filter"] == day["layers"][1]["filter"]
+    assert road["paint"]["line-width"] == day["layers"][1]["paint"]["line-width"]
+    match = road["paint"]["line-color"]
+    assert match[:4] == ["match", ["get", "class"], "motorway", match[3]] and match[3].startswith("rgb(")
+    label = out["layers"][2]["paint"]
+    assert _lightness(label["text-color"]) > _lightness(label["text-halo-color"])
+    assert out["name"] == "liberty (night)"
+
+
+def test_night_patterns_and_haloless_labels():
+    day = {"layers": [
+        {"id": "pedestrian", "type": "fill", "source-layer": "transportation", "paint": {"fill-pattern": "pedestrian_polygon"}},
+        {"id": "wetland", "type": "fill", "source-layer": "landcover", "paint": {"fill-pattern": "wetland", "fill-opacity": 0.8}},
+        {"id": "road-name", "type": "symbol", "paint": {"text-color": "#666"}},
+    ]}
+    pedestrian, wetland, name = (layer["paint"] for layer in night.night_style(day)["layers"])
+    assert "fill-pattern" not in pedestrian and pedestrian["fill-color"].startswith("rgb(")
+    assert wetland["fill-pattern"] == "wetland" and wetland["fill-opacity"] == pytest.approx(0.24)
+    assert _lightness(name["text-color"]) > 0.6
+    assert name["text-halo-color"].startswith("rgba(") and name["text-halo-width"] == 1
 
 
 def test_glyph_ranges_are_limited_to_latin_scripts():

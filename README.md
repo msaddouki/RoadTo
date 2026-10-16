@@ -14,18 +14,27 @@ once a region is downloaded.
 - MapLibre map, night theme. **Offline** with a downloaded region package
   (PMTiles + bundled style, sprites and fonts); online OpenFreeMap tiles
   otherwise.
+- **Night map**, from sunset to sunrise where you are (computed offline),
+  generated from the day style by the region pipeline.
 - Address and place search, **offline** in the installed region (SQLite
   FTS5, accent-insensitive), online (Photon) as a fallback. Long-press on the
   map to pick a destination.
 - **Search by category** (fuel, charging, parking, rest areas, toilets,
   food), offline: nearest around you, or next ones ahead on the route with
   the distance to them and how far they are from the road.
+- **Favourites** (Maison, Travail…) stored on the phone only: star a search
+  result, or long-press the map; they are listed before you type.
 - Route from Valhalla, turn-by-turn guidance with French voice prompts,
   arrival time, rerouting when off route. **Offline on Android** with the
   region's graph (valhalla-mobile); online on iOS and outside the region.
 - **Speed limits** from OSM on the navigation screen, red when over the
   limit (5 km/h margin, 5 % above 100 km/h); from the region's graph on
   Android, from the routing server otherwise.
+- **Navigation screen of the mockup**: next maneuver with the one after it
+  when close ("Puis…"), the alert ahead with how many drivers confirmed it,
+  speed limit and current speed, arrival time, and three large buttons
+  (voice, report, trip options). Set in Atkinson Hyperlegible, a typeface
+  drawn for legibility at a glance (SIL OFL, bundled).
 - **Simulated driving** on by default: the trip is replayed along the route,
   so everything can be tested without driving.
 - **One-gesture reporting**: six large tiles, 5 s to cancel. The police

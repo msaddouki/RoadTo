@@ -79,7 +79,10 @@ class WritePolicyPlugin {
     } catch (_) {
       return {'id': id, 'action': 'reject', 'msg': 'invalid: malformed event'};
     }
-    final refusal = checkWritePolicy(event, now: t, policeAllowed: policeAllowed);
+    // strfry has already checked the id and the signature (C++) before
+    // asking the plugin; checking again in Dart (~17 ms) made the plugin the
+    // relay's bottleneck under load.
+    final refusal = checkWritePolicy(event, now: t, policeAllowed: policeAllowed, verifySignature: false);
     return refusal == null ? {'id': id, 'action': 'accept'} : {'id': id, 'action': 'reject', 'msg': refusal};
   }
 

@@ -10,6 +10,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import '../config.dart';
 import '../services/device_routing.dart';
 import '../services/embedded_region.dart';
+import '../services/favorites.dart';
 import '../services/identity_store.dart';
 import '../services/location_source.dart';
 import '../services/settings_store.dart';
@@ -35,6 +36,9 @@ class AppController extends ChangeNotifier {
   LocationAvailability? locationStatus;
 
   Place? destination;
+
+  /// Saved places (Maison, Travail…), on the phone only.
+  late final Favorites favorites;
   TripRoute? route;
   GuidanceEngine? _guidance;
   GuidanceState? guidance;
@@ -81,7 +85,10 @@ class AppController extends ChangeNotifier {
       trustedKeys: Defaults.trustedRegionKeys,
       wantedKinds: {'map', 'places', 'style', if (DeviceRouting.supported) ...DeviceRouting.kinds},
     );
-    return AppController._(settings, identity.keys, store, regions)..hasRecoveryPhrase = identity.hasRecoveryPhrase;
+    final favorites = await Favorites.load();
+    return AppController._(settings, identity.keys, store, regions)
+      ..hasRecoveryPhrase = identity.hasRecoveryPhrase
+      ..favorites = favorites;
   }
 
   bool get navigating => route != null;
@@ -110,8 +117,17 @@ class AppController extends ChangeNotifier {
   /// Style to display: the installed region's offline map when there is one.
   String get mapStyle {
     final r = activeRegion;
-    return r != null && settings.offlineMap ? r.stylePath : settings.mapStyle;
+    if (r == null || !settings.offlineMap) return settings.mapStyle;
+    return nightMap && r.hasNightStyle ? r.nightStylePath : r.stylePath;
   }
+
+  /// Night colours for the map: by the sun where the car is (auto), or as
+  /// set. Re-read on every refresh, so the map switches at sunset.
+  bool get nightMap => switch (settings.nightMap) {
+    NightMap.always => true,
+    NightMap.never => false,
+    NightMap.auto => isNight(position, DateTime.now()),
+  };
 
   bool get usingOfflineMap => activeRegion != null && settings.offlineMap;
 

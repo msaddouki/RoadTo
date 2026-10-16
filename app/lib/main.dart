@@ -1,10 +1,15 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'state/app_controller.dart';
 import 'ui/map_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  LicenseRegistry.addLicense(() async* {
+    yield LicenseEntryWithLineBreaks(['Atkinson Hyperlegible'], await rootBundle.loadString('assets/fonts/OFL.txt'));
+  });
   final app = await AppController.create();
   runApp(RoadToApp(app: app));
   await app.start();
@@ -22,7 +27,7 @@ class RoadToApp extends StatelessWidget {
     return MaterialApp(
       title: 'RoadTo',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(colorScheme: scheme, useMaterial3: true),
+      theme: ThemeData(colorScheme: scheme, useMaterial3: true, fontFamily: 'Atkinson Hyperlegible Next'),
       home: MapScreen(app: app),
     );
   }
