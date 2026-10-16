@@ -59,10 +59,10 @@ flutter {
 dependencies {
     // Offline routing on the region's Valhalla graph (MIT). Bundles Valhalla
     // 3.9.0, matching the graphs built by pipeline/ (Valhalla 3.9.x).
-    implementation("io.github.rallista:valhalla-mobile:0.6.1")
-    implementation("io.github.rallista:valhalla-models:0.5.2")
-    implementation("io.github.rallista:valhalla-models-config:0.5.2")
+    implementation("io.github.rallista:valhalla-mobile:0.6.4")
+    implementation("io.github.rallista:valhalla-models:0.6.0")
+    implementation("io.github.rallista:valhalla-models-config:0.6.0")
     // JSON <-> valhalla-mobile models (the library only exposes typed routes).
     // Same version as the library's own runtime dependency.
-    implementation("com.squareup.moshi:moshi-kotlin:1.15.1")
+    implementation("com.squareup.moshi:moshi-kotlin:1.15.2")
 }
