@@ -327,9 +327,17 @@ class NavigationSheet extends StatelessWidget {
                   const Text('arrivée', style: TextStyle(fontSize: 14, color: NavColors.muted)),
                 ],
                 const Spacer(),
-                Text(
-                  remaining(state.remaining, state.remainingM),
-                  style: const TextStyle(fontFamily: _mono, fontSize: 18, color: NavColors.figures),
+                // Shrinks rather than overflows on narrow phones (320 dp: the
+                // sheet leaves 276 px, short of "1 h 05 · 12,3 km" at full size).
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      remaining(state.remaining, state.remainingM),
+                      style: const TextStyle(fontFamily: _mono, fontSize: 18, color: NavColors.figures),
+                    ),
+                  ),
                 ),
               ],
             ),
