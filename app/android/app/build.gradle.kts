@@ -28,6 +28,12 @@ android {
         versionName = flutter.versionName
     }
 
+    // The car library checks that icons exist: the Robolectric tests of the
+    // car screens need the app's resources.
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+    }
+
     buildTypes {
         release {
             // POC : signé avec la clé de debug. Les clés de release iront dans
@@ -52,6 +58,12 @@ configurations.all {
     exclude(group = "com.google.android.gms")
 }
 
+// With resources, the unit tests package the merged assets, which the
+// Flutter plugin also writes (copyFlutterAssetsDebug): order the two.
+tasks.matching { it.name == "packageDebugUnitTestForUnitTest" }.configureEach {
+    mustRunAfter(tasks.matching { it.name == "copyFlutterAssetsDebug" })
+}
+
 flutter {
     source = "../.."
 }
@@ -65,4 +77,15 @@ dependencies {
     // JSON <-> valhalla-mobile models (the library only exposes typed routes).
     // Same version as the library's own runtime dependency.
     implementation("com.squareup.moshi:moshi-kotlin:1.15.2")
+    // Android Auto (car/): templates, and the map drawn on the car screen
+    // with the same MapLibre build as maplibre_gl (OpenGL variant).
+    implementation("androidx.car.app:app:1.7.0")
+    implementation("androidx.car.app:app-projected:1.7.0")
+    implementation("org.maplibre.gl:android-sdk-opengl:13.5.0")
+
+    // Car screens tested on the JVM (Robolectric), without a head unit.
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.robolectric:robolectric:4.16")
+    testImplementation("androidx.car.app:app-testing:1.7.0")
+    testImplementation("androidx.test:core:1.7.0")
 }

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'services/car_link.dart';
 import 'services/crash_reports.dart';
 import 'state/app_controller.dart';
 import 'ui/map_screen.dart';
@@ -27,6 +28,8 @@ Future<void> main() async {
   final app = await AppController.create(crashReports: crashes);
   runApp(RoadToApp(app: app));
   await app.start();
+  // Android Auto shows this guidance on the car screen.
+  CarLink.forApp(app).start();
 }
 
 class RoadToApp extends StatelessWidget {

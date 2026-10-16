@@ -47,6 +47,9 @@ once a region is downloaded.
   **recovery phrase** (BIP-39, NIP-06) to restore it on another phone, or a
   **password-encrypted backup** file (NIP-49, `ncryptsec`); a throwaway key
   per trip signs the alerts.
+- **Android Auto** (first version, to test on the desktop head unit): the
+  car screen shows the phone's guidance on its own map, with a one-tap report
+  grid and "Still there?" as a car alert. See [docs/android-auto.md](docs/android-auto.md).
 - **Error reports stay on the phone** (Réglages > Rapports d’erreur), with
   positions, keys and network addresses removed. Nothing is sent: the user
   can read a report and share it, as a file or by copying it, if they want.
