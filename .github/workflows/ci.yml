@@ -9,9 +9,12 @@ on:
 permissions:
   contents: read
 
+# A new push to a PR cancels its previous run. Every commit on master keeps
+# its own run, so a merge that breaks something shows up even when several
+# PRs are merged in a row.
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  group: ci-${{ github.ref }}-${{ github.event_name == 'pull_request' && 'pr' || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   FLUTTER_VERSION: "3.47.7"
