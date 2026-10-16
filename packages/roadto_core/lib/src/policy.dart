@@ -8,12 +8,22 @@ import 'nostr/event.dart';
 ///
 /// Renvoie null si l'événement est accepté, sinon la raison du refus, préfixée
 /// comme le veut NIP-01 (« invalid: », « pow: », « blocked: »).
-String? checkWritePolicy(NostrEvent e, {DateTime? now, bool policeAllowed = FeatureFlags.policeAlerts}) {
+///
+/// [verifySignature]: false only where the id and the signature were already
+/// checked. strfry checks both, in C++, before calling its write-policy
+/// plugin; a Schnorr check in Dart costs about 17 ms, which capped the
+/// plugin (sequential) at a few dozen events a second.
+String? checkWritePolicy(
+  NostrEvent e, {
+  DateTime? now,
+  bool policeAllowed = FeatureFlags.policeAlerts,
+  bool verifySignature = true,
+}) {
   final t = now ?? DateTime.now();
   final nowS = t.millisecondsSinceEpoch ~/ 1000;
 
   if (!RoadToKinds.all.contains(e.kind)) return 'blocked: kind ${e.kind} non accepté';
-  if (!e.verify()) return 'invalid: identifiant ou signature';
+  if (verifySignature && !e.verify()) return 'invalid: identifiant ou signature';
   if (e.createdAt > nowS + 300) return 'invalid: date dans le futur';
   if (e.powBits < PowPolicy.forKind(e.kind)) {
     return 'pow: ${PowPolicy.forKind(e.kind)} bits requis';

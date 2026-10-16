@@ -11,6 +11,7 @@ import '../config.dart';
 import '../services/crash_reports.dart';
 import '../services/device_routing.dart';
 import '../services/embedded_region.dart';
+import '../services/favorites.dart';
 import '../services/identity_store.dart';
 import '../services/location_source.dart';
 import '../services/settings_store.dart';
@@ -36,6 +37,9 @@ class AppController extends ChangeNotifier {
   LocationAvailability? locationStatus;
 
   Place? destination;
+
+  /// Saved places (Maison, Travail…), on the phone only.
+  late final Favorites favorites;
   TripRoute? route;
   GuidanceEngine? _guidance;
   GuidanceState? guidance;
@@ -85,9 +89,10 @@ class AppController extends ChangeNotifier {
       trustedKeys: Defaults.trustedRegionKeys,
       wantedKinds: {'map', 'places', 'style', if (DeviceRouting.supported) ...DeviceRouting.kinds},
     );
+    final favorites = await Favorites.load();
     return AppController._(settings, identity.keys, store, regions)
       ..hasRecoveryPhrase = identity.hasRecoveryPhrase
-      ..crashReports = crashReports;
+      ..favorites = favorites;
   }
 
   bool get navigating => route != null;

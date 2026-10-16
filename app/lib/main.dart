@@ -1,8 +1,6 @@
-import 'dart:io';
-import 'dart:ui' show PlatformDispatcher;
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:flutter/services.dart';
 
 import 'services/crash_reports.dart';
 import 'state/app_controller.dart';
@@ -10,17 +8,10 @@ import 'ui/map_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Errors are kept on the phone, scrubbed; nothing is sent (plan J7).
-  final crashes = CrashReports(Directory('${(await getApplicationSupportDirectory()).path}/crashes'));
-  FlutterError.onError = (details) {
-    FlutterError.presentError(details);
-    crashes.record(details.exception, details.stack, context: details.context?.toDescription());
-  };
-  PlatformDispatcher.instance.onError = (error, stack) {
-    crashes.record(error, stack);
-    return false;
-  };
-  final app = await AppController.create(crashReports: crashes);
+  LicenseRegistry.addLicense(() async* {
+    yield LicenseEntryWithLineBreaks(['Atkinson Hyperlegible'], await rootBundle.loadString('assets/fonts/OFL.txt'));
+  });
+  final app = await AppController.create();
   runApp(RoadToApp(app: app));
   await app.start();
 }
@@ -37,7 +28,7 @@ class RoadToApp extends StatelessWidget {
     return MaterialApp(
       title: 'RoadTo',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(colorScheme: scheme, useMaterial3: true),
+      theme: ThemeData(colorScheme: scheme, useMaterial3: true, fontFamily: 'Atkinson Hyperlegible Next'),
       home: MapScreen(app: app),
     );
   }

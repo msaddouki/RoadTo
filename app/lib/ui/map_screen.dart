@@ -5,7 +5,9 @@ import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:roadto_core/roadto_core.dart';
 
 import '../state/app_controller.dart';
+import 'favorite_name_dialog.dart';
 import 'map_layers.dart';
+import 'navigation_panels.dart';
 import 'report_sheet.dart';
 import 'search_screen.dart';
 import 'settings_screen.dart';
@@ -170,7 +172,12 @@ class _MapScreenState extends State<MapScreen> {
   Future<void> _openSearch() async {
     final place = await Navigator.of(context).push<Place>(
       MaterialPageRoute(
-        builder: (_) => SearchScreen(search: app.search, from: app.position, searchCategory: app.searchCategory),
+        builder: (_) => SearchScreen(
+          search: app.search,
+          from: app.position,
+          searchCategory: app.searchCategory,
+          favorites: app.favorites,
+        ),
       ),
     );
     if (place != null) {
@@ -180,7 +187,9 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> _onLongPress(LatLng at) async {
-    final go = await showModalBottomSheet<bool>(
+    final point = LatLon(at.latitude, at.longitude);
+    final favorite = app.favorites.find(point);
+    final choice = await showModalBottomSheet<String>(
       context: context,
       showDragHandle: true,
       builder: (c) => SafeArea(
@@ -189,7 +198,7 @@ class _MapScreenState extends State<MapScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('${at.latitude.toStringAsFixed(5)}, ${at.longitude.toStringAsFixed(5)}'),
+              Text(favorite?.name ?? '${at.latitude.toStringAsFixed(5)}, ${at.longitude.toStringAsFixed(5)}'),
               const SizedBox(height: 12),
               SizedBox(
                 width: double.infinity,
@@ -197,17 +206,35 @@ class _MapScreenState extends State<MapScreen> {
                 child: FilledButton.icon(
                   icon: const Icon(Icons.directions),
                   label: const Text('Y aller'),
-                  onPressed: () => Navigator.pop(c, true),
+                  onPressed: () => Navigator.pop(c, 'go'),
                 ),
               ),
+              if (favorite == null) ...[
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: OutlinedButton.icon(
+                    icon: const Icon(Icons.star_border),
+                    label: const Text('Ajouter aux favoris'),
+                    onPressed: () => Navigator.pop(c, 'favorite'),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
       ),
     );
-    if (go ?? false) {
+    if (!mounted) return;
+    if (choice == 'go') {
       setState(() => _follow = true);
-      await app.navigateTo(Place(name: 'Point choisi', position: LatLon(at.latitude, at.longitude)));
+      await app.navigateTo(favorite ?? Place(name: 'Point choisi', position: point));
+    } else if (choice == 'favorite') {
+      final name = await askFavoriteName(context);
+      if (name == null) return;
+      await app.favorites.add(Place(name: name, position: point));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('« $name » ajouté aux favoris')));
     }
   }
 
@@ -222,11 +249,42 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 
+  Future<void> _openTripOptions() async {
+    final stop = await showModalBottomSheet<bool>(
+      context: context,
+      showDragHandle: true,
+      builder: (c) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              minTileHeight: 64,
+              leading: const Icon(Icons.close),
+              title: const Text('Arrêter le guidage'),
+              onTap: () => Navigator.pop(c, true),
+            ),
+            ListTile(
+              minTileHeight: 64,
+              leading: const Icon(Icons.settings),
+              title: const Text('Réglages'),
+              onTap: () {
+                Navigator.pop(c, false);
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) => SettingsScreen(app: app)));
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+    if (stop ?? false) app.stopNavigation();
+  }
+
   // --- Interface --------------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
     final g = app.guidance;
+    final navigating = app.navigating && g != null;
     return Scaffold(
       body: Stack(
         children: [
@@ -248,129 +306,105 @@ class _MapScreenState extends State<MapScreen> {
             ),
           ),
           SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (app.navigating && g != null)
-                    _ManeuverBanner(state: g)
-                  else
-                    _SearchBar(
-                      onSearch: _openSearch,
-                      onSettings: () =>
-                          Navigator.of(context).push(MaterialPageRoute(builder: (_) => SettingsScreen(app: app))),
-                      routing: app.routing,
-                      simulate: app.settings.simulate,
-                    ),
-                  if (app.ahead.isNotEmpty) ...[const SizedBox(height: 8), _AlertAheadChip(ahead: app.ahead.first)],
-                  const Spacer(),
-                  if (app.pendingConfirmation != null) ...[
-                    _StillThereCard(alert: app.pendingConfirmation!, onAnswer: app.answerConfirmation),
-                    const SizedBox(height: 12),
-                  ],
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
+            bottom: !navigating,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      if (app.navigating && app.speedLimit?.kph != null) ...[
-                        SpeedLimitSign(kph: app.speedLimit!.kph!, over: app.overSpeed),
-                        const SizedBox(width: 12),
+                      if (navigating)
+                        ManeuverBanner(state: g, then: ManeuverBanner.thenOf(app.route!, g))
+                      else
+                        _SearchBar(
+                          onSearch: _openSearch,
+                          onSettings: () =>
+                              Navigator.of(context).push(MaterialPageRoute(builder: (_) => SettingsScreen(app: app))),
+                          routing: app.routing,
+                          simulate: app.settings.simulate,
+                        ),
+                      if (app.ahead.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: AlertAheadCard(
+                            ahead: app.ahead.first,
+                            confirmations: app.alerts.stillThere(app.ahead.first.alert.id),
+                            now: DateTime.now(),
+                          ),
+                        ),
                       ],
-                      if (!_follow)
-                        FloatingActionButton.small(
-                          heroTag: 'recenter',
-                          tooltip: 'Recentrer',
-                          onPressed: () {
-                            setState(() => _follow = true);
-                            _syncMap();
-                          },
-                          child: const Icon(Icons.my_location),
-                        ),
-                      const Spacer(),
-                      SizedBox(
-                        width: 84,
-                        height: 84,
-                        child: FloatingActionButton(
-                          heroTag: 'report',
-                          tooltip: 'Signaler',
-                          backgroundColor: const Color(0xFFFF9F1C),
-                          foregroundColor: Colors.black,
-                          shape: const CircleBorder(),
-                          onPressed: _openReport,
-                          child: const Icon(Icons.campaign, size: 40),
-                        ),
-                      ),
                     ],
                   ),
-                  if (app.navigating && g != null) ...[
-                    const SizedBox(height: 12),
-                    _TripBar(state: g, onStop: app.stopNavigation),
-                  ],
-                ],
-              ),
+                ),
+                const Spacer(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (app.pendingConfirmation != null) ...[
+                        _StillThereCard(alert: app.pendingConfirmation!, onAnswer: app.answerConfirmation),
+                        const SizedBox(height: 12),
+                      ],
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          if (navigating) ...[
+                            if (app.speedLimit?.kph != null) ...[
+                              SpeedLimitSign(kph: app.speedLimit!.kph!, over: app.overSpeed),
+                              const SizedBox(width: 10),
+                            ],
+                            SpeedReadout(kph: ((app.fix?.speedMps ?? 0) * 3.6).round()),
+                          ],
+                          const Spacer(),
+                          if (!_follow)
+                            FloatingActionButton.small(
+                              heroTag: 'recenter',
+                              tooltip: 'Recentrer',
+                              onPressed: () {
+                                setState(() => _follow = true);
+                                _syncMap();
+                              },
+                              child: const Icon(Icons.my_location),
+                            ),
+                          if (!navigating) ...[
+                            const SizedBox(width: 12),
+                            SizedBox(
+                              width: 84,
+                              height: 84,
+                              child: FloatingActionButton(
+                                heroTag: 'report',
+                                tooltip: 'Signaler',
+                                backgroundColor: NavColors.report,
+                                foregroundColor: NavColors.onReport,
+                                shape: const CircleBorder(),
+                                onPressed: _openReport,
+                                child: const Icon(Icons.campaign, size: 40),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                  ),
+                ),
+                if (navigating)
+                  NavigationSheet(
+                    state: g,
+                    now: DateTime.now(),
+                    voiceOn: app.settings.voice,
+                    onToggleVoice: () => app.updateSettings(app.settings.copyWith(voice: !app.settings.voice)),
+                    onReport: _openReport,
+                    onOptions: _openTripOptions,
+                  ),
+              ],
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-IconData maneuverIcon(Maneuver? m) => switch (m?.type) {
-  null => Icons.straight,
-  1 || 2 || 3 => Icons.navigation,
-  4 || 5 || 6 => Icons.flag,
-  9 || 23 => Icons.turn_slight_right,
-  10 || 18 || 20 => Icons.turn_right,
-  11 => Icons.turn_sharp_right,
-  12 => Icons.u_turn_right,
-  13 => Icons.u_turn_left,
-  14 => Icons.turn_sharp_left,
-  15 || 19 || 21 => Icons.turn_left,
-  16 || 24 => Icons.turn_slight_left,
-  25 => Icons.merge,
-  26 || 27 => Icons.roundabout_right,
-  28 || 29 => Icons.directions_boat,
-  _ => Icons.straight,
-};
-
-class _ManeuverBanner extends StatelessWidget {
-  final GuidanceState state;
-
-  const _ManeuverBanner({required this.state});
-
-  @override
-  Widget build(BuildContext context) {
-    final m = state.nextManeuver;
-    return Material(
-      color: const Color(0xFF0B3D91),
-      borderRadius: BorderRadius.circular(16),
-      elevation: 4,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Icon(maneuverIcon(m), size: 56, color: Colors.white),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    state.offRoute ? 'Hors itinéraire' : formatDistance(state.distanceToNextM),
-                    style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
-                  Text(
-                    m == null ? 'Continuez' : (m.streetNames.isNotEmpty ? m.streetNames.first : m.instruction),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 18, color: Colors.white),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -424,38 +458,6 @@ class _SearchBar extends StatelessWidget {
   }
 }
 
-class _AlertAheadChip extends StatelessWidget {
-  final AlertAhead ahead;
-
-  const _AlertAheadChip({required this.ahead});
-
-  @override
-  Widget build(BuildContext context) {
-    final t = ahead.alert.type;
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Material(
-        color: const Color(0xFF1B1F24),
-        borderRadius: BorderRadius.circular(24),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(alertIcons[t], color: alertColors[t]),
-              const SizedBox(width: 8),
-              Text(
-                '${t.label} dans ${formatDistance(ahead.distanceM)}',
-                style: const TextStyle(fontSize: 16, color: Colors.white),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _StillThereCard extends StatelessWidget {
   final RoadAlert alert;
   final Future<void> Function(bool?) onAnswer;
@@ -504,90 +506,6 @@ class _StillThereCard extends StatelessWidget {
                   ),
                 ),
               ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Round speed limit sign, as on the road; filled red when over the limit.
-class SpeedLimitSign extends StatelessWidget {
-  final int kph;
-  final bool over;
-
-  const SpeedLimitSign({super.key, required this.kph, required this.over});
-
-  @override
-  Widget build(BuildContext context) {
-    const red = Color(0xFFD32F2F);
-    return Semantics(
-      label: 'Limitée à $kph km/h${over ? ', vitesse dépassée' : ''}',
-      excludeSemantics: true,
-      child: Container(
-        width: 68,
-        height: 68,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: over ? red : Colors.white,
-          border: Border.all(color: red, width: 7),
-          boxShadow: const [BoxShadow(blurRadius: 6, color: Colors.black45)],
-        ),
-        child: Text(
-          '$kph',
-          style: TextStyle(
-            fontSize: kph >= 100 ? 22 : 26,
-            fontWeight: FontWeight.w900,
-            color: over ? Colors.white : Colors.black,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _TripBar extends StatelessWidget {
-  final GuidanceState state;
-  final VoidCallback onStop;
-
-  const _TripBar({required this.state, required this.onStop});
-
-  @override
-  Widget build(BuildContext context) {
-    final eta = state.eta(DateTime.now());
-    final hh = eta.hour.toString().padLeft(2, '0'), mm = eta.minute.toString().padLeft(2, '0');
-    return Material(
-      color: Theme.of(context).colorScheme.surfaceContainerHigh,
-      borderRadius: BorderRadius.circular(20),
-      elevation: 3,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 8, 8, 8),
-        child: Row(
-          children: [
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    state.arrived ? 'Arrivé' : '$hh:$mm',
-                    style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    '${state.remaining.inMinutes} min · ${formatDistance(state.remainingM)}',
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(
-              height: 56,
-              child: FilledButton.tonalIcon(
-                onPressed: onStop,
-                icon: const Icon(Icons.close),
-                label: const Text('Arrêter'),
-              ),
             ),
           ],
         ),

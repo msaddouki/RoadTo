@@ -70,7 +70,9 @@ jobs:
           python -m pytest -q relay/strfry
       - name: Start two relays
         working-directory: relay/strfry
-        run: docker compose up -d --build
+        # The load test publishes from a single address: lift the per-client
+        # rate limit (30 a minute in production) for these relays.
+        run: ROADTO_RATE_PER_MINUTE=100000 docker compose up -d --build
       - name: Wait for the relays
         run: |
           for i in $(seq 60); do
@@ -81,6 +83,9 @@ jobs:
       - name: Publish to one relay, read from the other, check refusals
         working-directory: relay/strfry_policy
         run: dart run tool/smoke.dart ws://localhost:7777 ws://localhost:7778
+      - name: Load test, delivery from one relay to the other
+        working-directory: relay/strfry_policy
+        run: dart run tool/load.dart --writer ws://localhost:7777 --reader ws://localhost:7778 --rate 30 --seconds 30 --max-p95 5
       - name: No client address in the relay logs
         working-directory: relay/strfry
         run: |

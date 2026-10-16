@@ -144,6 +144,27 @@ void main() {
       expect(store.visible(now: t), isEmpty);
     });
 
+    test('résumé des « toujours là » : nombre de conducteurs et dernier « oui »', () {
+      final t0 = DateTime.now().toUtc();
+      final store = AlertStore();
+      final e = buildAlertEvent(keys: KeyPair.generate(), type: AlertType.accident, position: bellecour, now: t0);
+      store.ingest(e, now: t0);
+      final alert = store[e.id]!;
+      expect(store.stillThere(alert.id), (count: 0, latest: null));
+      NostrEvent answer(bool yes, int minutes) => buildConfirmationEvent(
+        keys: KeyPair.generate(),
+        alert: alert,
+        stillThere: yes,
+        now: t0.add(Duration(minutes: minutes)),
+      );
+      for (final c in [answer(true, 2), answer(false, 3), answer(true, 5)]) {
+        store.ingest(c, now: t0.add(const Duration(minutes: 6)));
+      }
+      final s = store.stillThere(alert.id);
+      expect(s.count, 2);
+      expect(s.latest!.difference(t0).inSeconds, closeTo(300, 1)); // event times are whole seconds
+    });
+
     test('une personne ne compte qu’une fois, l’auteur pas du tout', () {
       final store = AlertStore();
       final author = KeyPair.generate();
@@ -177,6 +198,14 @@ void main() {
     test('refuse un kind hors liste', () {
       final e = NostrEvent.create(keys: keys, kind: 1, tags: const []);
       expect(checkWritePolicy(e, now: now), startsWith('blocked:'));
+    });
+
+    test('signature : vérifiée sauf si le relais l’a déjà fait', () {
+      final e = buildAlertEvent(keys: KeyPair.generate(), type: AlertType.hazard, position: bellecour, now: now);
+      final json = e.toJson()..['sig'] = '${'0' * 127}1';
+      final forged = NostrEvent.fromJson(json);
+      expect(checkWritePolicy(forged, now: now), 'invalid: identifiant ou signature');
+      expect(checkWritePolicy(forged, now: now, verifySignature: false), isNull);
     });
 
     test('refuse une PoW insuffisante', () {

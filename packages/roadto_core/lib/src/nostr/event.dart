@@ -110,8 +110,14 @@ class NostrEvent {
   int get powBits => leadingZeroBits(id);
 
   /// Vérifie l'identifiant et la signature.
-  bool verify() {
-    if (computeId(pubkey, createdAt, kind, tags, content) != id) return false;
+  bool verify() => hasValidId() && hasValidSignature();
+
+  /// The id matches the content (a SHA-256: cheap).
+  bool hasValidId() => computeId(pubkey, createdAt, kind, tags, content) == id;
+
+  /// The signature matches the id and the key (Schnorr: ~17 ms in Dart, see
+  /// `EventVerifier` to keep it off the UI thread).
+  bool hasValidSignature() {
     try {
       return bip340.verify(pubkey, id, sig);
     } catch (_) {
