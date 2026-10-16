@@ -5,6 +5,7 @@ import 'package:roadto_core/roadto_core.dart';
 
 import '../services/favorites.dart';
 import 'favorite_name_dialog.dart';
+import 'place_sheet.dart';
 
 const _categoryIcons = {
   'fuel': Icons.local_gas_station,
@@ -55,7 +56,7 @@ class _SearchScreenState extends State<SearchScreen> {
   bool _loading = false;
   int _generation = 0;
   late String _fuel = widget.fuel;
-  bool _cheapestFirst = false;
+  _Order _order = _Order.nearest;
 
   @override
   void dispose() {
@@ -110,19 +111,81 @@ class _SearchScreenState extends State<SearchScreen> {
     widget.onFuelChanged?.call(fuel);
   }
 
-  /// Cheapest first for the chosen fuel when asked; stations without its
-  /// price keep their order after them.
+  /// Orders that make sense for these results: by price when some fuel
+  /// station has the chosen fuel's price, by detour when on a route.
+  List<_Order> _orders(List<NearbyPlace> nearby) => [
+    _Order.nearest,
+    if (_category?.id == 'fuel' && nearby.any((n) => n.fuel?.prices[_fuel] != null)) _Order.cheapest,
+    if (nearby.any((n) => n.offRouteM != null)) _Order.leastDetour,
+  ];
+
+  /// Results in the chosen order. Cheapest: stations without the chosen
+  /// fuel's price follow, in their order. The search returns them nearest
+  /// (or first on the route) first.
   List<NearbyPlace> _ordered(List<NearbyPlace> nearby) {
-    if (_category?.id != 'fuel' || !_cheapestFirst) return nearby;
-    final priced = [
-      for (final n in nearby)
-        if (n.fuel?.prices[_fuel] != null) n,
-    ]..sort((a, b) => a.fuel!.prices[_fuel]!.price.compareTo(b.fuel!.prices[_fuel]!.price));
-    return [
-      ...priced,
-      for (final n in nearby)
-        if (n.fuel?.prices[_fuel] == null) n,
-    ];
+    final order = _orders(nearby).contains(_order) ? _order : _Order.nearest;
+    switch (order) {
+      case _Order.nearest:
+        return nearby;
+      case _Order.cheapest:
+        final priced = [
+          for (final n in nearby)
+            if (n.fuel?.prices[_fuel] != null) n,
+        ]..sort((a, b) => a.fuel!.prices[_fuel]!.price.compareTo(b.fuel!.prices[_fuel]!.price));
+        return [
+          ...priced,
+          for (final n in nearby)
+            if (n.fuel?.prices[_fuel] == null) n,
+        ];
+      case _Order.leastDetour:
+        // List.sort is not stable: keep the route order between equal detours.
+        final indexed = [for (var i = 0; i < nearby.length; i++) (i, nearby[i])]
+          ..sort((a, b) {
+            final d = (a.$2.offRouteM ?? double.infinity).compareTo(b.$2.offRouteM ?? double.infinity);
+            return d != 0 ? d : a.$1.compareTo(b.$1);
+          });
+        return [for (final (_, n) in indexed) n];
+    }
+  }
+
+  Widget _orderBar(List<NearbyPlace> nearby) {
+    final orders = _orders(nearby);
+    final onRoute = nearby.any((n) => n.aheadM != null);
+    String label(_Order o) => switch (o) {
+      _Order.nearest => onRoute ? 'Premier sur la route' : 'Plus proche',
+      _Order.cheapest => 'Moins cher',
+      _Order.leastDetour => 'Moins de détour',
+    };
+    return SizedBox(
+      height: 52,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        children: [
+          for (final o in orders)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: ChoiceChip(
+                avatar: const Icon(Icons.sort, size: 18),
+                label: Text(label(o)),
+                selected: (orders.contains(_order) ? _order : _Order.nearest) == o,
+                onSelected: (_) => setState(() => _order = o),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// A result with official data opens its sheet first; the others are
+  /// picked at once.
+  Future<void> _pickNearby(NearbyPlace n) async {
+    if (n.fuel == null && n.charging == null) {
+      Navigator.of(context).pop(n.place);
+      return;
+    }
+    final go = await showPlaceSheet(context, n, distance: _distanceLabel(n), fuel: n.fuel == null ? null : _fuel);
+    if (go && mounted) Navigator.of(context).pop(n.place);
   }
 
   /// Official data of a category result: the price of the chosen fuel, or
@@ -148,12 +211,6 @@ class _SearchScreenState extends State<SearchScreen> {
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         children: [
-          FilterChip(
-            label: const Text('Moins cher d’abord'),
-            selected: _cheapestFirst,
-            onSelected: (v) => setState(() => _cheapestFirst = v),
-          ),
-          const SizedBox(width: 12),
           for (final MapEntry(key: id, value: label) in fuelLabels.entries)
             if (offered.contains(id))
               Padding(
@@ -278,6 +335,7 @@ class _SearchScreenState extends State<SearchScreen> {
             )
           : Column(
               children: [
+                if (showCategory && _orders(nearby).length > 1) _orderBar(nearby),
                 if (showFuelBar) _fuelBar(nearby),
                 Expanded(child: _resultList(category, nearby, showCategory)),
               ],
@@ -313,7 +371,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
                 ],
               ),
-        onTap: () => Navigator.of(context).pop(p),
+        onTap: () => showCategory ? _pickNearby(nearby![i]) : Navigator.of(context).pop(p),
       );
     },
   );
@@ -324,6 +382,8 @@ class _SearchScreenState extends State<SearchScreen> {
     return Text(lines.join('\n'));
   }
 }
+
+enum _Order { nearest, cheapest, leastDetour }
 
 /// "1,789 €".
 String formatPrice(double euros) => '${euros.toStringAsFixed(3).replaceFirst('.', ',')} €';
