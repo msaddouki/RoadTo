@@ -8,3 +8,8 @@
 -keep class com.osrm.api.models.** { *; }
 -keep class kotlin.Metadata { *; }
 -keepattributes RuntimeVisibleAnnotations,RuntimeVisibleParameterAnnotations,Signature,InnerClasses,EnclosingMethod
+
+# Google Play Services are excluded from the build (build.gradle.kts), but
+# maplibre_gl's GMSLocationEngine still references them. That code only runs
+# with myLocationEnabled, which the app never sets.
+-dontwarn com.google.android.gms.**

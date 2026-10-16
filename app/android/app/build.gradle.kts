@@ -43,6 +43,15 @@ kotlin {
     }
 }
 
+// No Google Play Services in the APK: the app runs on phones without them
+// (cross-cutting rule of the plan, checked by tool/check_no_trackers.sh).
+// maplibre_gl declares play-services-location for its own location engine,
+// which only starts with myLocationEnabled; the app never sets it (see
+// lib/ui/map_screen.dart) and draws the position from DeviceLocation.
+configurations.all {
+    exclude(group = "com.google.android.gms")
+}
+
 flutter {
     source = "../.."
 }
