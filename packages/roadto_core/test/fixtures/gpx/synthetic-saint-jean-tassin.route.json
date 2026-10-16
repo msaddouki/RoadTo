@@ -1,0 +1,447 @@
+{
+ "trip": {
+  "locations": [
+   {
+    "type": "break",
+    "lat": 45.76,
+    "lon": 4.827,
+    "original_index": 0
+   },
+   {
+    "type": "break",
+    "lat": 45.76,
+    "lon": 4.78,
+    "side_of_street": "left",
+    "original_index": 1
+   }
+  ],
+  "legs": [
+   {
+    "maneuvers": [
+     {
+      "type": 1,
+      "instruction": "Conduisez vers l'ouest sur Avenue Adolphe Max.",
+      "verbal_succinct_transition_instruction": "Conduisez vers l'ouest. Ensuite, Tournez à gauche dans Avenue du Doyenné.",
+      "verbal_pre_transition_instruction": "Conduisez vers l'ouest sur Avenue Adolphe Max. Ensuite, Tournez à gauche dans Avenue du Doyenné.",
+      "verbal_post_transition_instruction": "Continuez pendant 30 mètres.",
+      "street_names": [
+       "Avenue Adolphe Max"
+      ],
+      "bearing_after": 293,
+      "time": 7.263,
+      "length": 0.032,
+      "cost": 8.705,
+      "begin_shape_index": 0,
+      "end_shape_index": 3,
+      "verbal_multi_cue": true,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 15,
+      "instruction": "Tournez à gauche dans Avenue du Doyenné.",
+      "verbal_transition_alert_instruction": "Tournez à gauche dans Avenue du Doyenné.",
+      "verbal_succinct_transition_instruction": "Tournez à gauche.",
+      "verbal_pre_transition_instruction": "Tournez à gauche dans Avenue du Doyenné.",
+      "verbal_post_transition_instruction": "Continuez pendant 300 mètres.",
+      "street_names": [
+       "Avenue du Doyenné"
+      ],
+      "bearing_before": 295,
+      "bearing_after": 198,
+      "time": 67.249,
+      "length": 0.268,
+      "cost": 171.216,
+      "begin_shape_index": 3,
+      "end_shape_index": 19,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 10,
+      "instruction": "Tournez à droite dans Place François Bertras.",
+      "verbal_transition_alert_instruction": "Tournez à droite dans Place François Bertras.",
+      "verbal_succinct_transition_instruction": "Tournez à droite. Ensuite, Tournez à gauche dans Rue Saint-Georges.",
+      "verbal_pre_transition_instruction": "Tournez à droite dans Place François Bertras. Ensuite, Tournez à gauche dans Rue Saint-Georges.",
+      "verbal_post_transition_instruction": "Continuez pendant 20 mètres.",
+      "street_names": [
+       "Place François Bertras"
+      ],
+      "bearing_before": 201,
+      "bearing_after": 288,
+      "time": 6.632,
+      "length": 0.021,
+      "cost": 18.951,
+      "begin_shape_index": 19,
+      "end_shape_index": 20,
+      "verbal_multi_cue": true,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 15,
+      "instruction": "Tournez à gauche dans Rue Saint-Georges.",
+      "verbal_transition_alert_instruction": "Tournez à gauche dans Rue Saint-Georges.",
+      "verbal_succinct_transition_instruction": "Tournez à gauche.",
+      "verbal_pre_transition_instruction": "Tournez à gauche dans Rue Saint-Georges.",
+      "verbal_post_transition_instruction": "Continuez pendant 800 mètres.",
+      "street_names": [
+       "Rue Saint-Georges"
+      ],
+      "bearing_before": 288,
+      "bearing_after": 200,
+      "time": 180.163,
+      "length": 0.772,
+      "cost": 250.879,
+      "begin_shape_index": 20,
+      "end_shape_index": 55,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 10,
+      "instruction": "Tournez à droite dans Montée de Choulans.",
+      "verbal_transition_alert_instruction": "Tournez à droite dans Montée de Choulans.",
+      "verbal_succinct_transition_instruction": "Tournez à droite. Ensuite, Prenez la sortie M 6.",
+      "verbal_pre_transition_instruction": "Tournez à droite dans Montée de Choulans. Ensuite, Prenez la sortie M 6.",
+      "verbal_post_transition_instruction": "Continuez pendant 40 mètres.",
+      "street_names": [
+       "Montée de Choulans"
+      ],
+      "bearing_before": 238,
+      "bearing_after": 305,
+      "time": 7.812,
+      "length": 0.04,
+      "cost": 26.299,
+      "begin_shape_index": 55,
+      "end_shape_index": 59,
+      "verbal_multi_cue": true,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 20,
+      "instruction": "Prenez la sortie M 6 vers Paris/Roanne/Tassin.",
+      "verbal_transition_alert_instruction": "Prenez la sortie M 6.",
+      "verbal_pre_transition_instruction": "Prenez la sortie M 6 vers Paris, Roanne.",
+      "verbal_post_transition_instruction": "Continuez pendant 2.5 kilomètres.",
+      "street_names": [
+       "M 6",
+       "Autoroute du Soleil"
+      ],
+      "bearing_before": 312,
+      "bearing_after": 333,
+      "time": 166.154,
+      "length": 2.306,
+      "cost": 216.384,
+      "begin_shape_index": 59,
+      "end_shape_index": 130,
+      "sign": {
+       "exit_branch_elements": [
+        {
+         "text": "M 6",
+         "consecutive_count": 1
+        }
+       ],
+       "exit_toward_elements": [
+        {
+         "text": "Paris"
+        },
+        {
+         "text": "Roanne"
+        },
+        {
+         "text": "Tassin"
+        }
+       ]
+      },
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 24,
+      "instruction": "Gardez la gauche pour rester sur M 6/Autoroute du Soleil.",
+      "verbal_transition_alert_instruction": "Gardez la gauche pour rester sur M 6.",
+      "verbal_pre_transition_instruction": "Gardez la gauche pour rester sur M 6, Autoroute du Soleil.",
+      "verbal_post_transition_instruction": "Continuez pendant 1.5 kilomètres.",
+      "street_names": [
+       "M 6",
+       "Autoroute du Soleil"
+      ],
+      "bearing_before": 313,
+      "bearing_after": 312,
+      "time": 77.767,
+      "length": 1.296,
+      "cost": 87.48,
+      "begin_shape_index": 130,
+      "end_shape_index": 149,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 20,
+      "instruction": "Prenez la sortie 36 vers Genève/Grenoble.",
+      "verbal_transition_alert_instruction": "Prenez la sortie 36.",
+      "verbal_pre_transition_instruction": "Prenez la sortie 36 vers Genève, Grenoble.",
+      "street_names": [
+       "3"
+      ],
+      "bearing_before": 306,
+      "bearing_after": 323,
+      "time": 17.017,
+      "length": 0.216,
+      "cost": 18.929,
+      "begin_shape_index": 149,
+      "end_shape_index": 189,
+      "sign": {
+       "exit_number_elements": [
+        {
+         "text": "36"
+        }
+       ],
+       "exit_toward_elements": [
+        {
+         "text": "Genève",
+         "consecutive_count": 1
+        },
+        {
+         "text": "Grenoble",
+         "consecutive_count": 1
+        }
+       ]
+      },
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 24,
+      "instruction": "Gardez la gauche pour prendre F 3 vers Genève/Grenoble.",
+      "verbal_transition_alert_instruction": "Gardez la gauche pour prendre F 3.",
+      "verbal_pre_transition_instruction": "Gardez la gauche pour prendre F 3 vers Genève, Grenoble.",
+      "street_names": [
+       "F 3"
+      ],
+      "bearing_before": 227,
+      "bearing_after": 233,
+      "time": 19.249,
+      "length": 0.171,
+      "cost": 21.642,
+      "begin_shape_index": 189,
+      "end_shape_index": 211,
+      "sign": {
+       "exit_toward_elements": [
+        {
+         "text": "Genève",
+         "consecutive_count": 1
+        },
+        {
+         "text": "Grenoble",
+         "consecutive_count": 1
+        }
+       ]
+      },
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 26,
+      "instruction": "Entrez dans Rond-Point du Valvert et prenez la 3ème sortie dans Avenue Victor Hugo.",
+      "verbal_transition_alert_instruction": "Entrez dans Rond-Point du Valvert et prenez la 3ème sortie dans Avenue Victor Hugo.",
+      "verbal_succinct_transition_instruction": "Entrez dans le rond-point et prenez la 3ème sortie.",
+      "verbal_pre_transition_instruction": "Entrez dans Rond-Point du Valvert et prenez la 3ème sortie dans Avenue Victor Hugo.",
+      "street_names": [
+       "Rond-Point du Valvert"
+      ],
+      "bearing_before": 202,
+      "bearing_after": 243,
+      "time": 26.334,
+      "length": 0.136,
+      "cost": 46.302,
+      "begin_shape_index": 211,
+      "end_shape_index": 233,
+      "roundabout_exit_count": 3,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 27,
+      "instruction": "Quittez le rond-point dans Avenue Victor Hugo.",
+      "verbal_succinct_transition_instruction": "Quittez le rond-point.",
+      "verbal_pre_transition_instruction": "Quittez le rond-point dans Avenue Victor Hugo.",
+      "verbal_post_transition_instruction": "Continuez pendant 900 mètres.",
+      "street_names": [
+       "Avenue Victor Hugo"
+      ],
+      "bearing_before": 90,
+      "bearing_after": 113,
+      "time": 109.908,
+      "length": 0.87,
+      "cost": 124.83,
+      "begin_shape_index": 233,
+      "end_shape_index": 281,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 26,
+      "instruction": "Entrez dans Place Pierre Vauboin et prenez la 2e sortie dans Avenue Charles de Gaulle.",
+      "verbal_transition_alert_instruction": "Entrez dans Place Pierre Vauboin et prenez la 2e sortie dans Avenue Charles de Gaulle.",
+      "verbal_succinct_transition_instruction": "Entrez dans le rond-point et prenez la 2e sortie.",
+      "verbal_pre_transition_instruction": "Entrez dans Place Pierre Vauboin et prenez la 2e sortie dans Avenue Charles de Gaulle.",
+      "street_names": [
+       "Place Pierre Vauboin"
+      ],
+      "bearing_before": 231,
+      "bearing_after": 249,
+      "time": 7.955,
+      "length": 0.038,
+      "cost": 12.884,
+      "begin_shape_index": 281,
+      "end_shape_index": 292,
+      "roundabout_exit_count": 2,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 27,
+      "instruction": "Quittez le rond-point dans Avenue Charles de Gaulle.",
+      "verbal_succinct_transition_instruction": "Quittez le rond-point.",
+      "verbal_pre_transition_instruction": "Quittez le rond-point dans Avenue Charles de Gaulle.",
+      "verbal_post_transition_instruction": "Continuez pendant 300 mètres.",
+      "street_names": [
+       "Avenue Charles de Gaulle"
+      ],
+      "bearing_before": 146,
+      "bearing_after": 212,
+      "time": 29.772,
+      "length": 0.25,
+      "cost": 36.334,
+      "begin_shape_index": 292,
+      "end_shape_index": 309,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 24,
+      "instruction": "Gardez la gauche à la fourche.",
+      "verbal_transition_alert_instruction": "Gardez la gauche à la fourche.",
+      "verbal_pre_transition_instruction": "Gardez la gauche à la fourche. Ensuite, Tournez à gauche dans Chemin Vert.",
+      "verbal_post_transition_instruction": "Continuez pendant 50 mètres.",
+      "bearing_before": 214,
+      "bearing_after": 217,
+      "time": 6.313,
+      "length": 0.046,
+      "cost": 11.736,
+      "begin_shape_index": 309,
+      "end_shape_index": 314,
+      "verbal_multi_cue": true,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 15,
+      "instruction": "Tournez à gauche dans Chemin Vert.",
+      "verbal_transition_alert_instruction": "Tournez à gauche dans Chemin Vert.",
+      "verbal_succinct_transition_instruction": "Tournez à gauche.",
+      "verbal_pre_transition_instruction": "Tournez à gauche dans Chemin Vert.",
+      "verbal_post_transition_instruction": "Continuez pendant 90 mètres.",
+      "street_names": [
+       "Chemin Vert"
+      ],
+      "bearing_before": 207,
+      "bearing_after": 135,
+      "time": 17.469,
+      "length": 0.093,
+      "cost": 45.298,
+      "begin_shape_index": 314,
+      "end_shape_index": 320,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 10,
+      "instruction": "Tournez à droite dans Avenue de Lauterbourg.",
+      "verbal_transition_alert_instruction": "Tournez à droite dans Avenue de Lauterbourg.",
+      "verbal_succinct_transition_instruction": "Tournez à droite.",
+      "verbal_pre_transition_instruction": "Tournez à droite dans Avenue de Lauterbourg.",
+      "verbal_post_transition_instruction": "Continuez pendant 100 mètres.",
+      "street_names": [
+       "Avenue de Lauterbourg"
+      ],
+      "bearing_before": 108,
+      "bearing_after": 202,
+      "time": 31.18,
+      "length": 0.144,
+      "cost": 43.16,
+      "begin_shape_index": 320,
+      "end_shape_index": 325,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 15,
+      "instruction": "Tournez à gauche.",
+      "verbal_transition_alert_instruction": "Tournez à gauche.",
+      "verbal_succinct_transition_instruction": "Tournez à gauche.",
+      "verbal_pre_transition_instruction": "Tournez à gauche.",
+      "verbal_post_transition_instruction": "Continuez pendant 70 mètres.",
+      "bearing_before": 202,
+      "bearing_after": 107,
+      "time": 76.307,
+      "length": 0.067,
+      "cost": 1149.273,
+      "begin_shape_index": 325,
+      "end_shape_index": 331,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 6,
+      "instruction": "Votre destination est sur la gauche.",
+      "verbal_transition_alert_instruction": "Votre destination sera sur la gauche.",
+      "verbal_pre_transition_instruction": "Votre destination est sur la gauche.",
+      "bearing_before": 185,
+      "time": 0.0,
+      "length": 0.0,
+      "cost": 0.0,
+      "begin_shape_index": 331,
+      "end_shape_index": 331,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     }
+    ],
+    "summary": {
+     "has_time_restrictions": false,
+     "has_toll": false,
+     "has_highway": false,
+     "has_ferry": false,
+     "min_lat": 45.75178,
+     "min_lon": 4.779014,
+     "max_lat": 45.772825,
+     "max_lon": 4.827022,
+     "time": 854.554,
+     "length": 6.769,
+     "cost": 2290.311
+    },
+    "shape": "ga~gvA{wreHe@zBuBlKmAlFrFjBpDpAxIhCbJhCD|B`@xAtAz@rOrCr@NrIlBdAb@dCdAtH`DXNlq@p_@hChAsBlOdUpJv@b@tZpP|At@dLtFhR`KtUlFxFnA|y@jSlBj@fFzAnFnBtI`DpGlCxTfJpLjH|JfG`WhXdKzKnHnIvIlKlExGbGdJjDvFd@d@dBfBbCY`HcE~I}@lCl@D@pEzCzDxFl@jBrAfEeCrGwAjDaDhGcA|AgGdE}BhAiAFWEy@M{@c@}A{AaAgBw@_Cc@oBW_CQmDHeCVuC^mCn@oBf@{AdAyAfAy@|As@TK`Bi@jBSfBFlBf@tAl@lA`AlAvAT^R\\n@|Ad@bB`@tBPzBH`CEhCSxB]~Bc@`B]dAe@bAm@z@sAhBuC`E}LbQmCtBmoAbjAuZxX{AdBuJxKsM`Ow@|@gHfIaLdQc|@rtA_e@`t@kT~\\yo@fcAiq@leAkT|\\gz@|qAgGpJgh@dwAkPdd@}`AnkDeMdd@k{@~sBkYxd@{OzX}KjSwf@`|@s^hq@cK`RmUhd@mQh^mQv^m|@zfB{}@|cBmm@tdAcn@ncAiNxTqIxN{Tpa@eR~_@}Ot^gFpKeI~QyEnLi`@z`AgLdY_GzFoApBwAvAwA|@eBf@sAToADgAGiAg@_Ai@}@o@o@s@a@{@q@uAe@wA_@uBQqAEqAA{AFeBTsBZsBj@aBh@gAj@_AjAqArA{@jAi@fAQlAAfAFvAP~A\\dBt@zBrAvBzAtCnC`CpCfBrClArDjEdJhBxH~AjKp@nHv@nF`@rBl@pBn@zAr@pAz@pA~@|@tA~@lAd@~A^xAFhEE|Ey@`CA|AVz@ZjAn@fCfBh@tBj@`BlAdChCdDvEpC`B`@vANlB?|AOtA]pAg@bBeA|@w@rA_B`AaB~@wBrAeFXwBVcDDgCCiCQwCPaEVaBZeAb@aAv@sA|@}@pAs@`Bc@~BN`BdA`B~AhCpCbUbYtExHbBbChA~AbAvAtGzHxEtFfNtPvRbT~BfDp@|@xFvHdDlEj_@ld@`LjNre@nk@lXp\\|ExFtAfB|ClDd@h@tFvGnA|Ab]xa@rMvOzFjHhE~EnB|A`Xv[rI|JvAbBFJt@|@r@v@jAvAfA~BOnBDpB\\fBr@vA`Az@`A\\bA@~@UZS^YNSh@Px@z@V`@\\h@^h@vDtFpVbYf@j@xPhTt@dAjGhGzPnSbJpLlDzFfCtCnDzCr@v@tJvKbBjBpBdCx@j@j@QRGv@cB^aBpCgSlFka@dAoHnDfBhq@``@dDtAnC~@lGxCTeBB[b@mQXyAr@[~PjA"
+   }
+  ],
+  "summary": {
+   "has_time_restrictions": false,
+   "has_toll": false,
+   "has_highway": false,
+   "has_ferry": false,
+   "min_lat": 45.75178,
+   "min_lon": 4.779014,
+   "max_lat": 45.772825,
+   "max_lon": 4.827022,
+   "time": 854.554,
+   "length": 6.769,
+   "cost": 2290.311
+  },
+  "status_message": "Found route between points",
+  "status": 0,
+  "units": "kilometers",
+  "language": "fr-FR"
+ }
+}
