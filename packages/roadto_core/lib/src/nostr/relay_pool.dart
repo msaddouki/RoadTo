@@ -6,6 +6,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'event.dart';
 import 'filter.dart';
 import 'keys.dart';
+import 'verifier.dart';
 
 /// Réponse d'un relais à une publication (message OK de NIP-01).
 class PublishResult {
@@ -37,7 +38,10 @@ class RelayConnection {
   bool _closed = false;
   Completer<void>? _connecting;
 
-  RelayConnection(this.url, {this.reconnectDelay = const Duration(seconds: 3)});
+  /// Checks received events; null checks them inline, on this isolate.
+  final EventVerifier? verifier;
+
+  RelayConnection(this.url, {this.reconnectDelay = const Duration(seconds: 3), this.verifier});
 
   RelayStatus get status => _current;
   Stream<RelayStatus> get statusChanges => _status.stream;
@@ -108,10 +112,22 @@ class RelayConnection {
     if (msg.isEmpty) return;
     switch (msg[0]) {
       case 'EVENT' when msg.length >= 3:
+        final String subId;
+        final NostrEvent event;
         try {
-          final event = NostrEvent.fromJson(msg[2] as Map<String, dynamic>);
-          if (event.verify()) _events.add((msg[1] as String, event));
-        } catch (_) {}
+          subId = msg[1] as String;
+          event = NostrEvent.fromJson(msg[2] as Map<String, dynamic>);
+        } catch (_) {
+          return;
+        }
+        final v = verifier;
+        if (v == null) {
+          if (event.verify()) _events.add((subId, event));
+        } else {
+          v.verify(event).then((ok) {
+            if (ok && !_events.isClosed) _events.add((subId, event));
+          });
+        }
       case 'EOSE' when msg.length >= 2:
         _eose.add(msg[1] as String);
       case 'OK' when msg.length >= 3:
@@ -174,7 +190,14 @@ class RelayPool {
   final _listeners = <StreamSubscription>[];
   final Duration reconnectDelay;
 
-  RelayPool(Iterable<String> urls, {this.reconnectDelay = const Duration(seconds: 3)}) {
+  /// Shared by the pool's relays, so an event sent by several of them has
+  /// its signature checked once, off this isolate.
+  final EventVerifier verifier;
+  final bool _ownsVerifier;
+
+  RelayPool(Iterable<String> urls, {this.reconnectDelay = const Duration(seconds: 3), EventVerifier? verifier})
+    : verifier = verifier ?? EventVerifier(),
+      _ownsVerifier = verifier == null {
     for (final u in urls) {
       _add(u);
     }
@@ -182,7 +205,7 @@ class RelayPool {
 
   void _add(String url) {
     if (_relays.containsKey(url)) return;
-    final r = RelayConnection(Uri.parse(url), reconnectDelay: reconnectDelay);
+    final r = RelayConnection(Uri.parse(url), reconnectDelay: reconnectDelay, verifier: verifier);
     _relays[url] = r;
     _listeners.add(
       r.events.listen((pair) {
@@ -246,5 +269,6 @@ class RelayPool {
     }
     await Future.wait(_relays.values.map((r) => r.close()));
     _relays.clear();
+    if (_ownsVerifier) await verifier.close();
   }
 }

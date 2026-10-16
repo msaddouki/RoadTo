@@ -13,6 +13,7 @@ services:
     environment:
       ROUTER: /etc/roadto-router.conf
       PEER_URL: ws://relay-b:7777
+      ROADTO_RATE_PER_MINUTE: ${ROADTO_RATE_PER_MINUTE:-30}
     volumes:
       - relay-a-db:/app/strfry-db
       - ./router.conf:/etc/roadto-router.conf:ro
@@ -27,6 +28,8 @@ services:
     image: roadto-relay:dev
     ports:
       - "7778:7777"
+    environment:
+      ROADTO_RATE_PER_MINUTE: ${ROADTO_RATE_PER_MINUTE:-30}
     volumes:
       - relay-b-db:/app/strfry-db
     ulimits:

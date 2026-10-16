@@ -32,3 +32,18 @@ flutter:
   assets:
     # Signed region package copied here by CI (see assets/regions/lyon/README.md).
     - assets/regions/lyon/
+    - assets/fonts/OFL.txt
+  # Atkinson Hyperlegible (Braille Institute; SIL OFL 1.1, assets/fonts/OFL.txt):
+  # drawn to keep similar characters apart, for reading at a glance.
+  fonts:
+    - family: Atkinson Hyperlegible Next
+      fonts:
+        - asset: assets/fonts/AtkinsonHyperlegibleNext-Regular.ttf
+        - asset: assets/fonts/AtkinsonHyperlegibleNext-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/AtkinsonHyperlegibleNext-ExtraBold.ttf
+          weight: 800
+    - family: Atkinson Hyperlegible Mono
+      fonts:
+        - asset: assets/fonts/AtkinsonHyperlegibleMono-Bold.ttf
+          weight: 700

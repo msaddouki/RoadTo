@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:roadto_core/roadto_core.dart';
 
+import '../services/favorites.dart';
+import 'favorite_name_dialog.dart';
+
 const _categoryIcons = {
   'fuel': Icons.local_gas_station,
   'charging': Icons.ev_station,
@@ -12,8 +15,8 @@ const _categoryIcons = {
   'food': Icons.restaurant,
 };
 
-/// Address or place search, plus one-tap categories (fuel, charging…).
-/// Returns the chosen [Place].
+/// Address or place search, plus one-tap categories (fuel, charging…) and
+/// the user's favourites. Returns the chosen [Place].
 class SearchScreen extends StatefulWidget {
   final Future<List<Place>> Function(String query) search;
   final LatLon from;
@@ -21,7 +24,10 @@ class SearchScreen extends StatefulWidget {
   /// Category search; returns null when no offline region is installed.
   final List<NearbyPlace>? Function(PlaceCategory category)? searchCategory;
 
-  const SearchScreen({super.key, required this.search, required this.from, this.searchCategory});
+  /// Shown before anything is typed; results can be added to them.
+  final Favorites? favorites;
+
+  const SearchScreen({super.key, required this.search, required this.from, this.searchCategory, this.favorites});
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -45,7 +51,8 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   void _onChanged(String q) {
-    if (_category != null) setState(() => _category = null);
+    // Rebuilt on every key: favourites show while the field is empty.
+    setState(() => _category = null);
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 350), () => _run(q));
   }
@@ -90,8 +97,59 @@ class _SearchScreenState extends State<SearchScreen> {
     return 'dans ${formatDistance(n.aheadM!)}$detour';
   }
 
+  Future<void> _toggleFavorite(Place p) async {
+    final favorites = widget.favorites!;
+    if (favorites.contains(p)) {
+      await favorites.remove(p);
+    } else {
+      await favorites.add(p);
+    }
+  }
+
+  Future<void> _rename(Place f) async {
+    final name = await askFavoriteName(context, initial: f.name, title: 'Renommer le favori');
+    if (name != null) await widget.favorites!.rename(f, name);
+  }
+
+  Widget _favoriteList(List<Place> favorites) => ListView(
+    children: [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+        child: Text('Favoris', style: Theme.of(context).textTheme.titleSmall),
+      ),
+      for (final f in favorites)
+        ListTile(
+          minTileHeight: 64,
+          leading: const Icon(Icons.star),
+          title: Text(f.name),
+          subtitle: f.detail == null || f.detail!.isEmpty ? null : Text(f.detail!),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(formatDistance(distanceM(widget.from, f.position))),
+              PopupMenuButton<String>(
+                tooltip: 'Options',
+                onSelected: (v) => v == 'rename' ? _rename(f) : widget.favorites!.remove(f),
+                itemBuilder: (_) => const [
+                  PopupMenuItem(value: 'rename', child: Text('Renommer')),
+                  PopupMenuItem(value: 'remove', child: Text('Retirer des favoris')),
+                ],
+              ),
+            ],
+          ),
+          onTap: () => Navigator.of(context).pop(f),
+        ),
+    ],
+  );
+
   @override
   Widget build(BuildContext context) {
+    final favorites = widget.favorites;
+    if (favorites == null) return _build(context);
+    return ListenableBuilder(listenable: favorites, builder: (context, _) => _build(context));
+  }
+
+  Widget _build(BuildContext context) {
     final category = _category;
     final nearby = _nearby;
     final showCategory = category != null && nearby != null;
@@ -136,6 +194,8 @@ class _SearchScreenState extends State<SearchScreen> {
       ),
       body: _error != null
           ? Padding(padding: const EdgeInsets.all(16), child: Text(_error!))
+          : !showCategory && _controller.text.trim().isEmpty && (widget.favorites?.all.isNotEmpty ?? false)
+          ? _favoriteList(widget.favorites!.all)
           : showCategory && nearby.isEmpty
           ? Padding(
               padding: const EdgeInsets.all(16),
@@ -146,15 +206,29 @@ class _SearchScreenState extends State<SearchScreen> {
               separatorBuilder: (_, _) => const Divider(height: 1),
               itemBuilder: (context, i) {
                 final p = showCategory ? nearby[i].place : _results[i];
+                final distance = Text(
+                  showCategory ? _distanceLabel(nearby[i]) : formatDistance(distanceM(widget.from, p.position)),
+                  textAlign: TextAlign.end,
+                );
+                final favorite = widget.favorites?.contains(p);
                 return ListTile(
                   minTileHeight: 64,
                   leading: Icon(showCategory ? _categoryIcons[category.id] : Icons.place_outlined),
                   title: Text(p.name),
                   subtitle: p.detail == null || p.detail!.isEmpty ? null : Text(p.detail!),
-                  trailing: Text(
-                    showCategory ? _distanceLabel(nearby[i]) : formatDistance(distanceM(widget.from, p.position)),
-                    textAlign: TextAlign.end,
-                  ),
+                  trailing: favorite == null
+                      ? distance
+                      : Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            distance,
+                            IconButton(
+                              tooltip: favorite ? 'Retirer des favoris' : 'Ajouter aux favoris',
+                              icon: Icon(favorite ? Icons.star : Icons.star_border),
+                              onPressed: () => _toggleFavorite(p),
+                            ),
+                          ],
+                        ),
                   onTap: () => Navigator.of(context).pop(p),
                 );
               },
