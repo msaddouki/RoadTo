@@ -1,0 +1,87 @@
+{
+ "trip": {
+  "locations": [
+   {
+    "type": "break",
+    "lat": 45.7578,
+    "lon": 4.832
+   },
+   {
+    "type": "break",
+    "lat": 45.764986489399945,
+    "lon": 4.853888346369479
+   }
+  ],
+  "legs": [
+   {
+    "maneuvers": [
+     {
+      "type": 1,
+      "instruction": "Dirigez-vous vers l’est sur Place Bellecour.",
+      "verbal_pre_transition_instruction": "Dirigez-vous vers l’est sur Place Bellecour.",
+      "street_names": [
+       "Place Bellecour"
+      ],
+      "time": 143.839,
+      "length": 1.199,
+      "begin_shape_index": 0,
+      "end_shape_index": 24,
+      "verbal_post_transition_instruction": "Continuez pendant 1198 mètres."
+     },
+     {
+      "type": 15,
+      "instruction": "Tournez à gauche sur Quai Augagneur.",
+      "verbal_pre_transition_instruction": "Tournez à gauche sur Quai Augagneur.",
+      "street_names": [
+       "Quai Augagneur"
+      ],
+      "time": 95.892,
+      "length": 0.799,
+      "begin_shape_index": 24,
+      "end_shape_index": 40,
+      "verbal_transition_alert_instruction": "Tournez à gauche sur Quai Augagneur.",
+      "verbal_post_transition_instruction": "Continuez pendant 799 mètres."
+     },
+     {
+      "type": 10,
+      "instruction": "Tournez à droite sur Cours Lafayette.",
+      "verbal_pre_transition_instruction": "Tournez à droite sur Cours Lafayette.",
+      "street_names": [
+       "Cours Lafayette"
+      ],
+      "time": 59.925,
+      "length": 0.499,
+      "begin_shape_index": 40,
+      "end_shape_index": 50,
+      "verbal_transition_alert_instruction": "Tournez à droite sur Cours Lafayette.",
+      "verbal_post_transition_instruction": "Continuez pendant 499 mètres."
+     },
+     {
+      "type": 4,
+      "instruction": "Vous êtes arrivé à votre destination.",
+      "verbal_pre_transition_instruction": "Vous êtes arrivé à votre destination.",
+      "street_names": [],
+      "time": 0.0,
+      "length": 0.0,
+      "begin_shape_index": 50,
+      "end_shape_index": 50
+     }
+    ],
+    "summary": {
+     "length": 2.497,
+     "time": 299.64
+    },
+    "shape": "ouygvA_o|eH?gg@?gg@?eg@?gg@?gg@?gg@?eg@?gg@?gg@?gg@?gg@?eg@?gg@?gg@?gg@?eg@?gg@?gg@?gg@?eg@?gg@?gg@?gg@?gg@a[?a[?a[?c[?a[?a[?a[?a[?a[?c[?a[?a[?a[?a[?a[?a[??eg@?gg@?gg@?gg@?eg@?gg@?gg@?gg@?gg@?eg@"
+   }
+  ],
+  "summary": {
+   "length": 2.497,
+   "time": 299.64
+  },
+  "status_message": "Found route between points",
+  "status": 0,
+  "units": "kilometers",
+  "language": "fr-FR"
+ },
+ "id": "roadto"
+}

@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:roadto_core/roadto_core.dart';
 
@@ -46,7 +48,10 @@ class IdentityStore {
   static const _phraseName = 'roadto.identity.mnemonic';
   final SecretStore _store;
 
-  IdentityStore([this._store = const PlatformSecretStore()]);
+  /// scrypt cost of encrypted exports (NIP-49): 2^16, 64 MiB.
+  final int exportLogN;
+
+  IdentityStore([this._store = const PlatformSecretStore(), this.exportLogN = EncryptedKey.defaultLogN]);
 
   Future<Identity> loadOrCreate() async {
     final phrase = await recoveryPhrase();
@@ -83,5 +88,26 @@ class IdentityStore {
     await _store.write(_phraseName, phrase.toString());
     await _store.write(_keyName, keys.privateKey);
     return Identity(keys, hasRecoveryPhrase: true);
+  }
+
+  /// The private key encrypted with [password] (NIP-49, `ncryptsec1…`), a
+  /// backup that does not have to be written down, readable by any Nostr
+  /// client that supports NIP-49. scrypt is slow on purpose: it runs on a
+  /// background isolate.
+  Future<String> exportEncrypted(String password) async {
+    final sk = await _store.read(_keyName) ?? (await loadOrCreate()).keys.privateKey;
+    final logN = exportLogN;
+    return Isolate.run(() => EncryptedKey.encryptHex(sk, password, logN: logN));
+  }
+
+  /// Replaces the identity with the key of an encrypted export. The export
+  /// holds the key only, so the restored identity has no recovery phrase.
+  /// Throws [EncryptedKeyException] (wrong password, damaged text).
+  Future<Identity> restoreEncrypted(String encrypted, String password) async {
+    final sk = await Isolate.run(() => EncryptedKey.decryptToHex(encrypted, password));
+    final keys = KeyPair.fromPrivateKey(sk);
+    await _store.delete(_phraseName);
+    await _store.write(_keyName, keys.privateKey);
+    return Identity(keys, hasRecoveryPhrase: false);
   }
 }

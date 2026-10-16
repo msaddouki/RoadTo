@@ -49,8 +49,11 @@ limits, updates tied to app releases) and users only need their own region.
 - Measured on the first Lyon build (bbox 55 × 61 km, 3.8 M map features,
   284 k search entries): map 47 MB, search index 54 MB, style 1.3 MB,
   routing graph 91 MB. Spikes A and B still set the size budget per region.
-- The region folder sits in Application Support; it should be excluded from
-  iCloud backup before the beta (it can be downloaded again).
+- The region folder sits in Application Support and stays out of cloud
+  backups, since it can be reinstalled: on iOS it is marked excluded from
+  backup (`BackupExclusion`, AppDelegate.swift); on Android backups are off
+  (`allowBackup="false"`) and phone-to-phone transfers skip it
+  (`data_extraction_rules.xml`).
 - To verify on devices: MapLibre reading `pmtiles://file://` and `file://`
   glyphs on both platforms (supported by MapLibre Android 13.5 and iOS 6.28,
   the versions used).

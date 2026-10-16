@@ -30,7 +30,7 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "org.roadto/valhalla").setMethodCallHandler { call, result ->
             when (call.method) {
-                "route" -> {
+                "route", "traceAttributes" -> {
                     val config = call.argument<String>("config")
                     val request = call.argument<String>("request")
                     if (config == null || request == null) {
@@ -39,7 +39,11 @@ class MainActivity : FlutterActivity() {
                     }
                     routingThread.execute {
                         try {
-                            val response = route(config, request)
+                            val response = when (call.method) {
+                                "route" -> route(config, request)
+                                // Raw JSON is public for trace_attributes: no model mapping.
+                                else -> engine(config).traceAttributesRaw(request)
+                            }
                             main.post { result.success(response) }
                         } catch (e: Throwable) {
                             // Throwable, not Exception: a native library that fails to load
@@ -62,19 +66,25 @@ class MainActivity : FlutterActivity() {
      * requests, so the JSON goes through its models both ways.
      */
     private fun route(configPath: String, requestJson: String): String {
-        if (valhalla == null || valhallaConfig != configPath) {
-            valhalla?.close()
-            // The region's config (routing.offline.json) names the graph; the
-            // library's defaults cover the rest.
-            val extract = JSONObject(File(configPath).readText()).getJSONObject("mjolnir").getString("tile_extract")
-            valhalla = Valhalla(this, ValhallaConfigBuilder().withTileExtract(extract).build())
-            valhallaConfig = configPath
-        }
         val request = moshi.adapter(RouteRequest::class.java).fromJson(toModelJson(requestJson))
             ?: throw IllegalArgumentException("empty route request")
-        return when (val response = valhalla!!.route(request)) {
+        return when (val response = engine(configPath).route(request)) {
             is ValhallaResponse.Json -> moshi.adapter(RouteResponse::class.java).toJson(response.jsonResponse)
             else -> throw IllegalStateException("unexpected response format")
+        }
+    }
+
+    /** The engine for this region, built on first use and kept. */
+    private fun engine(configPath: String): Valhalla {
+        val current = valhalla
+        if (current != null && valhallaConfig == configPath) return current
+        current?.close()
+        // The region's config (routing.offline.json) names the graph; the
+        // library's defaults cover the rest.
+        val extract = JSONObject(File(configPath).readText()).getJSONObject("mjolnir").getString("tile_extract")
+        return Valhalla(this, ValhallaConfigBuilder().withTileExtract(extract).build()).also {
+            valhalla = it
+            valhallaConfig = configPath
         }
     }
 

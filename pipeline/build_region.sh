@@ -49,7 +49,10 @@ OSM_TIMESTAMP=$(osmium fileinfo -g header.option.osmosis_replication_timestamp "
 echo "OSM data as of: ${OSM_TIMESTAMP:-unknown}"
 
 step "Crop to bbox $BBOX"
-osmium extract --bbox "$BBOX" --strategy smart --set-bounds --overwrite -o "$WORK/region.osm.pbf" "$SRC"
+# Boundary relations are completed too, so communes cut by the bbox keep their
+# full outline (search results get their commune from it).
+osmium extract --bbox "$BBOX" --strategy smart -S types=multipolygon,boundary --set-bounds --overwrite \
+  -o "$WORK/region.osm.pbf" "$SRC"
 
 step "Map tiles (Planetiler $PLANETILER_VERSION)"
 docker run --rm --user "$DOCKER_USER" -e JAVA_TOOL_OPTIONS="-Xmx4g" \
