@@ -48,6 +48,32 @@ File URLs in the manifest are relative to it, so a package can be served
 from any static host. The schema of `places.sqlite` is
 [`schema/places.sql`](schema/places.sql).
 
+## Stations file (fuel prices, charging points)
+
+Prices change during the day, the map once a month: they travel in their own
+small file, `stations.json.gz`, next to the region package (plan J5). Built
+by `roadto_pipeline stations` (`roadto_pipeline/stations.py`) from:
+
+| Data | Source | Kept |
+| --- | --- | --- |
+| Fuel prices | [prix-carburants](https://www.prix-carburants.gouv.fr/rubrique/opendata/) live feed (`instantane` zip) | per station: each fuel's price and update time (prices older than 30 days dropped), fuels out of stock, 24/7 card machine, motorway |
+| Charging points | [base IRVE](https://www.data.gouv.fr/fr/datasets/base-nationale-des-irve-infrastructures-de-recharge-pour-vehicules-electriques/) consolidated by data.gouv.fr | per station: number of points, best power, connector types, free, card payment, open to all, 24/7 |
+
+Both are under the Licence Ouverte 2.0. The file is gzipped JSON (Lyon:
+about 60 KB, 220 fuel stations and 1,100 charging stations), byte-for-byte
+reproducible, and signed like the manifest (`stations.json.gz.sig`). The app
+downloads the whole file for its region, never "around me".
+
+The `Stations` workflow (`.github/workflows/stations.yml`) rebuilds it every
+3 hours and publishes it to the release `stations-<id>`; the IRVE base
+(~110 MB) is downloaded once a day and cached.
+
+```bash
+curl -fsSL -o fuel.zip https://donnees.roulez-eco.fr/opendata/instantane
+curl -fsSL -o irve.csv https://www.data.gouv.fr/fr/datasets/r/eb76d20a-8501-400e-b336-d85724de5435
+python -m roadto_pipeline stations --region regions/lyon.json --fuel fuel.zip --irve irve.csv --out stations.json.gz
+```
+
 ## Security model
 
 The app installs a package only if:
