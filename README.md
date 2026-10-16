@@ -47,6 +47,9 @@ once a region is downloaded.
   **recovery phrase** (BIP-39, NIP-06) to restore it on another phone, or a
   **password-encrypted backup** file (NIP-49, `ncryptsec`); a throwaway key
   per trip signs the alerts.
+- **Error reports stay on the phone** (Réglages > Rapports d’erreur), with
+  positions, keys and network addresses removed. Nothing is sent: the user
+  can read a report and share it, as a file or by copying it, if they want.
 
 ## Repository layout
 

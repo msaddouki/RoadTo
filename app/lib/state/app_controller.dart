@@ -8,6 +8,7 @@ import 'package:roadto_core/roadto_core.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../config.dart';
+import '../services/crash_reports.dart';
 import '../services/device_routing.dart';
 import '../services/embedded_region.dart';
 import '../services/favorites.dart';
@@ -73,9 +74,12 @@ class AppController extends ChangeNotifier {
   InstallProgress? installProgress;
   String? regionError;
 
+  /// Errors kept on the phone (Réglages > Rapports d'erreur).
+  CrashReports? crashReports;
+
   AppController._(this.settings, this.identity, this._identityStore, this.regionStore);
 
-  static Future<AppController> create() async {
+  static Future<AppController> create({CrashReports? crashReports}) async {
     final store = IdentityStore();
     final settings = await SettingsStore.load();
     final identity = await store.loadOrCreate();
@@ -88,7 +92,8 @@ class AppController extends ChangeNotifier {
     final favorites = await Favorites.load();
     return AppController._(settings, identity.keys, store, regions)
       ..hasRecoveryPhrase = identity.hasRecoveryPhrase
-      ..favorites = favorites;
+      ..favorites = favorites
+      ..crashReports = crashReports;
   }
 
   bool get navigating => route != null;
