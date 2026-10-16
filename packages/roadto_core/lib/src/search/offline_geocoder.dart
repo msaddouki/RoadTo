@@ -6,6 +6,7 @@ import '../geo.dart';
 import '../routing/route.dart';
 import 'categories.dart';
 import 'geocoder.dart';
+import 'stations.dart';
 
 /// Search in a region's `places.sqlite` (schema: `pipeline/schema/places.sql`),
 /// without network.
@@ -94,27 +95,53 @@ class OfflineGeocoder implements Geocoder {
     return out;
   }
 
-  /// Places of [category] within [radiusM] of [center], nearest first.
-  List<NearbyPlace> nearby(PlaceCategory category, LatLon center, {double radiusM = 5000, int limit = 30}) {
+  /// OSM places of [category] in the box, merged with the official
+  /// [stations] of that category when given.
+  List<StationCandidate> _candidates(
+    PlaceCategory category,
+    double minLat,
+    double maxLat,
+    double minLon,
+    double maxLon,
+    int cap,
+    Stations? stations,
+  ) => mergeStations(
+    category,
+    _inBox(category.kinds, minLat, maxLat, minLon, maxLon, cap),
+    stations?.inBox(category, minLat, maxLat, minLon, maxLon) ?? const [],
+  );
+
+  /// Places of [category] within [radiusM] of [center], nearest first. With
+  /// [stations], fuel and charging places carry their official data, and
+  /// official stations missing from OSM are listed too.
+  List<NearbyPlace> nearby(
+    PlaceCategory category,
+    LatLon center, {
+    double radiusM = 5000,
+    int limit = 30,
+    Stations? stations,
+  }) {
     final dLat = radiusM / 111320;
     final dLon = radiusM / (111320 * math.cos(center.lat * math.pi / 180));
     final found = [
-      for (final (place, p) in _inBox(
-        category.kinds,
+      for (final c in _candidates(
+        category,
         center.lat - dLat,
         center.lat + dLat,
         center.lon - dLon,
         center.lon + dLon,
         5000,
+        stations,
       ))
-        NearbyPlace(place, distanceM(center, p)),
+        NearbyPlace(c.place, distanceM(center, c.position), fuel: c.fuel, charging: c.charging),
     ]..removeWhere((n) => n.distanceM > radiusM);
     found.sort((a, b) => a.distanceM.compareTo(b.distanceM));
     return found.take(limit).toList();
   }
 
   /// Places of [category] ahead on [route], at most [maxOffRouteM] from it,
-  /// ordered by distance along the route from [alongM].
+  /// ordered by distance along the route from [alongM]. [stations] as for
+  /// [nearby].
   List<NearbyPlace> alongRoute(
     PlaceCategory category,
     TripRoute route,
@@ -122,6 +149,7 @@ class OfflineGeocoder implements Geocoder {
     double maxOffRouteM = 1000,
     double horizonM = 60000,
     int limit = 30,
+    Stations? stations,
   }) {
     final ahead = [
       for (var i = 0; i < route.shape.length; i++)
@@ -133,19 +161,29 @@ class OfflineGeocoder implements Geocoder {
     final padLon = pad / math.cos(ahead.first.lat * math.pi / 180);
     final here = route.pointAt(alongM);
     final found = <NearbyPlace>[];
-    for (final (place, p) in _inBox(
-      category.kinds,
+    for (final c in _candidates(
+      category,
       lats.reduce(math.min) - pad,
       lats.reduce(math.max) + pad,
       lons.reduce(math.min) - padLon,
       lons.reduce(math.max) + padLon,
       20000,
+      stations,
     )) {
-      final proj = projectOnRoute(route, p);
+      final proj = projectOnRoute(route, c.position);
       if (proj == null || proj.offsetM > maxOffRouteM) continue;
       final aheadM = proj.alongM - alongM;
       if (aheadM < 0 || aheadM > horizonM) continue;
-      found.add(NearbyPlace(place, distanceM(here, p), aheadM: aheadM, offRouteM: proj.offsetM));
+      found.add(
+        NearbyPlace(
+          c.place,
+          distanceM(here, c.position),
+          aheadM: aheadM,
+          offRouteM: proj.offsetM,
+          fuel: c.fuel,
+          charging: c.charging,
+        ),
+      );
     }
     found.sort((a, b) => a.aheadM!.compareTo(b.aheadM!));
     return found.take(limit).toList();

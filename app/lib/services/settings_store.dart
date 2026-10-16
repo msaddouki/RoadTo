@@ -27,6 +27,9 @@ class AppSettings {
 
   final NightMap nightMap;
 
+  /// Fuel whose price is shown in the fuel search (a key of `fuelLabels`).
+  final String fuel;
+
   const AppSettings({
     required this.mapStyle,
     required this.routingUrl,
@@ -37,6 +40,7 @@ class AppSettings {
     required this.voice,
     required this.offlineMap,
     this.nightMap = NightMap.auto,
+    this.fuel = 'gazole',
   });
 
   factory AppSettings.defaults() => AppSettings(
@@ -49,6 +53,7 @@ class AppSettings {
     voice: true,
     offlineMap: true,
     nightMap: NightMap.auto,
+    fuel: 'gazole',
   );
 
   AppSettings copyWith({
@@ -61,6 +66,7 @@ class AppSettings {
     bool? voice,
     bool? offlineMap,
     NightMap? nightMap,
+    String? fuel,
   }) => AppSettings(
     mapStyle: mapStyle ?? this.mapStyle,
     routingUrl: routingUrl ?? this.routingUrl,
@@ -71,6 +77,7 @@ class AppSettings {
     voice: voice ?? this.voice,
     offlineMap: offlineMap ?? this.offlineMap,
     nightMap: nightMap ?? this.nightMap,
+    fuel: fuel ?? this.fuel,
   );
 }
 
@@ -90,6 +97,7 @@ class SettingsStore {
         voice: p.getBool('voice') ?? d.voice,
         offlineMap: p.getBool('offlineMap') ?? d.offlineMap,
         nightMap: NightMap.parse(p.getString('nightMap')),
+        fuel: p.getString('fuel') ?? d.fuel,
       );
     } catch (_) {
       return d;
@@ -107,5 +115,6 @@ class SettingsStore {
     await p.setBool('voice', s.voice);
     await p.setBool('offlineMap', s.offlineMap);
     await p.setString('nightMap', s.nightMap.name);
+    await p.setString('fuel', s.fuel);
   }
 }

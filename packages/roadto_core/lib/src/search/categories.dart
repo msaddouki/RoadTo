@@ -1,4 +1,5 @@
 import 'geocoder.dart';
+import 'stations.dart';
 
 /// A kind of place drivers look for ("nearest fuel"), mapped to the `kind`
 /// values of the offline index (pipeline/roadto_pipeline/places.py).
@@ -33,5 +34,10 @@ class NearbyPlace {
   final double? aheadM;
   final double? offRouteM;
 
-  const NearbyPlace(this.place, this.distanceM, {this.aheadM, this.offRouteM});
+  /// Official data of the place, when the stations file has it: fuel prices,
+  /// or charge points.
+  final FuelStation? fuel;
+  final ChargingStation? charging;
+
+  const NearbyPlace(this.place, this.distanceM, {this.aheadM, this.offRouteM, this.fuel, this.charging});
 }

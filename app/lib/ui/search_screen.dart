@@ -27,7 +27,19 @@ class SearchScreen extends StatefulWidget {
   /// Shown before anything is typed; results can be added to them.
   final Favorites? favorites;
 
-  const SearchScreen({super.key, required this.search, required this.from, this.searchCategory, this.favorites});
+  /// Fuel whose price the fuel search shows, and where a new choice goes.
+  final String fuel;
+  final ValueChanged<String>? onFuelChanged;
+
+  const SearchScreen({
+    super.key,
+    required this.search,
+    required this.from,
+    this.searchCategory,
+    this.favorites,
+    this.fuel = 'gazole',
+    this.onFuelChanged,
+  });
 
   @override
   State<SearchScreen> createState() => _SearchScreenState();
@@ -42,6 +54,8 @@ class _SearchScreenState extends State<SearchScreen> {
   String? _error;
   bool _loading = false;
   int _generation = 0;
+  late String _fuel = widget.fuel;
+  bool _cheapestFirst = false;
 
   @override
   void dispose() {
@@ -89,6 +103,66 @@ class _SearchScreenState extends State<SearchScreen> {
           ? 'La recherche par catégorie utilise la région hors ligne : installez-en une dans Réglages.'
           : null;
     });
+  }
+
+  void _pickFuel(String fuel) {
+    setState(() => _fuel = fuel);
+    widget.onFuelChanged?.call(fuel);
+  }
+
+  /// Cheapest first for the chosen fuel when asked; stations without its
+  /// price keep their order after them.
+  List<NearbyPlace> _ordered(List<NearbyPlace> nearby) {
+    if (_category?.id != 'fuel' || !_cheapestFirst) return nearby;
+    final priced = [
+      for (final n in nearby)
+        if (n.fuel?.prices[_fuel] != null) n,
+    ]..sort((a, b) => a.fuel!.prices[_fuel]!.price.compareTo(b.fuel!.prices[_fuel]!.price));
+    return [
+      ...priced,
+      for (final n in nearby)
+        if (n.fuel?.prices[_fuel] == null) n,
+    ];
+  }
+
+  /// Official data of a category result: the price of the chosen fuel, or
+  /// the charge points.
+  String? _stationInfo(NearbyPlace n) {
+    final fuel = n.fuel;
+    if (fuel != null) {
+      final label = fuelLabels[_fuel] ?? _fuel;
+      final price = fuel.prices[_fuel];
+      if (price != null) return '$label ${formatPrice(price.price)} · ${formatAge(price.updated, DateTime.now())}';
+      return fuel.outOfStock.contains(_fuel) ? '$label en rupture' : 'Pas de $label';
+    }
+    final c = n.charging;
+    if (c != null) return chargingSummary(c);
+    return null;
+  }
+
+  Widget _fuelBar(List<NearbyPlace> nearby) {
+    final offered = {for (final n in nearby) ...?n.fuel?.prices.keys, _fuel};
+    return SizedBox(
+      height: 52,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        children: [
+          FilterChip(
+            label: const Text('Moins cher d’abord'),
+            selected: _cheapestFirst,
+            onSelected: (v) => setState(() => _cheapestFirst = v),
+          ),
+          const SizedBox(width: 12),
+          for (final MapEntry(key: id, value: label) in fuelLabels.entries)
+            if (offered.contains(id))
+              Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: ChoiceChip(label: Text(label), selected: _fuel == id, onSelected: (_) => _pickFuel(id)),
+              ),
+        ],
+      ),
+    );
   }
 
   static String _distanceLabel(NearbyPlace n) {
@@ -151,8 +225,9 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Widget _build(BuildContext context) {
     final category = _category;
-    final nearby = _nearby;
+    final nearby = _nearby == null ? null : _ordered(_nearby!);
     final showCategory = category != null && nearby != null;
+    final showFuelBar = showCategory && category.id == 'fuel' && nearby.any((n) => n.fuel != null);
     return Scaffold(
       appBar: AppBar(
         title: TextField(
@@ -201,38 +276,87 @@ class _SearchScreenState extends State<SearchScreen> {
               padding: const EdgeInsets.all(16),
               child: Text('Aucun résultat « ${category.label} » à proximité dans la région installée.'),
             )
-          : ListView.separated(
-              itemCount: showCategory ? nearby.length : _results.length,
-              separatorBuilder: (_, _) => const Divider(height: 1),
-              itemBuilder: (context, i) {
-                final p = showCategory ? nearby[i].place : _results[i];
-                final distance = Text(
-                  showCategory ? _distanceLabel(nearby[i]) : formatDistance(distanceM(widget.from, p.position)),
-                  textAlign: TextAlign.end,
-                );
-                final favorite = widget.favorites?.contains(p);
-                return ListTile(
-                  minTileHeight: 64,
-                  leading: Icon(showCategory ? _categoryIcons[category.id] : Icons.place_outlined),
-                  title: Text(p.name),
-                  subtitle: p.detail == null || p.detail!.isEmpty ? null : Text(p.detail!),
-                  trailing: favorite == null
-                      ? distance
-                      : Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            distance,
-                            IconButton(
-                              tooltip: favorite ? 'Retirer des favoris' : 'Ajouter aux favoris',
-                              icon: Icon(favorite ? Icons.star : Icons.star_border),
-                              onPressed: () => _toggleFavorite(p),
-                            ),
-                          ],
-                        ),
-                  onTap: () => Navigator.of(context).pop(p),
-                );
-              },
+          : Column(
+              children: [
+                if (showFuelBar) _fuelBar(nearby),
+                Expanded(child: _resultList(category, nearby, showCategory)),
+              ],
             ),
     );
   }
+
+  Widget _resultList(PlaceCategory? category, List<NearbyPlace>? nearby, bool showCategory) => ListView.separated(
+    itemCount: showCategory ? nearby!.length : _results.length,
+    separatorBuilder: (_, _) => const Divider(height: 1),
+    itemBuilder: (context, i) {
+      final p = showCategory ? nearby![i].place : _results[i];
+      final distance = Text(
+        showCategory ? _distanceLabel(nearby![i]) : formatDistance(distanceM(widget.from, p.position)),
+        textAlign: TextAlign.end,
+      );
+      final favorite = widget.favorites?.contains(p);
+      return ListTile(
+        minTileHeight: 64,
+        leading: Icon(showCategory ? _categoryIcons[category!.id] : Icons.place_outlined),
+        title: Text(p.name),
+        subtitle: _subtitle(p, showCategory ? _stationInfo(nearby![i]) : null),
+        trailing: favorite == null
+            ? distance
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  distance,
+                  IconButton(
+                    tooltip: favorite ? 'Retirer des favoris' : 'Ajouter aux favoris',
+                    icon: Icon(favorite ? Icons.star : Icons.star_border),
+                    onPressed: () => _toggleFavorite(p),
+                  ),
+                ],
+              ),
+        onTap: () => Navigator.of(context).pop(p),
+      );
+    },
+  );
+
+  Widget? _subtitle(Place p, String? info) {
+    final lines = [if (p.detail != null && p.detail!.isNotEmpty) p.detail!, ?info];
+    if (lines.isEmpty) return null;
+    return Text(lines.join('\n'));
+  }
+}
+
+/// "1,789 €".
+String formatPrice(double euros) => '${euros.toStringAsFixed(3).replaceFirst('.', ',')} €';
+
+/// How long ago a price was set: "à l'instant", "il y a 25 min", "il y a
+/// 3 h", "il y a 2 j".
+String formatAge(DateTime at, DateTime now) {
+  final d = now.difference(at);
+  if (d.inMinutes < 2) return 'à l’instant';
+  if (d.inHours < 1) return 'il y a ${d.inMinutes} min';
+  if (d.inDays < 1) return 'il y a ${d.inHours} h';
+  return 'il y a ${d.inDays} j';
+}
+
+const _connectorLabels = {
+  'type2': 'Type 2',
+  'ccs': 'CCS',
+  'chademo': 'CHAdeMO',
+  'ef': 'prise domestique',
+  'other': 'autre',
+};
+
+/// "4 points · 22 kW · Type 2, CCS · gratuit · accès réservé".
+String chargingSummary(ChargingStation c) {
+  final kw = c.maxKw == c.maxKw.roundToDouble()
+      ? c.maxKw.toStringAsFixed(0)
+      : c.maxKw.toStringAsFixed(1).replaceFirst('.', ',');
+  return [
+    c.points > 1 ? '${c.points} points' : '1 point',
+    if (c.maxKw > 0) '$kw kW',
+    if (c.connectors.isNotEmpty) c.connectors.map((k) => _connectorLabels[k] ?? k).join(', '),
+    if (c.free) 'gratuit',
+    if (!c.openToAll) 'accès réservé',
+    if (!c.alwaysOpen) 'horaires limités',
+  ].join(' · ');
 }
