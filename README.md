@@ -14,6 +14,8 @@ once a region is downloaded.
 - MapLibre map, night theme. **Offline** with a downloaded region package
   (PMTiles + bundled style, sprites and fonts); online OpenFreeMap tiles
   otherwise.
+- **Night map**, from sunset to sunrise where you are (computed offline),
+  generated from the day style by the region pipeline.
 - Address and place search, **offline** in the installed region (SQLite
   FTS5, accent-insensitive), online (Photon) as a fallback. Long-press on the
   map to pick a destination.

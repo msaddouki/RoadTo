@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:roadto_core/roadto_core.dart';
 
 import '../config.dart';
+import '../services/settings_store.dart';
 import '../state/app_controller.dart';
 import 'crash_reports_screen.dart';
 import 'identity_screens.dart';
@@ -126,6 +127,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
               subtitle: const Text('Affiche la carte de la région installée plutôt que les tuiles en ligne.'),
               value: _s.offlineMap,
               onChanged: app.activeRegion == null ? null : (v) => setState(() => _s = _s.copyWith(offlineMap: v)),
+            ),
+            Text('Carte de nuit', style: text.bodyMedium),
+            const SizedBox(height: 8),
+            SegmentedButton<NightMap>(
+              segments: const [
+                ButtonSegment(value: NightMap.auto, label: Text('Auto'), icon: Icon(Icons.brightness_auto)),
+                ButtonSegment(value: NightMap.always, label: Text('Toujours'), icon: Icon(Icons.dark_mode)),
+                ButtonSegment(value: NightMap.never, label: Text('Jamais'), icon: Icon(Icons.light_mode)),
+              ],
+              selected: {_s.nightMap},
+              onSelectionChanged: (v) => setState(() => _s = _s.copyWith(nightMap: v.single)),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 4, bottom: 12),
+              child: Text(
+                'Auto : couleurs de nuit entre le coucher et le lever du soleil, là où vous êtes. '
+                'Carte hors ligne seulement.',
+                style: text.bodySmall,
+              ),
             ),
             Text('Style en ligne', style: text.bodyMedium),
             RadioGroup<String>(
