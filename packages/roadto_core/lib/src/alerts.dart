@@ -244,6 +244,19 @@ class AlertStore {
     return freshness * support;
   }
 
+  /// Drivers whose latest answer is "still there", and when the most recent
+  /// of them said so: "Confirmé par 3 conducteurs · il y a 4 min".
+  ({int count, DateTime? latest}) stillThere(String alertId) {
+    var count = 0;
+    DateTime? latest;
+    for (final c in (_confirmations[alertId] ?? const {}).values) {
+      if (!c.stillThere) continue;
+      count++;
+      if (latest == null || c.at.isAfter(latest)) latest = c.at;
+    }
+    return (count: count, latest: latest);
+  }
+
   /// Alertes à afficher : non expirées et jugées fiables.
   List<RoadAlert> visible({DateTime? now}) {
     final t = now ?? DateTime.now();
