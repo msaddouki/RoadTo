@@ -36,6 +36,14 @@ jobs:
           (cd relay/dev_relay && dart pub get)
           (cd relay/strfry_policy && dart pub get)
           (cd app && flutter pub get)
+      # The app and the relays use roadto_core by path: a change to its
+      # pubspec (by hand or by Dependabot) must come with their lockfiles.
+      - name: Lockfiles up to date
+        run: |
+          if ! git diff --exit-code -- '*/pubspec.lock'; then
+            echo "::error::pubspec.lock out of date: run pub get in app/ and relay/*/ and commit the lockfiles"
+            exit 1
+          fi
       # After pub get: the formatter reads the line width from analysis_options.yaml.
       - name: Format
         run: dart format --output=none --set-exit-if-changed packages relay app/lib app/test
