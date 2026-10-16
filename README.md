@@ -20,6 +20,8 @@ once a region is downloaded.
 - **Search by category** (fuel, charging, parking, rest areas, toilets,
   food), offline: nearest around you, or next ones ahead on the route with
   the distance to them and how far they are from the road.
+- **Favourites** (Maison, Travail…) stored on the phone only: star a search
+  result, or long-press the map; they are listed before you type.
 - Route from Valhalla, turn-by-turn guidance with French voice prompts,
   arrival time, rerouting when off route. **Offline on Android** with the
   region's graph (valhalla-mobile); online on iOS and outside the region.
