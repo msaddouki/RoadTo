@@ -179,6 +179,14 @@ void main() {
       expect(checkWritePolicy(e, now: now), startsWith('blocked:'));
     });
 
+    test('signature : vérifiée sauf si le relais l’a déjà fait', () {
+      final e = buildAlertEvent(keys: KeyPair.generate(), type: AlertType.hazard, position: bellecour, now: now);
+      final json = e.toJson()..['sig'] = '${'0' * 127}1';
+      final forged = NostrEvent.fromJson(json);
+      expect(checkWritePolicy(forged, now: now), 'invalid: identifiant ou signature');
+      expect(checkWritePolicy(forged, now: now, verifySignature: false), isNull);
+    });
+
     test('refuse une PoW insuffisante', () {
       NostrEvent e;
       var i = 0;
