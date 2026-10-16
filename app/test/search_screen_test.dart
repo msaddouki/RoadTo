@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:roadto/ui/place_sheet.dart';
 import 'package:roadto/ui/search_screen.dart';
 import 'package:roadto_core/roadto_core.dart';
 
@@ -104,7 +105,7 @@ void main() {
       // Nearest first by default; cheapest first on demand.
       double y(String name) => tester.getTopLeft(find.text(name)).dy;
       expect(y('TotalEnergies'), lessThan(y('Intermarché')));
-      await tester.tap(find.text('Moins cher d’abord'));
+      await tester.tap(find.text('Moins cher'));
       await tester.pumpAndSettle();
       expect(y('Intermarché'), lessThan(y('TotalEnergies')));
       expect(y('TotalEnergies'), lessThan(y('Station-service')));
@@ -137,7 +138,9 @@ void main() {
       await tester.tap(find.text('Recharge'));
       await tester.pumpAndSettle();
       expect(find.text('Aire de Solaize\n6 points · 350 kW · CCS, Type 2'), findsOneWidget);
-      expect(find.text('Moins cher d’abord'), findsNothing);
+      expect(find.text('Moins cher'), findsNothing);
+      // Around the position, not on a route: nothing to choose the order by.
+      expect(find.text('Plus proche'), findsNothing);
     });
 
     test('price, age and charging summaries', () {
@@ -159,6 +162,96 @@ void main() {
         ),
         '1 point · 7,4 kW · prise domestique · gratuit · accès réservé · horaires limités',
       );
+    });
+  });
+
+  group('place sheet and order', () {
+    final now = DateTime.now();
+    const total = Place(name: 'TotalEnergies', detail: 'Lyon', position: LatLon(45.76, 4.84));
+    const esso = Place(name: 'Esso', position: LatLon(45.77, 4.85));
+    final totalStation = FuelStation(
+      id: '1',
+      position: const LatLon(45.76, 4.84),
+      card24h: true,
+      prices: {
+        'gazole': FuelPrice(1.849, now.subtract(const Duration(hours: 2))),
+        'sp98': FuelPrice(1.959, now.subtract(const Duration(days: 1))),
+      },
+      outOfStock: const ['e10'],
+    );
+
+    testWidgets('a station with prices opens its sheet; Y aller picks it', (tester) async {
+      await _open(tester, (_) => [NearbyPlace(total, 900, aheadM: 2400, offRouteM: 300, fuel: totalStation)]);
+      await tester.tap(find.text('Carburant'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('TotalEnergies'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(PlaceSheet), findsOneWidget);
+      expect(find.text('1,849 €  ·  il y a 2 h'), findsOneWidget);
+      expect(find.text('1,959 €  ·  il y a 1 j'), findsOneWidget);
+      expect(find.text('en rupture'), findsOneWidget);
+      expect(find.text('Automate carte bancaire 24h/24'), findsOneWidget);
+      expect(find.text('dans 2,4 km · à 300 m de la route'), findsOneWidget);
+
+      await tester.tap(find.text('Fermer'));
+      await tester.pumpAndSettle();
+      expect(find.byType(SearchScreen), findsOneWidget);
+
+      await tester.tap(find.text('TotalEnergies'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Y aller'));
+      await tester.pumpAndSettle();
+      expect(find.byType(SearchScreen), findsNothing);
+    });
+
+    testWidgets('on a route, the least detour comes first on demand', (tester) async {
+      await _open(
+        tester,
+        (_) => const [
+          NearbyPlace(total, 900, aheadM: 1000, offRouteM: 600),
+          NearbyPlace(esso, 3000, aheadM: 5000, offRouteM: 40),
+        ],
+      );
+      await tester.tap(find.text('Carburant'));
+      await tester.pumpAndSettle();
+      double y(String name) => tester.getTopLeft(find.text(name)).dy;
+      expect(find.text('Premier sur la route'), findsOneWidget);
+      expect(y('TotalEnergies'), lessThan(y('Esso')));
+      await tester.tap(find.text('Moins de détour'));
+      await tester.pumpAndSettle();
+      expect(y('Esso'), lessThan(y('TotalEnergies')));
+    });
+
+    testWidgets('a charging sheet shows the charge points and access', (tester) async {
+      await _open(
+        tester,
+        (_) => const [
+          NearbyPlace(
+            Place(name: 'Izivia', detail: 'Place Bellecour', position: LatLon(45.75, 4.83)),
+            300,
+            charging: ChargingStation(
+              id: 'FRIZIV1',
+              position: LatLon(45.75, 4.83),
+              operator: 'Izivia',
+              points: 4,
+              maxKw: 22,
+              connectors: ['type2'],
+              card: true,
+              openToAll: false,
+            ),
+          ),
+        ],
+      );
+      await tester.tap(find.text('Recharge'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Izivia'));
+      await tester.pumpAndSettle();
+      expect(find.text('Payant, carte bancaire acceptée'), findsOneWidget);
+      expect(find.text('Accès réservé'), findsOneWidget);
+      expect(find.text('Horaires limités'), findsOneWidget);
+      // The operator is the title already: not repeated.
+      expect(find.widgetWithText(PlaceSheet, 'Izivia'), findsOneWidget);
     });
   });
 }
