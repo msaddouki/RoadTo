@@ -8,6 +8,7 @@ import 'package:roadto_core/roadto_core.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import '../config.dart';
+import '../services/backup.dart';
 import '../services/crash_reports.dart';
 import '../services/device_routing.dart';
 import '../services/embedded_region.dart';
@@ -90,6 +91,8 @@ class AppController extends ChangeNotifier {
     final settings = await SettingsStore.load();
     final identity = await store.loadOrCreate();
     final support = await getApplicationSupportDirectory();
+    // Hundreds of MB that can be reinstalled: kept out of iCloud backups.
+    await BackupExclusion.exclude(Directory('${support.path}/regions'));
     final regions = RegionStore(
       Directory('${support.path}/regions'),
       trustedKeys: Defaults.trustedRegionKeys,

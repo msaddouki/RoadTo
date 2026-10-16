@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:roadto/main.dart';
 import 'package:roadto/services/device_routing.dart';
+import 'package:roadto/services/location_source.dart';
 import 'package:roadto/state/app_controller.dart';
 import 'package:roadto/ui/map_screen.dart';
 import 'package:roadto_core/roadto_core.dart';
@@ -23,6 +24,15 @@ void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
   // Draw every frame the app asks for, so the screenshots show the real app.
   binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
+
+  // The native side of the app's own channels is registered in MainActivity;
+  // a merge once dropped the location one and nothing noticed, since the
+  // default settings simulate the position.
+  testWidgets('Android channels are registered', (tester) async {
+    final status = await AndroidLocation.methods.invokeMapMethod<String, Object?>('status');
+    expect(status, containsPair('service', isA<bool>()));
+    expect(status, containsPair('permission', isA<String>()));
+  });
 
   testWidgets('Lyon offline: install, search, route on the device, navigate', (tester) async {
     final clock = Stopwatch()..start();

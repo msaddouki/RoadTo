@@ -23,6 +23,11 @@
 
 - Losing both the phone and the phrase loses the identity: there is no
   account to recover it from, by design.
+- The key does not leave the phone through backups on Android: Google Drive
+  backup is off and phone-to-phone transfers skip the secure storage (the key
+  is wrapped by this phone's keystore and would be unreadable elsewhere).
+  Moving to a new phone goes through the phrase. On iOS it stays in the
+  keychain, which only travels in encrypted backups.
 - Encrypted backup, as an alternative to writing words down (plan, J3):
   the key encrypted with a password in the Nostr standard NIP-49
   (`ncryptsec1…`: scrypt 2^16 with r = 8, p = 1, then XChaCha20-Poly1305;

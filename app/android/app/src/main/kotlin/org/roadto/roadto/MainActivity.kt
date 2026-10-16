@@ -26,8 +26,12 @@ class MainActivity : FlutterActivity() {
     private var valhalla: Valhalla? = null
     private var valhallaConfig: String? = null
 
+    // Position from Android's LocationManager, no Google Play Services.
+    private var location: DeviceLocation? = null
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+        location = DeviceLocation(this, flutterEngine.dartExecutor.binaryMessenger)
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "org.roadto/valhalla").setMethodCallHandler { call, result ->
             when (call.method) {
                 "route", "traceAttributes" -> {
@@ -106,7 +110,14 @@ class MainActivity : FlutterActivity() {
         return json.toString()
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        location?.onPermissionResult(requestCode)
+    }
+
     override fun onDestroy() {
+        location?.dispose()
+        location = null
         routingThread.execute { valhalla?.close(); valhalla = null }
         routingThread.shutdown()
         super.onDestroy()
