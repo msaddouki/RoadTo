@@ -1,0 +1,384 @@
+{
+ "trip": {
+  "locations": [
+   {
+    "type": "break",
+    "lat": 45.779,
+    "lon": 4.805,
+    "side_of_street": "left",
+    "original_index": 0
+   },
+   {
+    "type": "break",
+    "lat": 45.78,
+    "lon": 4.89,
+    "original_index": 1
+   }
+  ],
+  "legs": [
+   {
+    "maneuvers": [
+     {
+      "type": 3,
+      "instruction": "Conduisez vers l'ouest sur Rue Masaryk.",
+      "verbal_succinct_transition_instruction": "Conduisez vers l'ouest. Ensuite, Serrez à droite dans Place de Paris.",
+      "verbal_pre_transition_instruction": "Conduisez vers l'ouest sur Rue Masaryk. Ensuite, Serrez à droite dans Place de Paris.",
+      "verbal_post_transition_instruction": "Continuez pendant 60 mètres.",
+      "street_names": [
+       "Rue Masaryk"
+      ],
+      "bearing_after": 284,
+      "time": 14.443,
+      "length": 0.064,
+      "cost": 16.609,
+      "begin_shape_index": 0,
+      "end_shape_index": 2,
+      "verbal_multi_cue": true,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 9,
+      "instruction": "Serrez à droite dans Place de Paris.",
+      "verbal_transition_alert_instruction": "Serrez à droite dans Place de Paris.",
+      "verbal_succinct_transition_instruction": "Serrez à droite. Ensuite, Tournez à gauche vers Vaise centre.",
+      "verbal_pre_transition_instruction": "Serrez à droite dans Place de Paris. Ensuite, Tournez à gauche vers Vaise centre.",
+      "verbal_post_transition_instruction": "Continuez pendant 50 mètres.",
+      "street_names": [
+       "Place de Paris"
+      ],
+      "bearing_before": 284,
+      "bearing_after": 318,
+      "time": 10.714,
+      "length": 0.048,
+      "cost": 34.936,
+      "begin_shape_index": 2,
+      "end_shape_index": 6,
+      "verbal_multi_cue": true,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 15,
+      "instruction": "Tournez à gauche vers Vaise centre/Périphérique Porte de Vaise.",
+      "verbal_transition_alert_instruction": "Tournez à gauche vers Vaise centre.",
+      "verbal_succinct_transition_instruction": "Tournez à gauche vers Vaise centre, Périphérique Porte de Vaise.",
+      "verbal_pre_transition_instruction": "Tournez à gauche vers Vaise centre, Périphérique Porte de Vaise.",
+      "verbal_post_transition_instruction": "Continuez pendant 200 mètres.",
+      "street_names": [
+       "Rue du 24 Mars 1852"
+      ],
+      "bearing_before": 318,
+      "bearing_after": 240,
+      "time": 33.307,
+      "length": 0.152,
+      "cost": 55.214,
+      "begin_shape_index": 6,
+      "end_shape_index": 14,
+      "sign": {},
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 11,
+      "instruction": "Tournez tout de suite à droite dans Rue de Bourgogne.",
+      "verbal_transition_alert_instruction": "Tournez tout de suite à droite dans Rue de Bourgogne.",
+      "verbal_succinct_transition_instruction": "Tournez tout de suite à droite.",
+      "verbal_pre_transition_instruction": "Tournez tout de suite à droite dans Rue de Bourgogne.",
+      "verbal_post_transition_instruction": "Continuez pendant 300 mètres.",
+      "street_names": [
+       "Rue de Bourgogne"
+      ],
+      "bearing_before": 214,
+      "bearing_after": 351,
+      "time": 66.467,
+      "length": 0.319,
+      "cost": 121.658,
+      "begin_shape_index": 14,
+      "end_shape_index": 36,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 20,
+      "instruction": "Prenez la sortie vers Marseille/Genève/Grenoble/Périphérique Est.",
+      "verbal_transition_alert_instruction": "Prenez la sortie vers Marseille.",
+      "verbal_pre_transition_instruction": "Prenez la sortie vers Marseille, Genève.",
+      "verbal_post_transition_instruction": "Continuez pendant 6 kilomètres.",
+      "street_names": [
+       "Boulevard Périphérique Nord"
+      ],
+      "bearing_before": 339,
+      "bearing_after": 349,
+      "time": 325.611,
+      "length": 5.711,
+      "cost": 418.096,
+      "begin_shape_index": 36,
+      "end_shape_index": 131,
+      "toll": true,
+      "sign": {
+       "exit_toward_elements": [
+        {
+         "text": "Marseille"
+        },
+        {
+         "text": "Genève"
+        },
+        {
+         "text": "Grenoble"
+        },
+        {
+         "text": "Périphérique Est"
+        },
+        {
+         "text": "Porte de Saint-Clair"
+        }
+       ]
+      },
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 24,
+      "instruction": "Gardez la gauche pour rester sur Boulevard Périphérique Nord.",
+      "verbal_transition_alert_instruction": "Gardez la gauche pour rester sur Boulevard Périphérique Nord.",
+      "verbal_pre_transition_instruction": "Gardez la gauche pour rester sur Boulevard Périphérique Nord. Ensuite, Prenez la sortie sur la gauche.",
+      "verbal_post_transition_instruction": "Continuez pendant 30 mètres.",
+      "street_names": [
+       "Boulevard Périphérique Nord"
+      ],
+      "bearing_before": 67,
+      "bearing_after": 58,
+      "time": 2.012,
+      "length": 0.032,
+      "cost": 2.227,
+      "begin_shape_index": 131,
+      "end_shape_index": 132,
+      "toll": true,
+      "verbal_multi_cue": true,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 21,
+      "instruction": "Prenez la sortie sur la gauche.",
+      "verbal_transition_alert_instruction": "Prenez la sortie sur la gauche.",
+      "verbal_pre_transition_instruction": "Prenez la sortie sur la gauche. Ensuite, Gardez la gauche pour rester sur Boulevard Périphérique Nord.",
+      "street_names": [
+       "Boulevard Périphérique Nord"
+      ],
+      "bearing_before": 58,
+      "bearing_after": 58,
+      "time": 6.815,
+      "length": 0.087,
+      "cost": 7.659,
+      "begin_shape_index": 132,
+      "end_shape_index": 133,
+      "toll": true,
+      "verbal_multi_cue": true,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 24,
+      "instruction": "Gardez la gauche pour rester sur Boulevard Périphérique Nord.",
+      "verbal_transition_alert_instruction": "Gardez la gauche pour rester sur Boulevard Périphérique Nord.",
+      "verbal_pre_transition_instruction": "Gardez la gauche pour rester sur Boulevard Périphérique Nord.",
+      "verbal_post_transition_instruction": "Continuez pendant 2 kilomètres.",
+      "street_names": [
+       "Boulevard Périphérique Nord"
+      ],
+      "bearing_before": 58,
+      "bearing_after": 58,
+      "time": 111.864,
+      "length": 1.978,
+      "cost": 152.437,
+      "begin_shape_index": 133,
+      "end_shape_index": 181,
+      "toll": true,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 20,
+      "instruction": "Prenez la sortie 6/6a vers Porte de Croix-Luizet.",
+      "verbal_transition_alert_instruction": "Prenez la sortie 6, 6a.",
+      "verbal_pre_transition_instruction": "Prenez la sortie 6, 6a vers Porte de Croix-Luizet.",
+      "bearing_before": 142,
+      "bearing_after": 169,
+      "time": 12.947,
+      "length": 0.136,
+      "cost": 14.65,
+      "begin_shape_index": 181,
+      "end_shape_index": 195,
+      "sign": {
+       "exit_number_elements": [
+        {
+         "text": "6"
+        },
+        {
+         "text": "6a"
+        }
+       ],
+       "exit_toward_elements": [
+        {
+         "text": "Porte de Croix-Luizet"
+        }
+       ],
+       "exit_name_elements": [
+        {
+         "text": "Porte de Croix-Luizet"
+        },
+        {
+         "text": "Porte de la Doua"
+        }
+       ]
+      },
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 26,
+      "instruction": "Entrez dans Boulevard Laurent Bonnevay et prenez la 2e sortie dans Rue de la Feyssine.",
+      "verbal_transition_alert_instruction": "Entrez dans Boulevard Laurent Bonnevay et prenez la 2e sortie dans Rue de la Feyssine.",
+      "verbal_succinct_transition_instruction": "Entrez dans le rond-point et prenez la 2e sortie.",
+      "verbal_pre_transition_instruction": "Entrez dans Boulevard Laurent Bonnevay et prenez la 2e sortie dans Rue de la Feyssine.",
+      "street_names": [
+       "Boulevard Laurent Bonnevay"
+      ],
+      "bearing_before": 227,
+      "bearing_after": 252,
+      "time": 12.203,
+      "length": 0.057,
+      "cost": 23.826,
+      "begin_shape_index": 195,
+      "end_shape_index": 209,
+      "roundabout_exit_count": 2,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 27,
+      "instruction": "Quittez le rond-point dans Rue de la Feyssine.",
+      "verbal_succinct_transition_instruction": "Quittez le rond-point.",
+      "verbal_pre_transition_instruction": "Quittez le rond-point dans Rue de la Feyssine.",
+      "verbal_post_transition_instruction": "Continuez pendant 300 mètres.",
+      "street_names": [
+       "Rue de la Feyssine"
+      ],
+      "bearing_before": 103,
+      "bearing_after": 102,
+      "time": 42.099,
+      "length": 0.315,
+      "cost": 58.149,
+      "begin_shape_index": 209,
+      "end_shape_index": 227,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 26,
+      "instruction": "Entrez dans le rond-point et prenez la 3ème sortie dans Rue de la Feyssine.",
+      "verbal_transition_alert_instruction": "Entrez dans le rond-point et prenez la 3ème sortie dans Rue de la Feyssine.",
+      "verbal_succinct_transition_instruction": "Entrez dans le rond-point et prenez la 3ème sortie.",
+      "verbal_pre_transition_instruction": "Entrez dans le rond-point et prenez la 3ème sortie dans Rue de la Feyssine.",
+      "bearing_before": 178,
+      "bearing_after": 201,
+      "time": 8.049,
+      "length": 0.032,
+      "cost": 13.785,
+      "begin_shape_index": 227,
+      "end_shape_index": 236,
+      "roundabout_exit_count": 3,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 27,
+      "instruction": "Quittez le rond-point dans Rue de la Feyssine.",
+      "verbal_succinct_transition_instruction": "Quittez le rond-point.",
+      "verbal_pre_transition_instruction": "Quittez le rond-point dans Rue de la Feyssine.",
+      "verbal_post_transition_instruction": "Continuez pendant 600 mètres.",
+      "street_names": [
+       "Rue de la Feyssine"
+      ],
+      "bearing_before": 72,
+      "bearing_after": 108,
+      "time": 76.338,
+      "length": 0.569,
+      "cost": 129.853,
+      "begin_shape_index": 236,
+      "end_shape_index": 264,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 10,
+      "instruction": "Tournez à droite dans Impasse des Sœurs.",
+      "verbal_transition_alert_instruction": "Tournez à droite dans Impasse des Sœurs.",
+      "verbal_succinct_transition_instruction": "Tournez à droite.",
+      "verbal_pre_transition_instruction": "Tournez à droite dans Impasse des Sœurs.",
+      "verbal_post_transition_instruction": "Continuez pendant 100 mètres.",
+      "street_names": [
+       "Impasse des Sœurs"
+      ],
+      "bearing_before": 170,
+      "bearing_after": 261,
+      "time": 27.308,
+      "length": 0.126,
+      "cost": 41.338,
+      "begin_shape_index": 264,
+      "end_shape_index": 267,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 4,
+      "instruction": "Vous êtes arrivé à votre destination.",
+      "verbal_transition_alert_instruction": "Vous arriverez à votre destination.",
+      "verbal_pre_transition_instruction": "Vous êtes arrivé à votre destination.",
+      "bearing_before": 261,
+      "time": 0.0,
+      "length": 0.0,
+      "cost": 0.0,
+      "begin_shape_index": 267,
+      "end_shape_index": 267,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     }
+    ],
+    "summary": {
+     "has_time_restrictions": false,
+     "has_toll": true,
+     "has_highway": false,
+     "has_ferry": false,
+     "min_lat": 45.778563,
+     "min_lon": 4.800375,
+     "max_lat": 45.793875,
+     "max_lon": 4.891605,
+     "time": 750.184,
+     "length": 9.629,
+     "cost": 1090.444
+    },
+    "shape": "secivAqxgdHeEjc@gAlL_C`D_IxK_BvBcB~BjA~D|@bDZhAbJ|[b`@f^n@h@xEzEf@^{Dh@{GfGmJrI}JbJqAdAqAdAaBpAcBtAm^zZuFpEsPlNeAdA_B~A[ZyEtEwBpBUJiDViA^gA^aFtC_NdGqRpDuBj@iCZ{CNuCLeDEcDSgBSmCg@{DcAoDsAgFeCgCiA{LgNqLqOo_@qe@yBeF_c@e_AaWm^}d@w^}hBybAmp@wn@ye@{n@qPqVmIoNcGwM_Q}`@mGkRgI{T_Mg`@mNme@oTa`AoUwaAqHm[aEuOmFwRsCaKgDuKiJ}XuFcPyGkPmSud@wUil@uZ{aA}WicAqHs]aHq^{Fa^yFy_@wFmf@kEoe@eEqm@oCmo@qB}t@EaC}@kx@?{ELwFhBcpAxFwkAzJ{zAdLi~A|HojAzKkhA|Ro{AlXgtBxVcwBv_@{dDve@qiE|T_cBzSaaBxQyiAfSy~@~^_}AvLeq@tFel@zEobA|DihAbBkr@Z{m@hEmlDv@ch@\\uP`@aQRgPlA}b@Ful@]e^g@sMgAmReAkMsA_OiFya@gDqSuIgb@qHkUuXyz@aK_[gSgl@mWgp@kl@m}@gO{ViEiIgCeFwE{JqE_LcDmIyHmWmDqM_DgM_M}f@aNsj@ySa{@kI}]gC}NsIq\\oJm`@gC_LuBgLqC_QqCeU_CyXwA}Yg@_U@uT^gWdAoVl@uJv@uJ`AiJdAmJdDwUbEeThCaLzCqLrFiQrEgMxEyKbLsVtOoZhOkYtW{c@v[ef@p]gd@vhC{xChFOjBgAtAm@rG_BbFkBfEy@nEe@jFGlCVhCn@lB`AhAfAhAfBhCtFLpBb@hBr@pA|@z@hA`@jABbAS|@i@t@}@h@oAZyAHaBCaBS}AHeD`@}CF[|AuJ~Pgj@~DaKpH_MjHqJpEuEhGcFtJyGhe@uVpE}B`A_@^K~@Yz@GbATj@VlAFp@ObAs@h@}@`@cBFuAMkB[qAWsCZiCn@mBhBwCbEmBfaAgd@nc@yR~Aw@vJ}EjHuCpAe@hHmDfJcE~Dk@hCuAvIwE`CiAnE}BjJeFtDwBfDuCrB_@rDm@tb@sGdBU|Cm@xSeEfBYV`FfC|f@rDpt@"
+   }
+  ],
+  "summary": {
+   "has_time_restrictions": false,
+   "has_toll": true,
+   "has_highway": false,
+   "has_ferry": false,
+   "min_lat": 45.778563,
+   "min_lon": 4.800375,
+   "max_lat": 45.793875,
+   "max_lon": 4.891605,
+   "time": 750.184,
+   "length": 9.629,
+   "cost": 1090.444
+  },
+  "status_message": "Found route between points",
+  "status": 0,
+  "units": "kilometers",
+  "language": "fr-FR"
+ }
+}

@@ -1,0 +1,287 @@
+{
+ "trip": {
+  "locations": [
+   {
+    "type": "break",
+    "lat": 45.7605,
+    "lon": 4.859,
+    "side_of_street": "right",
+    "original_index": 0
+   },
+   {
+    "type": "break",
+    "lat": 45.743,
+    "lon": 4.818,
+    "side_of_street": "right",
+    "original_index": 1
+   }
+  ],
+  "legs": [
+   {
+    "maneuvers": [
+     {
+      "type": 2,
+      "instruction": "Conduisez vers le nord sur Tunnel de Vivier-Merle.",
+      "verbal_succinct_transition_instruction": "Conduisez vers le nord.",
+      "verbal_pre_transition_instruction": "Conduisez vers le nord sur Tunnel de Vivier-Merle.",
+      "verbal_post_transition_instruction": "Continuez pendant 700 mètres.",
+      "street_names": [
+       "Tunnel de Vivier-Merle"
+      ],
+      "bearing_after": 356,
+      "time": 119.441,
+      "length": 0.662,
+      "cost": 164.964,
+      "begin_shape_index": 0,
+      "end_shape_index": 36,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 15,
+      "instruction": "Tournez à gauche dans Rue Vauban.",
+      "verbal_transition_alert_instruction": "Tournez à gauche dans Rue Vauban.",
+      "verbal_succinct_transition_instruction": "Tournez à gauche.",
+      "verbal_pre_transition_instruction": "Tournez à gauche dans Rue Vauban.",
+      "verbal_post_transition_instruction": "Continuez pendant 200 mètres.",
+      "street_names": [
+       "Rue Vauban"
+      ],
+      "bearing_before": 358,
+      "bearing_after": 272,
+      "time": 36.558,
+      "length": 0.176,
+      "cost": 73.109,
+      "begin_shape_index": 36,
+      "end_shape_index": 51,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 15,
+      "instruction": "Tournez à gauche dans Boulevard des Brotteaux.",
+      "verbal_transition_alert_instruction": "Tournez à gauche dans Boulevard des Brotteaux.",
+      "verbal_succinct_transition_instruction": "Tournez à gauche.",
+      "verbal_pre_transition_instruction": "Tournez à gauche dans Boulevard des Brotteaux.",
+      "verbal_post_transition_instruction": "Continuez pendant 2 kilomètres.",
+      "street_names": [
+       "Boulevard des Brotteaux"
+      ],
+      "bearing_before": 263,
+      "bearing_after": 171,
+      "time": 377.733,
+      "length": 2.052,
+      "cost": 633.731,
+      "begin_shape_index": 51,
+      "end_shape_index": 146,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 24,
+      "instruction": "Gardez la gauche pour prendre Pont Wilson.",
+      "verbal_transition_alert_instruction": "Gardez la gauche pour prendre Pont Wilson.",
+      "verbal_pre_transition_instruction": "Gardez la gauche pour prendre Pont Wilson.",
+      "verbal_post_transition_instruction": "Continuez pendant 70 mètres.",
+      "street_names": [
+       "Pont Wilson"
+      ],
+      "bearing_before": 274,
+      "bearing_after": 271,
+      "time": 15.433,
+      "length": 0.074,
+      "cost": 39.583,
+      "begin_shape_index": 146,
+      "end_shape_index": 156,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 15,
+      "instruction": "Tournez à gauche dans Quai Jules Courmont.",
+      "verbal_transition_alert_instruction": "Tournez à gauche dans Quai Jules Courmont.",
+      "verbal_succinct_transition_instruction": "Tournez à gauche. Ensuite, Gardez la gauche pour rester sur Quai Jules Courmont.",
+      "verbal_pre_transition_instruction": "Tournez à gauche dans Quai Jules Courmont. Ensuite, Gardez la gauche pour rester sur Quai Jules Courmont.",
+      "verbal_post_transition_instruction": "Continuez pendant 70 mètres.",
+      "street_names": [
+       "Quai Jules Courmont"
+      ],
+      "bearing_before": 245,
+      "bearing_after": 191,
+      "time": 15.464,
+      "length": 0.069,
+      "cost": 38.154,
+      "begin_shape_index": 156,
+      "end_shape_index": 160,
+      "verbal_multi_cue": true,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 24,
+      "instruction": "Gardez la gauche pour rester sur Quai Jules Courmont.",
+      "verbal_transition_alert_instruction": "Gardez la gauche pour rester sur Quai Jules Courmont.",
+      "verbal_pre_transition_instruction": "Gardez la gauche pour rester sur Quai Jules Courmont.",
+      "verbal_post_transition_instruction": "Continuez pendant 1 kilomètre.",
+      "street_names": [
+       "Quai Jules Courmont"
+      ],
+      "bearing_before": 191,
+      "bearing_after": 191,
+      "time": 214.486,
+      "length": 1.178,
+      "cost": 309.916,
+      "begin_shape_index": 160,
+      "end_shape_index": 201,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 24,
+      "instruction": "Gardez la gauche pour prendre Quai du Docteur Gailleton.",
+      "verbal_transition_alert_instruction": "Gardez la gauche pour prendre Quai du Docteur Gailleton.",
+      "verbal_pre_transition_instruction": "Gardez la gauche pour prendre Quai du Docteur Gailleton. Ensuite, Gardez la gauche pour prendre Quai Perrache.",
+      "verbal_post_transition_instruction": "Continuez pendant 40 mètres.",
+      "street_names": [
+       "Quai du Docteur Gailleton"
+      ],
+      "bearing_before": 206,
+      "bearing_after": 208,
+      "time": 7.568,
+      "length": 0.042,
+      "cost": 8.693,
+      "begin_shape_index": 201,
+      "end_shape_index": 202,
+      "verbal_multi_cue": true,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 24,
+      "instruction": "Gardez la gauche pour prendre Quai Perrache.",
+      "verbal_transition_alert_instruction": "Gardez la gauche pour prendre Quai Perrache.",
+      "verbal_pre_transition_instruction": "Gardez la gauche pour prendre Quai Perrache.",
+      "verbal_post_transition_instruction": "Continuez pendant 300 mètres.",
+      "street_names": [
+       "Quai Perrache"
+      ],
+      "bearing_before": 208,
+      "bearing_after": 208,
+      "time": 59.946,
+      "length": 0.333,
+      "cost": 73.93,
+      "begin_shape_index": 202,
+      "end_shape_index": 208,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 9,
+      "instruction": "Serrez à droite pour rester sur Quai Perrache.",
+      "verbal_transition_alert_instruction": "Serrez à droite pour rester sur Quai Perrache.",
+      "verbal_succinct_transition_instruction": "Serrez à droite.",
+      "verbal_pre_transition_instruction": "Serrez à droite pour rester sur Quai Perrache.",
+      "verbal_post_transition_instruction": "Continuez pendant 700 mètres.",
+      "street_names": [
+       "Quai Perrache"
+      ],
+      "bearing_before": 212,
+      "bearing_after": 225,
+      "time": 133.916,
+      "length": 0.732,
+      "cost": 164.006,
+      "begin_shape_index": 208,
+      "end_shape_index": 234,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 10,
+      "instruction": "Tournez à droite dans Rue Casimir Périer.",
+      "verbal_transition_alert_instruction": "Tournez à droite dans Rue Casimir Périer.",
+      "verbal_succinct_transition_instruction": "Tournez à droite.",
+      "verbal_pre_transition_instruction": "Tournez à droite dans Rue Casimir Périer.",
+      "verbal_post_transition_instruction": "Continuez pendant 500 mètres.",
+      "street_names": [
+       "Rue Casimir Périer"
+      ],
+      "bearing_before": 210,
+      "bearing_after": 302,
+      "time": 100.398,
+      "length": 0.496,
+      "cost": 175.457,
+      "begin_shape_index": 234,
+      "end_shape_index": 262,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 15,
+      "instruction": "Tournez à gauche dans Rue Denuzière.",
+      "verbal_transition_alert_instruction": "Tournez à gauche dans Rue Denuzière.",
+      "verbal_succinct_transition_instruction": "Tournez à gauche.",
+      "verbal_pre_transition_instruction": "Tournez à gauche dans Rue Denuzière.",
+      "verbal_post_transition_instruction": "Continuez pendant 70 mètres.",
+      "street_names": [
+       "Rue Denuzière"
+      ],
+      "bearing_before": 300,
+      "bearing_after": 210,
+      "time": 22.11,
+      "length": 0.074,
+      "cost": 43.588,
+      "begin_shape_index": 262,
+      "end_shape_index": 265,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 5,
+      "instruction": "Votre destination est sur la droite.",
+      "verbal_transition_alert_instruction": "Votre destination sera sur la droite.",
+      "verbal_pre_transition_instruction": "Votre destination est sur la droite.",
+      "bearing_before": 211,
+      "time": 0.0,
+      "length": 0.0,
+      "cost": 0.0,
+      "begin_shape_index": 265,
+      "end_shape_index": 265,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     }
+    ],
+    "summary": {
+     "has_time_restrictions": false,
+     "has_toll": false,
+     "has_highway": false,
+     "has_ferry": false,
+     "min_lat": 45.741208,
+     "min_lon": 4.818139,
+     "max_lat": 45.766244,
+     "max_lon": 4.859227,
+     "time": 1103.058,
+     "length": 5.889,
+     "cost": 1725.139
+    },
+    "shape": "i|~gvAqtogHsBHk[vAgu@xGwv@xHcMn@gEUuEg@gFsAoF{BwCmAe@SoAm@}EsAsAg@UM_@WgCy@eA_@kHmCwGaCyGuCeIkDsD}AiEgBq`@_QsCmAiCiAuB}@_Bq@oX_MqEo@oJXsABy@@oA@cABArAAtD?zA@`B?lB@bARvg@DlEDvADjAnAf\\`AvWBn@JhCXjHzCa@p@KpKwArK}@pAMj@GbDWjIsAdAQb@ItAMn@KnB[h~@kLr^iDx@CpGUdINxSwBph@iFx{@yL~@JbAZx@bBj@vBxAr]rBfe@lBtb@lD`W`BtZ`B`]hBt]xAzb@n@tQTlR`A`d@FxABhA\\lJRpGRlFPnFP`Fv@rRpA~c@HvCJtEPbFfBdt@AlKl@fTHtCZfHJtDFfBJzCXxJ`AxY`@jLLvCNfELbEhB~m@FzCNhFJpDvAzj@Bp@J~GCpGl@nTThHz@xSLpCNlER~FxAbb@HfCP~Ed@tO\\dOLbFRzXJlDFhC\\tFj@zI]~w@?zA?|@XrEX~DEzCG~DiFfhCIpUDtC?FHnCFp@N`Aj@nFl@nEf@pB|@zBjCf@tPzBnAVzLzB|MfCfXrHtXhHtXfIbYpJ`ZlMlx@jc@zR`LtZdSl]|Xd^l[fEpGxK`HnAv@z@h@~AfA`WzOtOfJvEjCrJdGvBhAlW~OnQzKvA~@fAp@pEnCfXnP~GfENJ|@d@nC~Abc@fW|@j@dDtBpBhA`B~@fAr@|@l@rW`P|TlNpBnAxSzNrQ~L~o@lh@|JrHdYdSvVpTx^z[|GtK~NjMhUhRtKvJbBzAhN~HfGxEjEtCpDxAjEjDxUhRx[pWzt@tl@~BjBz@t@vC~BtC`Cp@h@hKjIbe@r_@xD`D|`@v[xSzPdGxEx@j@`ChBeA`Dc@vAyApEuTbs@uAdEeAnDsGnSwAjE_AdD_HhTyAdE}BrGgSlm@oA|Dy@fCm@jBY|@k@fBqAvD_CtHuEvNu@~BkLl^Sl@sDnLa@tAkOzf@gApDnB|A`HvFhVxR"
+   }
+  ],
+  "summary": {
+   "has_time_restrictions": false,
+   "has_toll": false,
+   "has_highway": false,
+   "has_ferry": false,
+   "min_lat": 45.741208,
+   "min_lon": 4.818139,
+   "max_lat": 45.766244,
+   "max_lon": 4.859227,
+   "time": 1103.058,
+   "length": 5.889,
+   "cost": 1725.139
+  },
+  "status_message": "Found route between points",
+  "status": 0,
+  "units": "kilometers",
+  "language": "fr-FR"
+ }
+}

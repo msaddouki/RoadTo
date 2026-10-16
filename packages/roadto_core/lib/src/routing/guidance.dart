@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import '../alerts.dart';
 import '../geo.dart';
 import 'route.dart';
@@ -49,6 +51,7 @@ class GuidanceEngine {
   final double arrivalThresholdM;
 
   int _segmentHint = 0;
+  double? _lastAlongM;
   int _offRouteCount = 0;
   bool _started = false;
   final _announced = <String>{};
@@ -61,18 +64,34 @@ class GuidanceEngine {
   });
 
   GuidanceState update(LatLon position, {double speedMps = 0}) {
-    // On cherche d'abord près du dernier segment connu, pour ne pas sauter
-    // sur une portion parallèle ou repassant au même endroit.
-    var proj = projectOnRoute(route, position, from: _segmentHint - 2, to: _segmentHint + 60);
+    // D'abord là où la voiture peut être depuis la position précédente :
+    // sous les trémies ou le long d'une bretelle, une portion plus loin sur
+    // l'itinéraire peut être plus proche du fix et ferait sauter des
+    // manœuvres. Ensuite près du dernier segment connu, puis sur toute la
+    // suite (après un tunnel, ou hors route). Jamais en arrière : un
+    // itinéraire ne repasse pas sur ses pas, et un demi-tour le fait
+    // recalculer ; une route parallèle déjà passée retiendrait le guidage.
+    final last = _lastAlongM;
+    final behind = last == null ? 0 : _segmentAt(last - 15);
+    RouteProjection? proj;
+    if (last != null) {
+      final reachM = math.max(80.0, speedMps * 5);
+      final near = projectOnRoute(route, position, from: behind, to: _segmentAt(last + reachM) + 1);
+      if (near != null && near.offsetM <= offRouteThresholdM) proj = near;
+    }
+    proj ??= projectOnRoute(route, position, from: math.max(_segmentHint - 2, behind), to: _segmentHint + 60);
     if (proj == null || proj.offsetM > offRouteThresholdM) {
-      final global = projectOnRoute(route, position);
+      final global = projectOnRoute(route, position, from: behind);
       if (global != null && (proj == null || global.offsetM < proj.offsetM)) proj = global;
     }
     if (proj == null) throw StateError('Itinéraire vide');
 
     final off = proj.offsetM > offRouteThresholdM;
     _offRouteCount = off ? _offRouteCount + 1 : 0;
-    if (!off) _segmentHint = proj.segmentIndex;
+    if (!off) {
+      _segmentHint = proj.segmentIndex;
+      _lastAlongM = proj.alongM;
+    }
 
     final along = proj.alongM;
     final remainingM = (route.shapeLengthM - along).clamp(0.0, double.infinity);
@@ -133,6 +152,18 @@ class GuidanceEngine {
       arrived: arrived,
       announcement: say,
     );
+  }
+
+  /// Indice du segment de l'itinéraire où se trouve [alongM].
+  int _segmentAt(double alongM) {
+    final c = route.cumulative;
+    if (c.length < 2 || alongM <= 0) return 0;
+    var lo = 0, hi = c.length - 1;
+    while (hi - lo > 1) {
+      final mid = (lo + hi) >> 1;
+      c[mid] <= alongM ? lo = mid : hi = mid;
+    }
+    return lo;
   }
 }
 
