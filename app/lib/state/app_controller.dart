@@ -92,7 +92,8 @@ class AppController extends ChangeNotifier {
     final favorites = await Favorites.load();
     return AppController._(settings, identity.keys, store, regions)
       ..hasRecoveryPhrase = identity.hasRecoveryPhrase
-      ..favorites = favorites;
+      ..favorites = favorites
+      ..crashReports = crashReports;
   }
 
   bool get navigating => route != null;
