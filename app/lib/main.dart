@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'services/car_link.dart';
 import 'services/crash_reports.dart';
+import 'services/live_activity.dart';
 import 'state/app_controller.dart';
 import 'ui/map_screen.dart';
 
@@ -30,6 +31,8 @@ Future<void> main() async {
   await app.start();
   // Android Auto shows this guidance on the car screen.
   CarLink.forApp(app).start();
+  // iPhone: the trip on the lock screen and in the Dynamic Island.
+  LiveActivityLink.forApp(app).start();
 }
 
 class RoadToApp extends StatelessWidget {

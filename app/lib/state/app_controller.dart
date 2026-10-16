@@ -187,24 +187,53 @@ class AppController extends ChangeNotifier {
   // --- Position ---------------------------------------------------------
 
   Future<void> _applyLocationMode() async {
-    await _deviceSub?.cancel();
-    _deviceSub = null;
     if (settings.simulate) {
       if (navigating) {
         _startSimulator(startM: guidance?.projection.alongM ?? 0);
       } else {
         _onFix(Fix(position));
       }
+    } else {
+      _stopSimulator();
+    }
+    await _listenToDevice();
+  }
+
+  /// iOS, while navigating: location in the background too. iOS suspends a
+  /// backgrounded app otherwise, which would stop the guidance, the voice
+  /// and the Live Activity.
+  bool _backgroundLocation = false;
+  int _deviceGeneration = 0;
+
+  Future<void> _setBackgroundLocation(bool on) async {
+    if (!Platform.isIOS || on == _backgroundLocation) return;
+    _backgroundLocation = on;
+    await _listenToDevice();
+  }
+
+  Future<void> _listenToDevice() async {
+    final generation = ++_deviceGeneration;
+    await _deviceSub?.cancel();
+    _deviceSub = null;
+    // A simulated trip in the background still needs fixes coming, only to
+    // keep the app running: they are ignored.
+    final keepAliveOnly = settings.simulate;
+    if (keepAliveOnly && !_backgroundLocation) return;
+    final status = await DeviceLocation.ensurePermission();
+    if (generation != _deviceGeneration) return; // a newer call took over
+    if (keepAliveOnly) {
+      if (status == LocationAvailability.ok) {
+        _deviceSub = DeviceLocation.stream(background: true).listen((_) {}, onError: (_) {});
+      }
       return;
     }
-    _stopSimulator();
-    locationStatus = await DeviceLocation.ensurePermission();
-    if (locationStatus != LocationAvailability.ok) {
+    locationStatus = status;
+    if (status != LocationAvailability.ok) {
       _say('Localisation indisponible : réglages > simulation, ou autorisez la localisation.', speak: false);
       notifyListeners();
       return;
     }
-    _deviceSub = DeviceLocation.stream().listen(_onFix, onError: (_) {});
+    _deviceSub = DeviceLocation.stream(background: _backgroundLocation).listen(_onFix, onError: (_) {});
   }
 
   void _startSimulator({double startM = 0}) {
@@ -281,6 +310,7 @@ class AppController extends ChangeNotifier {
       _ownKeys.add(tripKeys.publicKey);
       _setRoute(r);
       await WakelockPlus.enable().catchError((_) {});
+      unawaited(_setBackgroundLocation(true));
     } on Exception catch (e) {
       destination = null;
       _say('Itinéraire impossible : $e', speak: false);
@@ -357,6 +387,7 @@ class AppController extends ChangeNotifier {
     ahead = const [];
     _cells = const {};
     WakelockPlus.disable().catchError((_) {});
+    unawaited(_setBackgroundLocation(false));
     _updateSubscription();
     notifyListeners();
   }

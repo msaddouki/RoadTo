@@ -22,7 +22,10 @@ abstract final class DeviceLocation {
   static Future<LocationAvailability> ensurePermission() =>
       Platform.isAndroid ? AndroidLocation.ensurePermission() : _AppleLocation.ensurePermission();
 
-  static Stream<Fix> stream() => Platform.isAndroid ? AndroidLocation.stream() : _AppleLocation.stream();
+  /// [background]: iOS keeps sending fixes with the app in the background
+  /// (blue indicator in the status bar). Android keeps its own behaviour.
+  static Stream<Fix> stream({bool background = false}) =>
+      Platform.isAndroid ? AndroidLocation.stream() : _AppleLocation.stream(background: background);
 }
 
 /// Android side, implemented in MainActivity (DeviceLocation.kt).
@@ -72,15 +75,17 @@ abstract final class _AppleLocation {
     };
   }
 
-  static Stream<Fix> stream() => _platform
+  static Stream<Fix> stream({required bool background}) => _platform
       .getPositionStream(
         locationSettings: AppleSettings(
           accuracy: LocationAccuracy.bestForNavigation,
           activityType: ActivityType.automotiveNavigation,
           distanceFilter: 0,
           pauseLocationUpdatesAutomatically: false,
-          // No background location in the POC.
-          allowBackgroundLocationUpdates: false,
+          // Only while navigating: guidance, voice and the Live Activity go
+          // on with the screen locked; the indicator shows it.
+          allowBackgroundLocationUpdates: background,
+          showBackgroundLocationIndicator: background,
         ),
       )
       .map(
