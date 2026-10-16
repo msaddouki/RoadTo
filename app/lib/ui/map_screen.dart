@@ -22,6 +22,10 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   MapLibreMapController? _map;
+  // Key of the MapLibreMap that [_map] belongs to. A new style or region
+  // rebuilds the map under a new key: until its onMapCreated, [_map] still
+  // points at the disposed one, whose platform channel is gone.
+  String? _mapKey;
   bool _styleReady = false;
   bool _follow = true;
   StreamSubscription<String>? _messages;
@@ -29,6 +33,8 @@ class _MapScreenState extends State<MapScreen> {
   String? _lastRouteKey;
 
   AppController get app => widget.app;
+
+  String get _currentMapKey => '${app.mapStyle}@${app.activeRegion?.version}';
 
   @override
   void initState() {
@@ -122,7 +128,7 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<void> _syncMap() async {
     final map = _map;
-    if (map == null || !_styleReady) return;
+    if (map == null || !_styleReady || _mapKey != _currentMapKey) return;
     final g = app.guidance;
     final routeKey = '${identityHashCode(app.route)}:${((g?.projection.alongM ?? 0) / 25).floor()}';
     if (routeKey != _lastRouteKey) {
@@ -227,6 +233,7 @@ class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     final g = app.guidance;
+    final mapKey = _currentMapKey;
     return Scaffold(
       body: Stack(
         children: [
@@ -235,12 +242,13 @@ class _MapScreenState extends State<MapScreen> {
               if (_follow) setState(() => _follow = false);
             },
             child: MapLibreMap(
-              key: ValueKey('${app.mapStyle}@${app.activeRegion?.version}'),
+              key: ValueKey(mapKey),
               styleString: app.mapStyle,
               initialCameraPosition: CameraPosition(target: LatLng(app.position.lat, app.position.lon), zoom: 13),
               compassEnabled: false,
               onMapCreated: (c) {
                 _map = c;
+                _mapKey = mapKey;
                 _styleReady = false;
               },
               onStyleLoadedCallback: _onStyleLoaded,
