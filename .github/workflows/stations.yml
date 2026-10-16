@@ -34,8 +34,8 @@ jobs:
       PUBLISH: ${{ github.event_name != 'workflow_dispatch' || inputs.publish }}
       WORK: pipeline/work/stations
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.13"
       - name: Tools
@@ -43,7 +43,7 @@ jobs:
       - name: Day
         id: day
         run: echo "day=$(date -u +%F)" >> "$GITHUB_OUTPUT"
-      - uses: actions/cache@v4
+      - uses: actions/cache@v6
         with:
           path: ${{ env.WORK }}/irve.csv
           key: irve-${{ steps.day.outputs.day }}
@@ -79,7 +79,7 @@ jobs:
           gh release upload "$tag" "$WORK/stations.json.gz" "$WORK/stations.json.gz.sig" --clobber
       - name: Keep the file as an artifact
         if: env.PUBLISH != 'true' || hashFiles('pipeline/work/stations/stations.json.gz.sig') == ''
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: stations-${{ env.REGION }}
           path: ${{ env.WORK }}/stations.json.gz*
