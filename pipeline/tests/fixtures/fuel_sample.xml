@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+<pdv_liste>
+  <pdv id="69003001" latitude="4576050" longitude="485900" cp="69003" pop="R">
+    <adresse>12 Rue Garibaldi</adresse>
+    <ville>Lyon</ville>
+    <horaires automate-24-24="1"></horaires>
+    <prix nom="Gazole" id="1" maj="2026-10-16 07:30:00" valeur="1.789"/>
+    <prix nom="E10" id="5" maj="2026-10-16 07:30:00" valeur="1.759"/>
+    <prix nom="SP98" id="6" maj="2026-08-01 07:30:00" valeur="1.899"/>
+    <rupture id="6" nom="SP98" debut="2026-10-10 08:00:00" type="temporaire"/>
+    <rupture id="3" nom="E85" debut="2026-10-10 08:00:00" type="temporaire"/>
+  </pdv>
+  <pdv id="69960002" latitude="4570000" longitude="486000" cp="69960" pop="A">
+    <adresse>A7 aire de Solaize</adresse>
+    <ville>Solaize</ville>
+    <horaires automate-24-24=""></horaires>
+    <prix nom="Gazole" id="1" maj="2026-10-15 22:00:00" valeur="1999"/>
+  </pdv>
+  <pdv id="69000003" latitude="4576000" longitude="485000" cp="69000" pop="R">
+    <adresse>Sans prix</adresse><ville>Lyon</ville>
+  </pdv>
+  <pdv id="13000004" latitude="4329000" longitude="537000" cp="13000" pop="R">
+    <adresse>Hors région</adresse><ville>Marseille</ville>
+    <prix nom="Gazole" id="1" maj="2026-10-16 07:30:00" valeur="1.799"/>
+  </pdv>
+  <pdv id="69000005" latitude="" longitude="" cp="69000" pop="R">
+    <adresse>Sans position</adresse><ville>Lyon</ville>
+    <prix nom="Gazole" id="1" maj="2026-10-16 07:30:00" valeur="1.799"/>
+  </pdv>
+</pdv_liste>

@@ -7,7 +7,7 @@ import json
 import sys
 from pathlib import Path
 
-from . import bundle, manifest, places, routing, signing, style
+from . import bundle, manifest, places, routing, signing, stations, style
 
 
 def _cmd_places(a: argparse.Namespace) -> None:
@@ -20,6 +20,12 @@ def _cmd_places_stats(a: argparse.Namespace) -> None:
     if a.region:
         probes += json.loads(Path(a.region).read_text(encoding="utf-8")).get("search_probes", [])
     print(places.index_stats(a.db, probes), end="")
+
+
+def _cmd_stations(a: argparse.Namespace) -> None:
+    region = json.loads(Path(a.region).read_text(encoding="utf-8"))
+    counts = stations.build(region, Path(a.fuel).read_bytes(), Path(a.irve), Path(a.out))
+    print(f"stations: {counts['fuel']} fuel, {counts['charging']} charging, {counts['bytes']} bytes -> {a.out}")
 
 
 def _cmd_style(a: argparse.Namespace) -> None:
@@ -86,6 +92,13 @@ def main(argv: list[str] | None = None) -> None:
     s.add_argument("--region", help="region definition; its search_probes are looked up")
     s.add_argument("--probe", action="append", help="exact place name to look up (repeatable)")
     s.set_defaults(func=_cmd_places_stats)
+
+    s = sub.add_parser("stations", help="build the stations file (fuel prices, charging points)")
+    s.add_argument("--region", required=True, help="region definition (regions/<id>.json)")
+    s.add_argument("--fuel", required=True, help="fuel price feed, the instantane zip or its XML")
+    s.add_argument("--irve", required=True, help="consolidated IRVE file (CSV)")
+    s.add_argument("--out", required=True, help="stations.json.gz to write")
+    s.set_defaults(func=_cmd_stations)
 
     s = sub.add_parser("style", help="build the offline style bundle")
     s.add_argument("--out", required=True)

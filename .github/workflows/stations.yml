@@ -1,0 +1,86 @@
+name: Stations (fuel prices, charging points)
+
+# Builds the small stations file of a region from official open data and
+# publishes it, signed, next to the region package. Fuel prices change during
+# the day; the IRVE base is refreshed once a day, so it is cached per day.
+
+on:
+  workflow_dispatch:
+    inputs:
+      region:
+        description: Region id (pipeline/regions/<id>.json)
+        default: lyon
+        required: true
+      publish:
+        description: Publish to the release (untick to only keep the file as an artifact)
+        type: boolean
+        default: true
+  schedule:
+    - cron: "41 */3 * * *" # every 3 hours
+
+permissions:
+  contents: write
+
+concurrency:
+  group: stations-${{ inputs.region || 'lyon' }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      REGION: ${{ inputs.region || 'lyon' }}
+      PUBLISH: ${{ github.event_name != 'workflow_dispatch' || inputs.publish }}
+      WORK: pipeline/work/stations
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Tools
+        run: pip install -q -r pipeline/requirements.txt
+      - name: Day
+        id: day
+        run: echo "day=$(date -u +%F)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        with:
+          path: ${{ env.WORK }}/irve.csv
+          key: irve-${{ steps.day.outputs.day }}
+      - name: Download
+        run: |
+          mkdir -p "$WORK"
+          curl -fsSL --retry 3 -o "$WORK/fuel.zip" https://donnees.roulez-eco.fr/opendata/instantane
+          [[ -s "$WORK/irve.csv" ]] || curl -fsSL --retry 3 -o "$WORK/irve.csv" \
+            https://www.data.gouv.fr/fr/datasets/r/eb76d20a-8501-400e-b336-d85724de5435
+          ls -lh "$WORK"
+      - name: Build
+        env:
+          PYTHONPATH: pipeline
+          ROADTO_SIGNING_KEY: ${{ secrets.REGION_SIGNING_KEY }}
+        run: |
+          out="$WORK/stations.json.gz"
+          python3 -m roadto_pipeline stations --region "pipeline/regions/$REGION.json" \
+            --fuel "$WORK/fuel.zip" --irve "$WORK/irve.csv" --out "$out" | tee -a "$GITHUB_STEP_SUMMARY"
+          if [[ -n "$ROADTO_SIGNING_KEY" ]]; then
+            python3 -m roadto_pipeline sign --file "$out"
+          else
+            echo "**Unsigned**: add the \`REGION_SIGNING_KEY\` secret to publish." >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Publish
+        if: env.PUBLISH == 'true' && hashFiles('pipeline/work/stations/stations.json.gz.sig') != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="stations-$REGION"
+          gh release view "$tag" >/dev/null 2>&1 || gh release create "$tag" --prerelease \
+            --target "$GITHUB_SHA" --title "Stations: $REGION" \
+            --notes "Fuel prices (prix-carburants.gouv.fr) and charging points (base IRVE, data.gouv.fr) for the RoadTo app, under the Licence Ouverte 2.0. Refreshed every 3 hours."
+          gh release upload "$tag" "$WORK/stations.json.gz" "$WORK/stations.json.gz.sig" --clobber
+      - name: Keep the file as an artifact
+        if: env.PUBLISH != 'true' || hashFiles('pipeline/work/stations/stations.json.gz.sig') == ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: stations-${{ env.REGION }}
+          path: ${{ env.WORK }}/stations.json.gz*
+          retention-days: 3
