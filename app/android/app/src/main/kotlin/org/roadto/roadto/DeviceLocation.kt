@@ -26,10 +26,16 @@ import io.flutter.plugin.common.MethodChannel
  *   accuracy, provider). GPS is preferred; network fixes only fill in while
  *   GPS has nothing recent (start-up, tunnels).
  */
-class DeviceLocation(private val activity: Activity, messenger: BinaryMessenger) :
+class DeviceLocation(private val context: Context, messenger: BinaryMessenger) :
     MethodChannel.MethodCallHandler, EventChannel.StreamHandler {
 
-    private val manager = activity.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    /**
+     * The phone screen, when shown: only it can ask for the permission. The
+     * engine also runs without it, started by Android Auto (RoadToEngine).
+     */
+    var activity: Activity? = null
+
+    private val manager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
     private val methods = MethodChannel(messenger, "org.roadto/location")
     private val fixes = EventChannel(messenger, "org.roadto/location/fixes")
     private var pendingRequest: MethodChannel.Result? = null
@@ -77,7 +83,7 @@ class DeviceLocation(private val activity: Activity, messenger: BinaryMessenger)
         }
 
     private fun granted(permission: String) =
-        activity.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
+        context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
 
     private fun hasFine() = granted(Manifest.permission.ACCESS_FINE_LOCATION)
 
@@ -86,6 +92,12 @@ class DeviceLocation(private val activity: Activity, messenger: BinaryMessenger)
     private fun request(result: MethodChannel.Result) {
         if (hasAnyPermission()) {
             result.success("granted")
+            return
+        }
+        val activity = activity
+        if (activity == null) {
+            // From the car, with the phone screen closed: asked when RoadTo is opened.
+            result.success("denied")
             return
         }
         if (pendingRequest != null) {
@@ -109,7 +121,7 @@ class DeviceLocation(private val activity: Activity, messenger: BinaryMessenger)
                 hasAnyPermission() -> "granted"
                 // Refused with "don't ask again" (or by policy): the system no
                 // longer shows the dialog, only the app settings can grant it.
-                !activity.shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> "deniedForever"
+                activity?.shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) == false -> "deniedForever"
                 else -> "denied"
             }
         )

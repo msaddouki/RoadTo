@@ -3,6 +3,10 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <!-- During a trip only (NavigationService): the position keeps coming with
+         the screen off or RoadTo closed, e.g. driving with Android Auto. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
     <!-- Android Auto: navigation templates and drawing the map on the car screen. -->
     <uses-permission android:name="androidx.car.app.NAVIGATION_TEMPLATES"/>
     <uses-permission android:name="androidx.car.app.ACCESS_SURFACE"/>
@@ -41,6 +45,10 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <service
+            android:name=".NavigationService"
+            android:exported="false"
+            android:foregroundServiceType="location"/>
         <!-- Android Auto (car/RoadToCarAppService.kt). The meta-data name is
              Android Auto's own key; it does not pull Google Play Services. -->
         <service
