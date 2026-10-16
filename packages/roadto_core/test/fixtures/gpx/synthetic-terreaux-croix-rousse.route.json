@@ -1,0 +1,272 @@
+{
+ "trip": {
+  "locations": [
+   {
+    "type": "break",
+    "lat": 45.767,
+    "lon": 4.836,
+    "side_of_street": "left",
+    "original_index": 0
+   },
+   {
+    "type": "break",
+    "lat": 45.779,
+    "lon": 4.832,
+    "side_of_street": "right",
+    "original_index": 1
+   }
+  ],
+  "legs": [
+   {
+    "maneuvers": [
+     {
+      "type": 3,
+      "instruction": "Conduisez vers l'ouest sur Rue Joseph Serlin.",
+      "verbal_succinct_transition_instruction": "Conduisez vers l'ouest.",
+      "verbal_pre_transition_instruction": "Conduisez vers l'ouest sur Rue Joseph Serlin.",
+      "verbal_post_transition_instruction": "Continuez pendant 100 mètres.",
+      "street_names": [
+       "Rue Joseph Serlin"
+      ],
+      "bearing_after": 261,
+      "time": 54.808,
+      "length": 0.121,
+      "cost": 64.376,
+      "begin_shape_index": 0,
+      "end_shape_index": 2,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 9,
+      "instruction": "Serrez à droite dans Place des Terreaux.",
+      "verbal_transition_alert_instruction": "Serrez à droite dans Place des Terreaux.",
+      "verbal_succinct_transition_instruction": "Serrez à droite.",
+      "verbal_pre_transition_instruction": "Serrez à droite dans Place des Terreaux.",
+      "verbal_post_transition_instruction": "Continuez pendant 100 mètres.",
+      "street_names": [
+       "Place des Terreaux"
+      ],
+      "bearing_before": 260,
+      "bearing_after": 285,
+      "time": 27.206,
+      "length": 0.12,
+      "cost": 44.375,
+      "begin_shape_index": 2,
+      "end_shape_index": 7,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 15,
+      "instruction": "Tournez à gauche dans Rue Paul Chenavard.",
+      "verbal_transition_alert_instruction": "Tournez à gauche dans Rue Paul Chenavard.",
+      "verbal_succinct_transition_instruction": "Tournez à gauche. Ensuite, Tournez à droite dans Rue du Major Martin.",
+      "verbal_pre_transition_instruction": "Tournez à gauche dans Rue Paul Chenavard. Ensuite, Tournez à droite dans Rue du Major Martin.",
+      "verbal_post_transition_instruction": "Continuez pendant 50 mètres.",
+      "street_names": [
+       "Rue Paul Chenavard"
+      ],
+      "bearing_before": 248,
+      "bearing_after": 174,
+      "time": 13.855,
+      "length": 0.048,
+      "cost": 41.209,
+      "begin_shape_index": 7,
+      "end_shape_index": 9,
+      "verbal_multi_cue": true,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 10,
+      "instruction": "Tournez à droite dans Rue du Major Martin.",
+      "verbal_transition_alert_instruction": "Tournez à droite dans Rue du Major Martin.",
+      "verbal_succinct_transition_instruction": "Tournez à droite.",
+      "verbal_pre_transition_instruction": "Tournez à droite dans Rue du Major Martin.",
+      "verbal_post_transition_instruction": "Continuez pendant 90 mètres.",
+      "street_names": [
+       "Rue du Major Martin"
+      ],
+      "bearing_before": 175,
+      "bearing_after": 245,
+      "time": 20.753,
+      "length": 0.089,
+      "cost": 38.329,
+      "begin_shape_index": 9,
+      "end_shape_index": 14,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 10,
+      "instruction": "Tournez à droite dans Rue Lanterne.",
+      "verbal_transition_alert_instruction": "Tournez à droite dans Rue Lanterne.",
+      "verbal_succinct_transition_instruction": "Tournez à droite.",
+      "verbal_pre_transition_instruction": "Tournez à droite dans Rue Lanterne.",
+      "verbal_post_transition_instruction": "Continuez pendant 200 mètres.",
+      "street_names": [
+       "Rue Lanterne"
+      ],
+      "bearing_before": 256,
+      "bearing_after": 1,
+      "time": 44.306,
+      "length": 0.197,
+      "cost": 102.399,
+      "begin_shape_index": 14,
+      "end_shape_index": 39,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 10,
+      "instruction": "Tournez à droite dans Rue de la Martinière.",
+      "verbal_transition_alert_instruction": "Tournez à droite dans Rue de la Martinière.",
+      "verbal_succinct_transition_instruction": "Tournez à droite. Ensuite, Tournez à gauche dans Rue Terme.",
+      "verbal_pre_transition_instruction": "Tournez à droite dans Rue de la Martinière. Ensuite, Tournez à gauche dans Rue Terme.",
+      "verbal_post_transition_instruction": "Continuez pendant 50 mètres.",
+      "street_names": [
+       "Rue de la Martinière"
+      ],
+      "bearing_before": 2,
+      "bearing_after": 93,
+      "time": 11.055,
+      "length": 0.049,
+      "cost": 29.534,
+      "begin_shape_index": 39,
+      "end_shape_index": 44,
+      "verbal_multi_cue": true,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 15,
+      "instruction": "Tournez à gauche dans Rue Terme.",
+      "verbal_transition_alert_instruction": "Tournez à gauche dans Rue Terme.",
+      "verbal_succinct_transition_instruction": "Tournez à gauche.",
+      "verbal_pre_transition_instruction": "Tournez à gauche dans Rue Terme.",
+      "verbal_post_transition_instruction": "Continuez pendant 200 mètres.",
+      "street_names": [
+       "Rue Terme"
+      ],
+      "bearing_before": 92,
+      "bearing_after": 348,
+      "time": 40.205,
+      "length": 0.186,
+      "cost": 75.77,
+      "begin_shape_index": 44,
+      "end_shape_index": 58,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 10,
+      "instruction": "Tournez à droite dans Tunnel Routier de la Rue Terme.",
+      "verbal_transition_alert_instruction": "Tournez à droite dans Tunnel Routier de la Rue Terme.",
+      "verbal_succinct_transition_instruction": "Tournez à droite.",
+      "verbal_pre_transition_instruction": "Tournez à droite dans Tunnel Routier de la Rue Terme.",
+      "verbal_post_transition_instruction": "Continuez pendant 1 kilomètre.",
+      "street_names": [
+       "Tunnel Routier de la Rue Terme"
+      ],
+      "bearing_before": 319,
+      "bearing_after": 5,
+      "time": 211.78,
+      "length": 1.173,
+      "cost": 306.926,
+      "begin_shape_index": 58,
+      "end_shape_index": 132,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 10,
+      "instruction": "Tournez à droite dans Rue Jacques-Louis Hénon.",
+      "verbal_transition_alert_instruction": "Tournez à droite dans Rue Jacques-Louis Hénon.",
+      "verbal_succinct_transition_instruction": "Tournez à droite.",
+      "verbal_pre_transition_instruction": "Tournez à droite dans Rue Jacques-Louis Hénon.",
+      "verbal_post_transition_instruction": "Continuez pendant 400 mètres.",
+      "street_names": [
+       "Rue Jacques-Louis Hénon"
+      ],
+      "bearing_before": 351,
+      "bearing_after": 90,
+      "time": 71.583,
+      "length": 0.379,
+      "cost": 103.453,
+      "begin_shape_index": 132,
+      "end_shape_index": 156,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 10,
+      "instruction": "Tournez à droite dans Grande Rue de la Croix-Rousse.",
+      "verbal_transition_alert_instruction": "Tournez à droite dans Grande Rue de la Croix-Rousse.",
+      "verbal_succinct_transition_instruction": "Tournez à droite. Ensuite, Votre destination sera sur la droite.",
+      "verbal_pre_transition_instruction": "Tournez à droite dans Grande Rue de la Croix-Rousse. Ensuite, Votre destination sera sur la droite.",
+      "verbal_post_transition_instruction": "Continuez pendant 60 mètres.",
+      "street_names": [
+       "Grande Rue de la Croix-Rousse"
+      ],
+      "bearing_before": 90,
+      "bearing_after": 191,
+      "time": 13.429,
+      "length": 0.055,
+      "cost": 23.813,
+      "begin_shape_index": 156,
+      "end_shape_index": 161,
+      "verbal_multi_cue": true,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 5,
+      "instruction": "Votre destination est sur la droite.",
+      "verbal_transition_alert_instruction": "Votre destination sera sur la droite.",
+      "verbal_pre_transition_instruction": "Votre destination est sur la droite.",
+      "bearing_before": 182,
+      "time": 0.0,
+      "length": 0.0,
+      "cost": 0.0,
+      "begin_shape_index": 161,
+      "end_shape_index": 161,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     }
+    ],
+    "summary": {
+     "has_time_restrictions": false,
+     "has_toll": false,
+     "has_highway": false,
+     "has_ferry": false,
+     "min_lat": 45.766442,
+     "min_lon": 4.827445,
+     "max_lat": 45.77955,
+     "max_lon": 4.835897,
+     "time": 508.986,
+     "length": 2.418,
+     "cost": 830.188
+    },
+    "shape": "uqlhvAsbdfH`H|sAn@fKu@|G@~KfBzZbBf[rCdO`DYvTyA`@fBbDnM~ClQvDb\\Hx@m\\Qo@BkAVi@LkCbAuCfAWJmAd@mFrBOFmAd@i@PmBr@sBR_AX}@XsHbCuBl@aBf@wAd@eGjBa@La@D_AAgEIDcDBuC@yDBeNLsGwCl@wGxAoFnAcSlHy@XsAv@mCzAc@Zg@ZcYlRqKnHo@x@[|@QtAkBMMBmDr@yGxEoTCkEBkd@GsCA}mC{AeFRqBHcADoRpAkJf@qD\\iBP{ALoBRyElC}AfA]TSLyGbEsAlBeC`E}@hBcDdG{@jAk@f@cAd@aBd@wDJsDEmCCoBAiC`@SJmAv@gIlFqUhPgLdIoCjB_Ap@k@^wAbAsDfCk@`@yIfG}LpIcm@xa@eAp@}FlDmBjA{@f@}BnA{B|AuMjKa@Z[TgDdCwEvCoBnAo@ZsFrCkGzCmBl@uAb@{FhBkE|@wOxCyC`@}BZc@DmDd@@aJ?gC@i@?iBFaUPgm@@{CBoH@eE?oD@aE@gALsb@FwMBiHDqLBqFDgQPsF@cHDqq@?C?qI?qCtAVjB^nH~@`HXjE@"
+   }
+  ],
+  "summary": {
+   "has_time_restrictions": false,
+   "has_toll": false,
+   "has_highway": false,
+   "has_ferry": false,
+   "min_lat": 45.766442,
+   "min_lon": 4.827445,
+   "max_lat": 45.77955,
+   "max_lon": 4.835897,
+   "time": 508.986,
+   "length": 2.418,
+   "cost": 830.188
+  },
+  "status_message": "Found route between points",
+  "status": 0,
+  "units": "kilometers",
+  "language": "fr-FR"
+ }
+}

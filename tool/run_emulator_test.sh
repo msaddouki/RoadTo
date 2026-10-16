@@ -30,9 +30,13 @@ SHOTS=$!
 trap 'kill "$SHOTS" 2>/dev/null' EXIT
 
 cd "$ROOT/app"
-flutter drive --driver=test_driver/integration_test.dart --target=integration_test/app_test.dart 2>&1 \
+# A test that fails inside an async callback can leave `flutter drive`
+# waiting forever: give up after 20 minutes (build included; a run takes ~7).
+timeout --kill-after=30s 20m \
+  flutter drive --driver=test_driver/integration_test.dart --target=integration_test/app_test.dart 2>&1 \
   | tee "$OUT/drive.log"
 status=${PIPESTATUS[0]}
+[[ $status == 124 ]] && echo "::error::flutter drive did not finish within 20 minutes"
 
 kill "$SHOTS" 2>/dev/null
 cp build/integration_response_data.json "$OUT/" 2>/dev/null

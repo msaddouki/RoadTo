@@ -1,0 +1,226 @@
+{
+ "trip": {
+  "locations": [
+   {
+    "type": "break",
+    "lat": 45.7493,
+    "lon": 4.827,
+    "original_index": 0
+   },
+   {
+    "type": "break",
+    "lat": 45.762,
+    "lon": 4.8272,
+    "side_of_street": "right",
+    "original_index": 1
+   }
+  ],
+  "legs": [
+   {
+    "maneuvers": [
+     {
+      "type": 1,
+      "instruction": "Conduisez vers le sud-est sur Trémie n°6.",
+      "verbal_succinct_transition_instruction": "Conduisez vers le sud-est. Ensuite, Serrez à droite.",
+      "verbal_pre_transition_instruction": "Conduisez vers le sud-est sur Trémie n°6. Ensuite, Serrez à droite.",
+      "verbal_post_transition_instruction": "Continuez pendant 200 mètres.",
+      "street_names": [
+       "Trémie n°6"
+      ],
+      "bearing_after": 115,
+      "time": 35.088,
+      "length": 0.194,
+      "cost": 44.901,
+      "begin_shape_index": 0,
+      "end_shape_index": 11,
+      "verbal_multi_cue": true,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 9,
+      "instruction": "Serrez à droite.",
+      "verbal_transition_alert_instruction": "Serrez à droite.",
+      "verbal_succinct_transition_instruction": "Serrez à droite. Ensuite, Serrez à droite.",
+      "verbal_pre_transition_instruction": "Serrez à droite. Ensuite, Serrez à droite.",
+      "verbal_post_transition_instruction": "Continuez pendant 60 mètres.",
+      "bearing_before": 89,
+      "bearing_after": 133,
+      "time": 10.236,
+      "length": 0.059,
+      "cost": 11.631,
+      "begin_shape_index": 11,
+      "end_shape_index": 31,
+      "verbal_multi_cue": true,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 9,
+      "instruction": "Serrez à droite.",
+      "verbal_transition_alert_instruction": "Serrez à droite.",
+      "verbal_succinct_transition_instruction": "Serrez à droite. Ensuite, Serrez à gauche vers Quais de Saône.",
+      "verbal_pre_transition_instruction": "Serrez à droite. Ensuite, Serrez à gauche vers Quais de Saône.",
+      "verbal_post_transition_instruction": "Continuez pendant 50 mètres.",
+      "bearing_before": 272,
+      "bearing_after": 313,
+      "time": 8.207,
+      "length": 0.045,
+      "cost": 11.19,
+      "begin_shape_index": 31,
+      "end_shape_index": 34,
+      "verbal_multi_cue": true,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 16,
+      "instruction": "Serrez à gauche vers Quais de Saône.",
+      "verbal_transition_alert_instruction": "Serrez à gauche vers Quais de Saône.",
+      "verbal_succinct_transition_instruction": "Serrez à gauche vers Quais de Saône.",
+      "verbal_pre_transition_instruction": "Serrez à gauche vers Quais de Saône.",
+      "verbal_post_transition_instruction": "Continuez pendant 500 mètres.",
+      "street_names": [
+       "Trémie n°3"
+      ],
+      "bearing_before": 312,
+      "bearing_after": 293,
+      "time": 91.13,
+      "length": 0.503,
+      "cost": 148.812,
+      "begin_shape_index": 34,
+      "end_shape_index": 53,
+      "sign": {},
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 9,
+      "instruction": "Serrez à droite dans Pont Kitchener-Marchand.",
+      "verbal_transition_alert_instruction": "Serrez à droite dans Pont Kitchener-Marchand.",
+      "verbal_succinct_transition_instruction": "Serrez à droite.",
+      "verbal_pre_transition_instruction": "Serrez à droite dans Pont Kitchener-Marchand.",
+      "verbal_post_transition_instruction": "Continuez pendant 100 mètres.",
+      "street_names": [
+       "Pont Kitchener-Marchand"
+      ],
+      "bearing_before": 275,
+      "bearing_after": 294,
+      "time": 25.004,
+      "length": 0.137,
+      "cost": 37.692,
+      "begin_shape_index": 53,
+      "end_shape_index": 59,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 10,
+      "instruction": "Tournez à droite dans Quai Fulchiron.",
+      "verbal_transition_alert_instruction": "Tournez à droite dans Quai Fulchiron.",
+      "verbal_succinct_transition_instruction": "Tournez à droite.",
+      "verbal_pre_transition_instruction": "Tournez à droite dans Quai Fulchiron.",
+      "verbal_post_transition_instruction": "Continuez pendant 1.5 kilomètres.",
+      "street_names": [
+       "Quai Fulchiron"
+      ],
+      "bearing_before": 292,
+      "bearing_after": 34,
+      "time": 239.833,
+      "length": 1.31,
+      "cost": 316.709,
+      "begin_shape_index": 59,
+      "end_shape_index": 122,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 15,
+      "instruction": "Tournez à gauche dans Rue du Palais de Justice.",
+      "verbal_transition_alert_instruction": "Tournez à gauche dans Rue du Palais de Justice.",
+      "verbal_succinct_transition_instruction": "Tournez à gauche.",
+      "verbal_pre_transition_instruction": "Tournez à gauche dans Rue du Palais de Justice.",
+      "verbal_post_transition_instruction": "Continuez pendant 100 mètres.",
+      "street_names": [
+       "Rue du Palais de Justice"
+      ],
+      "bearing_before": 16,
+      "bearing_after": 282,
+      "time": 50.864,
+      "length": 0.1,
+      "cost": 66.75,
+      "begin_shape_index": 122,
+      "end_shape_index": 126,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 15,
+      "instruction": "Tournez à gauche dans Rue Saint-Jean.",
+      "verbal_transition_alert_instruction": "Tournez à gauche dans Rue Saint-Jean.",
+      "verbal_succinct_transition_instruction": "Tournez à gauche.",
+      "verbal_pre_transition_instruction": "Tournez à gauche dans Rue Saint-Jean.",
+      "verbal_post_transition_instruction": "Continuez pendant 50 mètres.",
+      "street_names": [
+       "Rue Saint-Jean"
+      ],
+      "bearing_before": 286,
+      "bearing_after": 194,
+      "time": 29.462,
+      "length": 0.052,
+      "cost": 33.59,
+      "begin_shape_index": 126,
+      "end_shape_index": 129,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     },
+     {
+      "type": 5,
+      "instruction": "Votre destination est sur la droite.",
+      "verbal_transition_alert_instruction": "Votre destination sera sur la droite.",
+      "verbal_pre_transition_instruction": "Votre destination est sur la droite.",
+      "bearing_before": 196,
+      "time": 0.0,
+      "length": 0.0,
+      "cost": 0.0,
+      "begin_shape_index": 129,
+      "end_shape_index": 129,
+      "travel_mode": "drive",
+      "travel_type": "car"
+     }
+    ],
+    "summary": {
+     "has_time_restrictions": false,
+     "has_toll": false,
+     "has_highway": false,
+     "has_ferry": false,
+     "min_lat": 45.748745,
+     "min_lon": 4.821574,
+     "max_lat": 45.762412,
+     "max_lon": 4.829562,
+     "time": 489.826,
+     "length": 2.402,
+     "cost": 671.277
+    },
+    "shape": "{bigvA{vreHrUoeAr@kFVoF?kCEgBKaBsBaQg@wFWcFI_H@iHjA}DZ{@\\q@^_@\\[`@Q`@Ih@Ib@BZJf@PXV^b@Vf@Tn@Lz@Fr@?jAC~@_@nGcHzL_EhHcAtBoD|QqBvJay@nuD{@zCcA~CaBtDqPl\\cC`FeBlD{AtDeEhO_@xAkAfF}GrE}C|LaAzDe@dB}B~JMfFmKzg@mLfh@c@~AuBnBk@bDm@|CkPqO_A{@cBcBsAoAmBaBsIkIuJsJcEmDqFiFiZ{YuP_PsGoEgEiCaKaDc@OoFgBaGqB{b@uNsDuAoDoAso@ySwReJkD_BgBy@cDeB_b@yYiMaJeQ{PoAmAo@o@sKeKoFcFiAeAuBoBmCcCoO{OgRmRcH}GiHuHc@e@gJkLec@qa@eAeA}@_Ae@c@{CyCqEsCoDmBc]uPkJkDk@QcCu@uPwD_UuE_ASg@MgAQyPx@{@SqFyAqGoB_K}CcCu@]`Ec@`DmEfZiFvd@jQtEtCv@jDdA"
+   }
+  ],
+  "summary": {
+   "has_time_restrictions": false,
+   "has_toll": false,
+   "has_highway": false,
+   "has_ferry": false,
+   "min_lat": 45.748745,
+   "min_lon": 4.821574,
+   "max_lat": 45.762412,
+   "max_lon": 4.829562,
+   "time": 489.826,
+   "length": 2.402,
+   "cost": 671.277
+  },
+  "status_message": "Found route between points",
+  "status": 0,
+  "units": "kilometers",
+  "language": "fr-FR"
+ }
+}
