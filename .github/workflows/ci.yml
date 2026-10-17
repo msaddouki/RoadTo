@@ -270,11 +270,64 @@ jobs:
         run: tool/embed_region.sh lyon --with-routing
         env:
           GH_TOKEN: ${{ github.token }}
+      # Release signing with the upload key (docs/release-signing.md), on
+      # master and manual runs only: pull requests build with the debug key.
+      - name: Upload key
+        if: github.event_name != 'pull_request'
+        env:
+          KEYSTORE: ${{ secrets.ANDROID_UPLOAD_KEYSTORE }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_UPLOAD_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_UPLOAD_KEY_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE" ]; then
+            echo "::warning::No upload key in the repository secrets: the release build is signed with the debug key"
+            exit 0
+          fi
+          echo "$KEYSTORE" | base64 -d > "$RUNNER_TEMP/upload.jks"
+          {
+            echo "ROADTO_UPLOAD_KEYSTORE=$RUNNER_TEMP/upload.jks"
+            echo "ROADTO_UPLOAD_KEYSTORE_PASSWORD=$STORE_PASSWORD"
+            echo "ROADTO_UPLOAD_KEY_ALIAS=$KEY_ALIAS"
+            echo "ROADTO_UPLOAD_KEY_PASSWORD=$KEY_PASSWORD"
+          } >> "$GITHUB_ENV"
+      # Each run gets a higher version code, as the stores require.
       - name: Build
         working-directory: app
         run: |
           flutter pub get
-          flutter build apk --release
+          flutter build apk --release --build-number=${{ github.run_number }}
+      # Google Play takes bundles (.aab); built on master only, to save
+      # minutes on pull requests.
+      - name: Build the Play bundle
+        if: github.event_name != 'pull_request'
+        working-directory: app
+        run: flutter build appbundle --release --build-number=${{ github.run_number }}
+      - name: Signature and checksums
+        working-directory: app/build/app/outputs
+        run: |
+          apksigner=$(ls -d "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
+          certs=$("$apksigner" verify --print-certs flutter-apk/app-release.apk)
+          echo "$certs"
+          if [ -n "$ROADTO_UPLOAD_KEYSTORE" ] && grep -q "CN=Android Debug" <<<"$certs"; then
+            echo "::error::The upload key was given but the APK is signed with the debug key"
+            exit 1
+          fi
+          cp flutter-apk/app-release.apk .
+          if [ -f bundle/release/app-release.aab ]; then
+            cp bundle/release/app-release.aab .
+            size=$(stat -c %s app-release.aab)
+            echo "Bundle: $((size / 1048576)) MB"
+            # Google Play refuses a base module over 200 MB once compressed;
+            # the embedded region is most of it (docs/release-signing.md).
+            if [ "$size" -gt $((200 * 1048576)) ]; then
+              echo "::warning::The bundle is over 200 MB: Google Play would refuse it with the region embedded"
+            fi
+          fi
+          sha256sum app-release.* | tee SHA256SUMS
+      - name: Remove the upload key
+        if: always()
+        run: rm -f "$RUNNER_TEMP/upload.jks"
       - name: Disk usage
         if: always()
         run: df -h / && du -sh app/build ~/.gradle 2>/dev/null || true
@@ -290,7 +343,10 @@ jobs:
       - uses: actions/upload-artifact@v7
         with:
           name: roadto-android-apk
-          path: app/build/app/outputs/flutter-apk/app-release.apk
+          path: |
+            app/build/app/outputs/app-release.apk
+            app/build/app/outputs/app-release.aab
+            app/build/app/outputs/SHA256SUMS
           retention-days: 14
 
   android-emulator:

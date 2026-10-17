@@ -101,7 +101,10 @@ recorded on the road go in `packages/roadto_core/test/fixtures/gpx/` with
 their route and are replayed the same way.
 
 CI also builds the Android APK and the iOS app (simulator) on every pull
-request; both can be downloaded from the workflow artifacts.
+request; both can be downloaded from the workflow artifacts. On master, the
+APK and the Play bundle are signed with the upload key from the repository
+secrets (see [docs/release-signing.md](docs/release-signing.md)); pull
+requests keep the debug key.
 
 End to end on Android, with the Lyon region embedded: the app installs the
 region, searches and routes on the device, and drives a simulated trip.
