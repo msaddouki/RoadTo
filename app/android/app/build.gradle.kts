@@ -34,11 +34,26 @@ android {
         unitTests.isIncludeAndroidResources = true
     }
 
+    // Release signing with the upload key, given by CI from its secrets
+    // (docs/release-signing.md); never in the repository or on a workstation.
+    // Google Play re-signs with the app signing key it keeps. Without the
+    // key (pull requests from forks, local builds) the release build is
+    // signed with the debug key, for testing only.
+    val uploadKeystore = System.getenv("ROADTO_UPLOAD_KEYSTORE")?.takeIf { it.isNotBlank() }
+    signingConfigs {
+        if (uploadKeystore != null) {
+            create("upload") {
+                storeFile = file(uploadKeystore)
+                storePassword = System.getenv("ROADTO_UPLOAD_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("ROADTO_UPLOAD_KEY_ALIAS")
+                keyPassword = System.getenv("ROADTO_UPLOAD_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // POC : signé avec la clé de debug. Les clés de release iront dans
-            // Vault (règle du plan), jamais sur un poste.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName(if (uploadKeystore != null) "upload" else "debug")
         }
     }
 }
