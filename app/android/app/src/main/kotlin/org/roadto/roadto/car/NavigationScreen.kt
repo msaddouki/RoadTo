@@ -30,7 +30,8 @@ import java.util.TimeZone
 
 /**
  * The car's main screen: the map with the next maneuver, the time and
- * distance left, and two actions (Signaler, Arrêter). "Toujours là ?" shows
+ * distance left, and its actions (Destinations before a trip, Signaler,
+ * Arrêter during one). "Toujours là ?" shows
  * as a car alert with two answers. Everything comes from the phone app's
  * guidance through [CarBridge].
  */
@@ -87,15 +88,20 @@ class NavigationScreen(carContext: CarContext, private val bridge: CarBridge) : 
         val builder = NavigationTemplate.Builder().setActionStrip(actions(s))
         val maneuver = s.maneuver
         when {
+            // The car starts RoadTo when it is not running (RoadToEngine).
             !bridge.connected ->
+                builder.setNavigationInfo(MessageInfo.Builder("RoadTo démarre…").setText("Un instant.").build())
+            s.locationDenied ->
                 builder.setNavigationInfo(
-                    MessageInfo.Builder("Ouvrez RoadTo sur le téléphone").setText("La voiture affiche son guidage.").build(),
+                    MessageInfo.Builder("Localisation désactivée")
+                        .setText("Autorisez-la dans RoadTo sur le téléphone, à l’arrêt.")
+                        .build(),
                 )
+            s.routing ->
+                builder.setNavigationInfo(MessageInfo.Builder("Calcul de l’itinéraire…").build())
             !s.navigating || maneuver == null ->
                 builder.setNavigationInfo(
-                    MessageInfo.Builder("Choisissez une destination")
-                        .setText("Sur le téléphone, avant de partir.")
-                        .build(),
+                    MessageInfo.Builder("Où allez-vous ?").setText("Destinations : vos favoris ou une recherche.").build(),
                 )
             else -> {
                 builder.setNavigationInfo(
@@ -121,7 +127,15 @@ class NavigationScreen(carContext: CarContext, private val bridge: CarBridge) : 
 
     private fun actions(s: CarState): ActionStrip {
         val strip = ActionStrip.Builder()
-            .addAction(
+        if (bridge.connected && !s.navigating) {
+            strip.addAction(
+                Action.Builder()
+                    .setTitle("Destinations")
+                    .setOnClickListener { screenManager.push(DestinationsScreen(carContext, bridge)) }
+                    .build(),
+            )
+        }
+        strip.addAction(
                 Action.Builder()
                     .setTitle("Signaler")
                     .setOnClickListener { screenManager.push(ReportScreen(carContext, bridge)) }

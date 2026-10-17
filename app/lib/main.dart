@@ -8,6 +8,7 @@ import 'package:path_provider/path_provider.dart';
 import 'services/car_link.dart';
 import 'services/crash_reports.dart';
 import 'services/live_activity.dart';
+import 'services/trip_service.dart';
 import 'state/app_controller.dart';
 import 'ui/map_screen.dart';
 
@@ -33,6 +34,8 @@ Future<void> main() async {
   CarLink.forApp(app).start();
   // iPhone: the trip on the lock screen and in the Dynamic Island.
   LiveActivityLink.forApp(app).start();
+  // Android: guidance goes on with the screen off or RoadTo closed.
+  TripService.forApp(app).start();
 }
 
 class RoadToApp extends StatelessWidget {

@@ -7,6 +7,9 @@ import androidx.car.app.model.Action
 import androidx.car.app.model.Distance
 import androidx.car.app.model.GridItem
 import androidx.car.app.model.GridTemplate
+import androidx.car.app.model.ListTemplate
+import androidx.car.app.model.Row
+import androidx.car.app.model.SearchTemplate
 import androidx.car.app.navigation.model.Maneuver
 import androidx.car.app.navigation.model.MessageInfo
 import androidx.car.app.navigation.model.NavigationTemplate
@@ -73,6 +76,17 @@ class CarScreensTest {
         shadowOf(Looper.getMainLooper()).idle()
     }
 
+    private fun click(item: Row) {
+        item.onClickDelegate!!.sendClick(
+            object : OnDoneCallback {
+                override fun onSuccess(response: Bundleable?) {}
+
+                override fun onFailure(response: Bundleable) {}
+            },
+        )
+        shadowOf(Looper.getMainLooper()).idle()
+    }
+
     private fun click(item: GridItem) {
         item.onClickDelegate!!.sendClick(
             object : OnDoneCallback {
@@ -85,17 +99,61 @@ class CarScreensTest {
     }
 
     @Test
-    fun withoutThePhoneApp_asksToOpenIt() {
+    fun beforeTheFlutterSideAnswers_saysItIsStarting() {
+        bridge.attach(messenger)
         val t = NavigationScreen(context, bridge).onGetTemplate() as NavigationTemplate
-        assertEquals("Ouvrez RoadTo sur le téléphone", (t.navigationInfo as MessageInfo).title.toString())
+        assertEquals("RoadTo démarre…", (t.navigationInfo as MessageInfo).title.toString())
+        assertEquals(listOf("Signaler"), t.actionStrip!!.actions.map { it.title.toString() })
     }
 
     @Test
-    fun connectedWithoutTrip_asksForADestination() {
+    fun connectedWithoutTrip_offersDestinations() {
         bridge.attach(messenger)
+        bridge.update(CarState())
         val t = NavigationScreen(context, bridge).onGetTemplate() as NavigationTemplate
-        assertEquals("Choisissez une destination", (t.navigationInfo as MessageInfo).title.toString())
-        assertEquals(listOf("Signaler"), t.actionStrip!!.actions.map { it.title.toString() })
+        assertEquals("Où allez-vous ?", (t.navigationInfo as MessageInfo).title.toString())
+        assertEquals(listOf("Destinations", "Signaler"), t.actionStrip!!.actions.map { it.title.toString() })
+    }
+
+    @Test
+    fun routingAndMissingPermission_areSaid() {
+        bridge.update(CarState(routing = true))
+        var t = NavigationScreen(context, bridge).onGetTemplate() as NavigationTemplate
+        assertEquals("Calcul de l’itinéraire…", (t.navigationInfo as MessageInfo).title.toString())
+        bridge.update(CarState(locationDenied = true))
+        t = NavigationScreen(context, bridge).onGetTemplate() as NavigationTemplate
+        assertEquals("Localisation désactivée", (t.navigationInfo as MessageInfo).title.toString())
+    }
+
+    @Test
+    fun destinations_listSavedPlaces_andATapStartsTheTrip() {
+        val home = CarPlace("Maison", "12 rue Pasteur, Lyon", 45.75, 4.84)
+        bridge.update(CarState(places = listOf(home, CarPlace("Travail", null, 45.77, 4.86))))
+        val screens = context.getCarService(TestScreenManager::class.java)
+        ScreenController(NavigationScreen(context, bridge)).moveToState(Lifecycle.State.RESUMED)
+        val destinations = DestinationsScreen(context, bridge)
+        ScreenController(destinations).moveToState(Lifecycle.State.RESUMED)
+        val t = destinations.onGetTemplate() as ListTemplate
+        val rows = t.singleList!!.items.map { it as Row }
+        assertEquals(listOf("Maison", "Travail"), rows.map { it.title.toString() })
+        assertEquals("12 rue Pasteur, Lyon", rows[0].texts.single().toString())
+        click(rows[0])
+        assertEquals(listOf("navigate" to home.toMap()), sent)
+        assertTrue(screens.top is NavigationScreen)
+    }
+
+    @Test
+    fun search_showsWhatThePhoneFinds() {
+        val queries = mutableListOf<String>()
+        bridge.searcher = { q, done -> queries.add(q); done(listOf(CarPlace("Gare Part-Dieu", "Lyon", 45.76, 4.86))) }
+        val search = SearchScreen(context, bridge)
+        ScreenController(search).moveToState(Lifecycle.State.RESUMED)
+        assertTrue((search.onGetTemplate() as SearchTemplate).isShowKeyboardByDefault)
+        search.search("  gare  ")
+        val t = search.onGetTemplate() as SearchTemplate
+        assertEquals(listOf("gare"), queries)
+        assertFalse(t.isLoading)
+        assertEquals(listOf("Gare Part-Dieu"), t.itemList!!.items.map { (it as Row).title.toString() })
     }
 
     @Test
@@ -181,6 +239,13 @@ class CarStateTest {
         assertEquals(2, next.route.size)
         val other = CarState.fromMap(mapOf("navigating" to true, "routeId" to "r2"), first)
         assertTrue(other.route.isEmpty())
+        assertTrue(other.places.isEmpty())
+
+        val withPlaces = CarState.fromMap(
+            mapOf("places" to listOf(mapOf("name" to "Maison", "detail" to null, "lat" to 45.7, "lon" to 4.8), mapOf("name" to "Sans position"))),
+            CarState(),
+        )
+        assertEquals(listOf(CarPlace("Maison", null, 45.7, 4.8)), withPlaces.places)
     }
 
     @Test

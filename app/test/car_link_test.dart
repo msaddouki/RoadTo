@@ -51,6 +51,24 @@ void main() {
       expect(s['arrivalEpochMs'], now.add(g.remaining).millisecondsSinceEpoch);
       expect(s['speedKph'], 50);
       expect((s['route']! as List).first, [4.8320, 45.7578]);
+      expect(s['places'], isEmpty);
+      expect(s['routing'], isFalse);
+    });
+
+    test('saved places go to the car, as many as a car list shows', () {
+      final s = carState(
+        guidance: null,
+        route: null,
+        position: const LatLon(45.75, 4.83),
+        places: [for (var i = 0; i < 9; i++) Place(name: 'Lieu $i', position: LatLon(45.7, 4.8 + i / 100))],
+        routing: true,
+        locationDenied: true,
+        now: DateTime.now(),
+      );
+      expect(s['places'] as List, hasLength(CarLink.maxPlaces));
+      expect((s['places']! as List).first, {'name': 'Lieu 0', 'detail': null, 'lat': 45.7, 'lon': 4.8});
+      expect(s['routing'], isTrue);
+      expect(s['locationDenied'], isTrue);
     });
 
     test('not navigating: position and map only', () {
@@ -84,6 +102,13 @@ void main() {
         onReport: (t) => calls.add('report ${t.code}'),
         onConfirm: (id, v) => calls.add('confirm $id $v'),
         onStop: () => calls.add('stop'),
+        onNavigate: (p) => calls.add('navigate ${p.name} ${p.position.lat},${p.position.lon}'),
+        onSearch: (q) async {
+          if (q == 'panne') throw Exception('offline');
+          return [
+            for (var i = 0; i < 8; i++) Place(name: '$q $i', detail: 'Lyon', position: LatLon(45.75, 4.83 + i / 100)),
+          ];
+        },
         minInterval: const Duration(milliseconds: 100),
       )..start(android: true);
     });
@@ -125,6 +150,19 @@ void main() {
       await fromCar('stop');
       expect(calls, ['report closure', 'confirm abc false', 'confirm abc null', 'stop']);
     });
+
+    testWidgets('destinations from the car: navigate, search (capped, errors give nothing)', (tester) async {
+      final codec = const StandardMethodCodec();
+      await fromCar('navigate', {'name': 'Maison', 'detail': null, 'lat': 45.76, 'lon': 4.85});
+      await fromCar('navigate', {'name': 'Sans position'});
+      expect(calls, ['navigate Maison 45.76,4.85']);
+
+      final found = codec.decodeEnvelope((await fromCar('search', {'query': ' gare '}))! as ByteData) as List;
+      expect(found, hasLength(CarLink.maxPlaces));
+      expect(found.first, {'name': 'gare 0', 'detail': 'Lyon', 'lat': 45.75, 'lon': 4.83});
+      final none = codec.decodeEnvelope((await fromCar('search', {'query': 'panne'}))! as ByteData) as List;
+      expect(none, isEmpty);
+    });
   });
 
   test('does nothing outside Android', () {
@@ -139,6 +177,8 @@ void main() {
       onReport: (_) {},
       onConfirm: (_, _) {},
       onStop: () {},
+      onNavigate: (_) {},
+      onSearch: (_) async => const [],
     ).start(android: false);
     changes.notifyListeners();
     expect(snapshots, 0);

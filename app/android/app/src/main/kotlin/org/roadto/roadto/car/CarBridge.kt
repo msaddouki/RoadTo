@@ -18,6 +18,21 @@ data class CarManeuver(
 /** An alert ahead on the route. */
 data class CarAlert(val label: String, val distanceM: Double, val confirmations: Int)
 
+/** A place to drive to: a saved one (Maison, Travail…) or a search result. */
+data class CarPlace(val name: String, val detail: String?, val lat: Double, val lon: Double) {
+    fun toMap(): Map<String, Any?> = mapOf("name" to name, "detail" to detail, "lat" to lat, "lon" to lon)
+
+    companion object {
+        fun fromMap(m: Map<*, *>): CarPlace? {
+            val lat = (m["lat"] as? Number)?.toDouble() ?: return null
+            val lon = (m["lon"] as? Number)?.toDouble() ?: return null
+            return CarPlace(m["name"] as? String ?: "", m["detail"] as? String, lat, lon)
+        }
+
+        fun listFrom(value: Any?): List<CarPlace> = (value as? List<*>)?.mapNotNull { (it as? Map<*, *>)?.let(::fromMap) } ?: emptyList()
+    }
+}
+
 /** "Toujours là ?" for an alert the car just passed. */
 data class CarConfirmation(val id: String, val label: String)
 
@@ -44,6 +59,12 @@ data class CarState(
     val routeId: String? = null,
     /** The route's shape, [lon, lat] pairs. */
     val route: List<DoubleArray> = emptyList(),
+    /** Saved places, offered as destinations from the car. */
+    val places: List<CarPlace> = emptyList(),
+    /** A route is being computed. */
+    val routing: Boolean = false,
+    /** The phone has no location permission: it must be granted there. */
+    val locationDenied: Boolean = false,
 ) {
     companion object {
         @Suppress("UNCHECKED_CAST")
@@ -88,6 +109,9 @@ data class CarState(
                 confirmation = confirmation,
                 routeId = routeId,
                 route = route,
+                places = CarPlace.listFrom(m["places"]),
+                routing = m["routing"] as? Boolean ?: false,
+                locationDenied = m["locationDenied"] as? Boolean ?: false,
             )
         }
     }
@@ -99,15 +123,19 @@ data class CarState(
  *
  * - Flutter -> car: `update` with the [CarState] as a map.
  * - car -> Flutter: `report` {type} (an AlertType code), `confirm`
- *   {id, stillThere: true/false/null}, `stop`.
+ *   {id, stillThere: true/false/null}, `stop`, `navigate` {name, detail,
+ *   lat, lon}, `search` {query} answered with a list of places.
  *
- * The car app runs in the same process as the phone app; it only works while
- * the Flutter side is running ([connected]).
+ * The car app runs in the same process as the phone app and shares its
+ * Flutter engine (RoadToEngine), which the car starts when needed;
+ * [connected] once the Flutter side has answered.
  */
 class CarBridge {
     @Volatile var state = CarState()
         private set
-    val connected get() = channel != null
+    /** The Flutter side has sent its state at least once. */
+    @Volatile var connected = false
+        private set
 
     private var channel: MethodChannel? = null
     private val listeners = mutableListOf<() -> Unit>()
@@ -132,12 +160,14 @@ class CarBridge {
     fun detach() {
         channel?.setMethodCallHandler(null)
         channel = null
+        connected = false
         state = CarState()
         notifyListeners()
     }
 
     fun update(s: CarState) {
         state = s
+        connected = true
         notifyListeners()
     }
 
@@ -151,8 +181,34 @@ class CarBridge {
 
     fun stop() = send("stop", null)
 
+    fun navigate(place: CarPlace) = send("navigate", place.toMap())
+
+    /** Places matching [query], found by the phone (offline index first); empty on error. */
+    fun search(query: String, done: (List<CarPlace>) -> Unit) = searcher(query, done)
+
     /** Calls to Flutter; overridden in tests. */
     internal var sender: (String, Any?) -> Unit = { method, args -> main.post { channel?.invokeMethod(method, args) } }
+
+    internal var searcher: (String, (List<CarPlace>) -> Unit) -> Unit = { query, done ->
+        main.post {
+            val c = channel
+            if (c == null) {
+                done(emptyList())
+            } else {
+                c.invokeMethod(
+                    "search",
+                    mapOf("query" to query),
+                    object : MethodChannel.Result {
+                        override fun success(result: Any?) = done(CarPlace.listFrom(result))
+
+                        override fun error(code: String, message: String?, details: Any?) = done(emptyList())
+
+                        override fun notImplemented() = done(emptyList())
+                    },
+                )
+            }
+        }
+    }
 
     private fun send(method: String, args: Any?) = sender(method, args)
 

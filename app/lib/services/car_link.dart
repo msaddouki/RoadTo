@@ -6,13 +6,15 @@ import 'package:flutter/services.dart';
 import 'package:roadto_core/roadto_core.dart';
 
 import '../state/app_controller.dart';
+import 'location_source.dart';
 
 /// Shows the phone's guidance on Android Auto (android/…/car/): the car app
 /// computes nothing, it draws what this sends and sends back what the driver
 /// taps (reports, "Toujours là ?" answers, stop).
 ///
 /// Channel "org.roadto/car": `update` (this state) to the car; `report`
-/// {type}, `confirm` {id, stillThere}, `stop` from the car.
+/// {type}, `confirm` {id, stillThere}, `stop`, `navigate` {name, detail, lat,
+/// lon} and `search` {query} (answered with places) from the car.
 class CarLink {
   static const channel = MethodChannel('org.roadto/car');
 
@@ -21,7 +23,12 @@ class CarLink {
   final void Function(AlertType type) onReport;
   final void Function(String id, bool? stillThere) onConfirm;
   final VoidCallback onStop;
+  final void Function(Place place) onNavigate;
+  final Future<List<Place>> Function(String query) onSearch;
   final MethodChannel _channel;
+
+  /// Rows a car list shows at most.
+  static const maxPlaces = 6;
 
   /// The car screen does not need more than a few updates a second.
   final Duration minInterval;
@@ -36,6 +43,8 @@ class CarLink {
     required this.onReport,
     required this.onConfirm,
     required this.onStop,
+    required this.onNavigate,
+    required this.onSearch,
     MethodChannel? methodChannel,
     this.minInterval = const Duration(milliseconds: 500),
   }) : _channel = methodChannel ?? channel;
@@ -48,6 +57,8 @@ class CarLink {
       if (app.pendingConfirmation?.id == id) app.answerConfirmation(stillThere);
     },
     onStop: app.stopNavigation,
+    onNavigate: (place) => unawaited(app.navigateTo(place)),
+    onSearch: app.search,
   );
 
   /// Android only: Android Auto has no iOS counterpart here (CarPlay, J8).
@@ -79,6 +90,19 @@ class CarLink {
       case 'stop':
         onStop();
         return true;
+      case 'navigate':
+        final place = placeFromMap(args);
+        if (place == null) return false;
+        onNavigate(place);
+        return true;
+      case 'search':
+        final query = (args['query'] as String? ?? '').trim();
+        if (query.isEmpty) return const <Object?>[];
+        try {
+          return [for (final p in (await onSearch(query)).take(maxPlaces)) placeToMap(p)];
+        } on Exception {
+          return const <Object?>[]; // offline without a region: nothing found
+        }
     }
     throw MissingPluginException('car: ${call.method}');
   }
@@ -114,8 +138,31 @@ Map<String, Object?> carStateOf(AppController app) => carState(
   ahead: app.ahead.firstOrNull,
   confirmations: app.ahead.isEmpty ? 0 : app.alerts.stillThere(app.ahead.first.alert.id).count,
   pending: app.pendingConfirmation,
+  places: app.favorites.all,
+  routing: app.routing,
+  locationDenied:
+      !app.settings.simulate &&
+      (app.locationStatus == LocationAvailability.denied || app.locationStatus == LocationAvailability.deniedForever),
   now: DateTime.now(),
 );
+
+Map<String, Object?> placeToMap(Place p) => {
+  'name': p.name,
+  'detail': p.detail,
+  'lat': p.position.lat,
+  'lon': p.position.lon,
+};
+
+Place? placeFromMap(Map<String, Object?> m) {
+  final lat = m['lat'], lon = m['lon'];
+  if (lat is! num || lon is! num) return null;
+  final name = m['name'] as String? ?? '';
+  return Place(
+    name: name.isEmpty ? 'Destination' : name,
+    detail: m['detail'] as String?,
+    position: LatLon(lat.toDouble(), lon.toDouble()),
+  );
+}
 
 @visibleForTesting
 Map<String, Object?> carState({
@@ -129,6 +176,9 @@ Map<String, Object?> carState({
   AlertAhead? ahead,
   int confirmations = 0,
   RoadAlert? pending,
+  List<Place> places = const [],
+  bool routing = false,
+  bool locationDenied = false,
   required DateTime now,
 }) {
   final g = guidance, next = guidance?.nextManeuver;
@@ -156,6 +206,9 @@ Map<String, Object?> carState({
     if (ahead != null)
       'alert': {'label': ahead.alert.type.label, 'distanceM': ahead.distanceM, 'confirmations': confirmations},
     if (pending != null) 'confirmation': {'id': pending.id, 'label': pending.type.label},
+    'places': [for (final p in places.take(CarLink.maxPlaces)) placeToMap(p)],
+    'routing': routing,
+    'locationDenied': locationDenied,
     if (route != null) ...{
       'routeId': '${identityHashCode(route)}',
       'route': [
