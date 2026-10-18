@@ -102,7 +102,11 @@ def main(argv: list[str] | None = None) -> None:
 
     s = sub.add_parser("style", help="build the offline style bundle")
     s.add_argument("--out", required=True)
-    s.add_argument("--style-url", default=style.DEFAULT_STYLE_URL)
+    s.add_argument(
+        "--style-url",
+        default=None,
+        help=f"adapt this style instead of RoadTo's own (e.g. {style.DEFAULT_STYLE_URL})",
+    )
     s.set_defaults(func=_cmd_style)
 
     s = sub.add_parser("manifest", help="write manifest.json for a package directory")

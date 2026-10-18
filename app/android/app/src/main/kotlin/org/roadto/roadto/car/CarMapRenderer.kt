@@ -34,6 +34,7 @@ class CarMapRenderer(private val carContext: CarContext, private val bridge: Car
     private var mapView: MapView? = null
     private var map: MapLibreMap? = null
     private var style: Style? = null
+    private var navLabels: Boolean? = null
     private var styleUri: String? = null
     private var routeId: String? = null
     private var width = 0
@@ -111,6 +112,7 @@ class CarMapRenderer(private val carContext: CarContext, private val bridge: Car
             styleUri = uri
             style = null
             routeId = null
+            navLabels = null
             m.setStyle(Style.Builder().fromUri(uri)) { loaded ->
                 if (styleUri != uri) return@setStyle
                 addLayers(loaded)
@@ -120,6 +122,10 @@ class CarMapRenderer(private val carContext: CarContext, private val bridge: Car
             return
         }
         val st = style ?: return
+        if (s.navigating != navLabels) {
+            navLabels = s.navigating
+            showNavigationLabels(st, s.navigating)
+        }
         if (s.routeId != routeId) {
             routeId = s.routeId
             (st.getSource(ROUTE) as? GeoJsonSource)?.setGeoJson(lineGeoJson(s.route))
@@ -148,7 +154,11 @@ class CarMapRenderer(private val carContext: CarContext, private val bridge: Car
         try {
             style.addSource(GeoJsonSource(ROUTE, lineGeoJson(emptyList())))
             style.addSource(GeoJsonSource(POSITION, pointGeoJson(null, null)))
-            style.addLayer(
+            // Under the street names of RoadTo's style (its "roadto-labels"
+            // marker): the route never covers a name.
+            fun addRouteLayer(layer: LineLayer) =
+                if (style.getLayer(LABELS_MARKER) != null) style.addLayerBelow(layer, LABELS_MARKER) else style.addLayer(layer)
+            addRouteLayer(
                 LineLayer("$ROUTE-casing", ROUTE).withProperties(
                     PropertyFactory.lineColor("#0B3D91"),
                     PropertyFactory.lineWidth(12f),
@@ -156,7 +166,7 @@ class CarMapRenderer(private val carContext: CarContext, private val bridge: Car
                     PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
                 ),
             )
-            style.addLayer(
+            addRouteLayer(
                 LineLayer(ROUTE, ROUTE).withProperties(
                     PropertyFactory.lineColor("#3D8BFF"),
                     PropertyFactory.lineWidth(8f),
@@ -177,8 +187,27 @@ class CarMapRenderer(private val carContext: CarContext, private val bridge: Car
         }
     }
 
+    /**
+     * During a trip, street names in bubbles (the style's "-nav" layers)
+     * rather than along the roads, as on the phone. Styles without them are
+     * left as they are.
+     */
+    private fun showNavigationLabels(style: Style, navigating: Boolean) {
+        for (layer in style.layers) {
+            val id = layer.id
+            val visible = when {
+                id.endsWith(NAV_SUFFIX) -> navigating
+                style.getLayer(id + NAV_SUFFIX) != null -> !navigating
+                else -> continue
+            }
+            layer.setProperties(PropertyFactory.visibility(if (visible) Property.VISIBLE else Property.NONE))
+        }
+    }
+
     companion object {
         private const val TAG = "RoadToCarMap"
+        private const val LABELS_MARKER = "roadto-labels"
+        private const val NAV_SUFFIX = "-nav"
         private const val ROUTE = "roadto-route"
         private const val POSITION = "roadto-position"
 
