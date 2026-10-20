@@ -65,6 +65,7 @@ packages/roadto_core/   Pure Dart core: geo, geohash, Nostr, alerts, guidance,
                         simulation, offline regions and search
 relay/dev_relay/        Development Nostr relay enforcing the RoadTo write policy
 relay/strfry/           Production relays: strfry + the same policy as a plugin
+                        (hosting one: docs/relay-self-hosting.md)
 relay/strfry_policy/    The strfry write-policy plugin (Dart) and an end-to-end check
 pipeline/               Builds signed offline region packages from OpenStreetMap
 docs/adr/               Architecture decision records
@@ -116,6 +117,13 @@ an emulator or a phone connected:
 tool/embed_region.sh lyon --with-routing   # needs GH_TOKEN
 tool/run_emulator_test.sh                  # results in build/emulator-test
 ```
+
+## Beta documents
+
+Drafts to review before the closed beta: the
+[privacy policy](docs/beta/politique-de-confidentialite.md) and the
+[terms of use](docs/beta/conditions-d-utilisation.md), in French, and the
+[relay hosting guide](docs/relay-self-hosting.md).
 
 ## Safety rule
 
