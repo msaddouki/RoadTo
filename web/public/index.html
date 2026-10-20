@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RoadTo · navigation et alertes, sans pistage</title>
+<meta name="description" content="RoadTo guide votre trajet et partage les alertes des conducteurs autour de vous, sans compte ni pistage, avec des cartes hors connexion.">
+<link rel="stylesheet" href="assets/maplibre-gl.css">
+<link rel="stylesheet" href="site.css">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<script src="config.js"></script>
+</head>
+<body>
+<header class="wrap top">
+  <a class="brand" href="./"><svg viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="10" fill="#1B3A73"/><path d="M17 6l9 21-9-5-9 5z" fill="#F5B83D"/></svg> RoadTo</a>
+  <nav><a href="carte.html">Alertes en direct</a><a href="#beta">Bêta</a><a href="confidentialite.html">Confidentialité</a></nav>
+</header>
+<main>
+  <section class="wrap hero">
+    <div>
+      <h1>La route, signalée par ceux qui la prennent.</h1>
+      <p>RoadTo vous guide et vous prévient des accidents, bouchons et travaux signalés par les conducteurs autour de vous. Sans compte, sans pistage, avec des cartes qui marchent hors connexion.</p>
+      <div class="cta">
+        <a class="button primary" href="carte.html">Voir les alertes en direct</a>
+        <a class="button ghost" href="#beta">Rejoindre la bêta</a>
+      </div>
+    </div>
+    <div class="phone" aria-hidden="true">
+      <div class="map" id="hero-map"></div>
+      <div class="banner"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 20v-7a4 4 0 0 1 4-4h9"/><path d="M15 5l4 4-4 4"/></svg><div><small>dans 260 m</small>Pont de la Guillotière</div></div>
+    </div>
+  </section>
+  <section class="wrap promises">
+    <article class="promise"><h2>Aucun compte</h2><p>Pas d’e-mail, pas de mot de passe, pas de profil. Votre identité est une clé gardée sur votre téléphone.</p></article>
+    <article class="promise"><h2>Votre position reste chez vous</h2><p>Un signalement publie une zone d’environ 150 m, jamais votre position exacte, et une clé neuve à chaque trajet.</p></article>
+    <article class="promise"><h2>Hors connexion</h2><p>Carte, recherche et itinéraire fonctionnent sans réseau une fois votre région installée.</p></article>
+  </section>
+  <section class="wrap section">
+    <h2>Comment marchent les alertes</h2>
+    <p>Les alertes passent par des relais ouverts : n’importe qui peut en héberger un, et elles disparaissent seules.</p>
+    <ol class="steps">
+      <li><strong>Vous signalez</strong><span>Un accident, un bouchon, des travaux : un appui, sans texte libre.</span></li>
+      <li><strong>Les conducteurs confirment</strong><span>En passant, « Toujours là ? » : oui ou non. La fiabilité se recalcule.</span></li>
+      <li><strong>L’alerte s’efface</strong><span>De 30 minutes pour un bouchon à 12 heures pour des travaux, puis plus rien.</span></li>
+    </ol>
+  </section>
+  <section class="wrap section" id="beta">
+    <h2>Bêta fermée</h2>
+    <p>RoadTo est en test sur Android et iPhone, avec Android Auto. La bêta se fait sur invitation.</p>
+    <p id="contact">Les inscriptions ouvrent bientôt.</p>
+  </section>
+</main>
+<footer><div class="wrap">
+  <span>Cartes © les contributeurs <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · tuiles <a href="https://openfreemap.org">OpenFreeMap</a></span>
+  <span><a href="confidentialite.html">Confidentialité</a> · <a href="cgu.html">Conditions d’utilisation</a></span>
+</div></footer>
+<script>
+  const c = window.ROADTO_CONFIG?.contact;
+  if (c) {
+    const p = document.getElementById('contact');
+    p.textContent = 'Pour rejoindre la bêta, écrivez à ';
+    const a = document.createElement('a');
+    a.href = 'mailto:' + c;
+    a.textContent = c;
+    p.append(a, '.');
+  }
+</script>
+<script type="module" src="assets/index.js"></script>
+</body>
+</html>

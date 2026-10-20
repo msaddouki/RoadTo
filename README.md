@@ -63,6 +63,7 @@ once a region is downloaded.
 app/                    Flutter app (Android + iOS)
 packages/roadto_core/   Pure Dart core: geo, geohash, Nostr, alerts, guidance,
                         simulation, offline regions and search
+web/                    Companion web site: live alerts map, shared places, beta and legal pages
 relay/dev_relay/        Development Nostr relay enforcing the RoadTo write policy
 relay/strfry/           Production relays: strfry + the same policy as a plugin
 relay/strfry_policy/    The strfry write-policy plugin (Dart) and an end-to-end check

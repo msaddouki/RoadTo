@@ -400,3 +400,14 @@ def test_drive_bundle_files():
         "sprites/roadto@2x.png",
     }
     assert json.loads(files["style-night.json"])["layers"][0]["paint"]["background-color"] == drive_style.NIGHT.background
+
+
+def test_online_style_uses_online_tiles_and_real_font_names():
+    s = drive_style.online_style(drive_style.DAY, "t")
+    assert s["sources"]["openmaptiles"] == {"type": "vector", "url": drive_style.ONLINE_TILES}
+    assert s["glyphs"] == drive_style.ONLINE_GLYPHS and s["sprite"] == "@ROADTO_SPRITE@"
+    fonts = {f for layer in s["layers"] for f in layer.get("layout", {}).get("text-font", [])}
+    assert fonts <= {"Noto Sans Regular", "Noto Sans Bold", "Noto Sans Italic"}
+    assert "@ROADTO_REGION_DIR@" not in json.dumps(s)
+    # Same layers as offline.
+    assert [l["id"] for l in s["layers"]] == [l["id"] for l in drive_style.drive_style(drive_style.DAY, "t")["layers"]]

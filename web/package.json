@@ -1,0 +1,17 @@
+{
+  "name": "roadto-web",
+  "private": true,
+  "type": "module",
+  "description": "RoadTo's companion web site: live alerts map, place links, beta and legal pages.",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "build": "node build.mjs"
+  },
+  "devDependencies": {
+    "@noble/curves": "1.4.0",
+    "@noble/hashes": "1.4.0",
+    "esbuild": "0.23.0",
+    "maplibre-gl": "4.7.1",
+    "marked": "12.0.2"
+  }
+}

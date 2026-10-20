@@ -478,3 +478,24 @@ BUBBLES = {
     "bubble-day": ("#FFFFFF", "#C4C7CC"),
     "bubble-night": ("#2C3E54", "#4D6382"),
 }
+
+
+# The same style on OpenFreeMap's online tiles, for the web site and the
+# app's online map: the source, the glyph server (real font names) and the
+# sprite, which the page resolves against its own address (@ROADTO_SPRITE@).
+ONLINE_TILES = "https://tiles.openfreemap.org/planet"
+ONLINE_GLYPHS = "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf"
+
+
+def online_style(p: Palette, name: str) -> dict:
+    import copy
+    import json
+
+    style = copy.deepcopy(drive_style(p, name))
+    style["sources"]["openmaptiles"] = {"type": "vector", "url": ONLINE_TILES}
+    style["glyphs"] = ONLINE_GLYPHS
+    style["sprite"] = "@ROADTO_SPRITE@"
+    text = json.dumps(style)
+    for font in (REGULAR, BOLD, ITALIC):
+        text = text.replace(f'"{font}"', json.dumps(font.replace("_", " ")))
+    return json.loads(text)

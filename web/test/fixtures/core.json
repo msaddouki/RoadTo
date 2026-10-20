@@ -1,0 +1,237 @@
+{
+ "events": [
+  {
+   "id": "0004ddc54d424d80bd4acd6711d1df881c0c304894a0c98bc7ed95433078ba38",
+   "pubkey": "e2f9982e1c26f744371ac9fa5776d266eb2d27223dea3a63cdc8923ed3bae96f",
+   "created_at": 1792483200,
+   "kind": 4550,
+   "tags": [
+    [
+     "t",
+     "accident"
+    ],
+    [
+     "g",
+     "u05k"
+    ],
+    [
+     "g",
+     "u05kq"
+    ],
+    [
+     "g",
+     "u05kqt"
+    ],
+    [
+     "g",
+     "u05kqt1"
+    ],
+    [
+     "expiration",
+     "1792486800"
+    ],
+    [
+     "bearing",
+     "90"
+    ],
+    [
+     "nonce",
+     "2296",
+     "12"
+    ]
+   ],
+   "content": "",
+   "sig": "2101cbbc9223f97c92cf651ef3dbe2acf3d71ba3b50dc25ab2134ff7d3333c89d92fea85eea5534e6e4859c1b8d325067b23b44e32f3f135fe42fcc612b78ac1"
+  },
+  {
+   "id": "00003ef1ef0fca7ce78a39b9fdcbc0dbeb940f0baa78650b34ce609caee57a44",
+   "pubkey": "46a0989106c688b71ccc9037f47fdb434a1c004efb8ef0eaa98746d6aeb941b0",
+   "created_at": 1792482000,
+   "kind": 4550,
+   "tags": [
+    [
+     "t",
+     "traffic"
+    ],
+    [
+     "g",
+     "u05kqbz"
+    ],
+    [
+     "expiration",
+     "1792483800"
+    ],
+    [
+     "nonce",
+     "10466",
+     "12"
+    ]
+   ],
+   "content": "",
+   "sig": "0a02f19077e5081cf6633b8d19ea976845cfdb7083f14788ae4734c40fdebe1f9cb9a2287cd6cb3b1d6234fafcafae604e7791e12580673d85145eb291651045"
+  },
+  {
+   "id": "00d17916cabae4605fefa19defc03e5251e5b6167771a102290aed21909b1caf",
+   "pubkey": "3c882d21b8a47dcde978a1e32a697730a50932c14036d20f64081af3692c74df",
+   "created_at": 1792483800,
+   "kind": 4551,
+   "tags": [
+    [
+     "e",
+     "0004ddc54d424d80bd4acd6711d1df881c0c304894a0c98bc7ed95433078ba38"
+    ],
+    [
+     "still",
+     "yes"
+    ],
+    [
+     "nonce",
+     "237",
+     "8"
+    ]
+   ],
+   "content": "",
+   "sig": "6c8be946e49a1cedf9aff414d3949f2c96eb03182c35b711283f6c6e3383e5581d3c857893214c7fe132bc87b1ab0228726a9f055dacc7f4a6ec94c8cb3ea61e"
+  },
+  {
+   "id": "00cce0a181d3a262820997e976747e53678d0b5c51c66cd078ca2bc8a74dbf5e",
+   "pubkey": "04d974c0d33228904677fb739b4da8d90bea2b0b8039f26acf1cac6659e38858",
+   "created_at": 1792484100,
+   "kind": 4551,
+   "tags": [
+    [
+     "e",
+     "0004ddc54d424d80bd4acd6711d1df881c0c304894a0c98bc7ed95433078ba38"
+    ],
+    [
+     "still",
+     "no"
+    ],
+    [
+     "nonce",
+     "297",
+     "8"
+    ]
+   ],
+   "content": "",
+   "sig": "e7b7f24ae9e8589cfaa3bd6ab5e62a00867c29b719f35d024880c600a68fdf91299d0caeabad9adffc3e061ab490a05e1523d414a0d3fecc39b2eb31fd0d4242"
+  },
+  {
+   "id": "0071d2ed8da4f9df803e6880b3068593ac18c8515cc9a1971a5a7ebee691db6c",
+   "pubkey": "e2f9982e1c26f744371ac9fa5776d266eb2d27223dea3a63cdc8923ed3bae96f",
+   "created_at": 1792484150,
+   "kind": 4551,
+   "tags": [
+    [
+     "e",
+     "0004ddc54d424d80bd4acd6711d1df881c0c304894a0c98bc7ed95433078ba38"
+    ],
+    [
+     "still",
+     "yes"
+    ],
+    [
+     "nonce",
+     "190",
+     "8"
+    ]
+   ],
+   "content": "",
+   "sig": "740c42b3be364cd87c7cf5427fc9ab7413f4e52272b7e6caa9a7b3e6e54a3555989594408830df5eb9f6a285bae856fdab9b7541001abc94465fff64d5766c72"
+  },
+  {
+   "id": "00d063b4f3a31d8260a13ac753662df450426473605afcdc75bb36b41ca0e7dd",
+   "pubkey": "1c38a17ee4739238ca6c1ecea41effdb65d6edbe5c3c0d028a1ca9721a6080fa",
+   "created_at": 1792483500,
+   "kind": 4551,
+   "tags": [
+    [
+     "e",
+     "00003ef1ef0fca7ce78a39b9fdcbc0dbeb940f0baa78650b34ce609caee57a44"
+    ],
+    [
+     "still",
+     "no"
+    ],
+    [
+     "nonce",
+     "8",
+     "8"
+    ]
+   ],
+   "content": "",
+   "sig": "8105a4c8e939862c7ddd81547ab6c36044821ae14525a69675bd2900a1fa33e80bb2cc91b590c5d51fef756838d28e6865af3a2f609b3f47f16ddf75c096648e"
+  },
+  {
+   "id": "00ae1c4e9365a235f8c883c32ecf88f16cb3cab928cd7f02d421a47d85afcb08",
+   "pubkey": "d69f5a07caf2b555dc6ce31ccf1e193dd1b3d8c753150fa4f14eb1c962343df0",
+   "created_at": 1792483510,
+   "kind": 4551,
+   "tags": [
+    [
+     "e",
+     "00003ef1ef0fca7ce78a39b9fdcbc0dbeb940f0baa78650b34ce609caee57a44"
+    ],
+    [
+     "still",
+     "no"
+    ],
+    [
+     "nonce",
+     "935",
+     "8"
+    ]
+   ],
+   "content": "",
+   "sig": "88f1fbcccad5c842ff327e604ce69c54f5406eea1cc0db9334422565e3b58b70146725afc316362ff58040c10a4f9472b158bfb58a1df50ab28e12918398b9c4"
+  }
+ ],
+ "reliability": {
+  "0004ddc54d424d80bd4acd6711d1df881c0c304894a0c98bc7ed95433078ba38": [
+   0.5708910569533668,
+   0.4931390022413214,
+   0.4341852257229106
+  ],
+  "00003ef1ef0fca7ce78a39b9fdcbc0dbeb940f0baa78650b34ce609caee57a44": [
+   0.14592788662896414,
+   0.21145892887422377,
+   0.31741088716886595
+  ]
+ },
+ "visible": {
+  "1792483200": [
+   "0004ddc54d424d80bd4acd6711d1df881c0c304894a0c98bc7ed95433078ba38"
+  ],
+  "1792484400": [
+   "0004ddc54d424d80bd4acd6711d1df881c0c304894a0c98bc7ed95433078ba38"
+  ],
+  "1792486200": [
+   "0004ddc54d424d80bd4acd6711d1df881c0c304894a0c98bc7ed95433078ba38"
+  ]
+ },
+ "stillThere": {
+  "0004ddc54d424d80bd4acd6711d1df881c0c304894a0c98bc7ed95433078ba38": 1
+ },
+ "nows": [
+  1792483200,
+  1792484400,
+  1792486200
+ ],
+ "geohash": [
+  {
+   "lat": 45.7578,
+   "lon": 4.832,
+   "hash": "u05kmcy"
+  },
+  {
+   "lat": 48.8566,
+   "lon": 2.3522,
+   "hash": "u09tvw0"
+  },
+  {
+   "lat": -33.8688,
+   "lon": 151.2093,
+   "hash": "r3gx2f7"
+  }
+ ]
+}

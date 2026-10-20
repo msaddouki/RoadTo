@@ -246,6 +246,32 @@ jobs:
           flutter analyze --fatal-infos
           flutter test
 
+
+  web:
+    name: Web site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      # The map style comes from the pipeline (python -m roadto_pipeline.web_style).
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - working-directory: web
+        run: |
+          npm ci
+          npm test
+          npm run build
+      - uses: actions/upload-artifact@v7
+        with:
+          name: roadto-web
+          path: web/dist
+          retention-days: 14
+
   android:
     name: Android APK
     needs: [core, app]
