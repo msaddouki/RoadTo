@@ -358,10 +358,10 @@ class NavigationSheet extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: _Figure(value: timeLeft(state.remaining), label: 'restant'),
+                child: TripFigure(value: timeLeft(state.remaining), label: 'restant'),
               ),
               Expanded(
-                child: _Figure(
+                child: TripFigure(
                   value: state.arrived ? 'Arrivé' : '$hh:$mm',
                   label: state.arrived ? '' : 'arrivée',
                   color: NavColors.eta,
@@ -369,7 +369,7 @@ class NavigationSheet extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child: _Figure(value: formatDistance(state.remainingM), label: 'à parcourir'),
+                child: TripFigure(value: formatDistance(state.remainingM), label: 'à parcourir'),
               ),
             ],
           ),
@@ -418,14 +418,21 @@ class NavigationSheet extends StatelessWidget {
   }
 }
 
-/// One figure of the sheet: the value big, what it is under it.
-class _Figure extends StatelessWidget {
+/// One figure of a trip (time left, arrival, distance): the value big, what
+/// it is under it.
+class TripFigure extends StatelessWidget {
   final String value;
   final String label;
   final Color color;
   final bool big;
 
-  const _Figure({required this.value, required this.label, this.color = NavColors.figures, this.big = false});
+  const TripFigure({
+    super.key,
+    required this.value,
+    required this.label,
+    this.color = NavColors.figures,
+    this.big = false,
+  });
 
   @override
   Widget build(BuildContext context) {

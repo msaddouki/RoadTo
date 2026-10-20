@@ -17,6 +17,7 @@ import '../services/identity_store.dart';
 import '../services/location_source.dart';
 import '../services/settings_store.dart';
 import '../services/voice.dart';
+import 'trip_preview.dart';
 
 /// État de l'app et orchestration : position, itinéraire, guidage, alertes.
 /// Toute la logique métier vit dans roadto_core ; ce contrôleur ne fait que
@@ -38,6 +39,9 @@ class AppController extends ChangeNotifier {
   LocationAvailability? locationStatus;
 
   Place? destination;
+
+  /// A route computed and shown, waiting for "Partir" (route preview).
+  TripPreview? preview;
 
   /// Saved places (Maison, Travail…), on the phone only.
   late final Favorites favorites;
@@ -298,19 +302,56 @@ class AppController extends ChangeNotifier {
       if (a.type.blocksRoad) a.position,
   ];
 
+  /// Computes the route to [place] and shows it without starting: the
+  /// driver sees time, distance and alerts, then taps "Partir" ([startPreview]).
+  Future<void> planTo(Place place) async {
+    routing = true;
+    preview = null;
+    notifyListeners();
+    try {
+      final from = position;
+      final r = await _router.route(from, place.position, headingDeg: fix?.bearingDeg, avoid: _blockedPoints);
+      preview = TripPreview(
+        place: place,
+        route: r,
+        alerts: alertsAhead(r, 0, alerts.visible()),
+        from: from,
+        computedAt: DateTime.now(),
+      );
+    } on Exception catch (e) {
+      _say('Itinéraire impossible : $e', speak: false);
+    } finally {
+      routing = false;
+      notifyListeners();
+    }
+  }
+
+  /// Starts guidance on the route shown; computed again when it is stale.
+  Future<void> startPreview() async {
+    final p = preview;
+    if (p == null) return;
+    preview = null;
+    if (!p.fresh(position, DateTime.now())) return navigateTo(p.place);
+    destination = p.place;
+    _startTrip(p.route);
+    notifyListeners();
+  }
+
+  void cancelPreview() {
+    if (preview == null) return;
+    preview = null;
+    notifyListeners();
+  }
+
+  /// Computes the route to [place] and starts at once (from the car).
   Future<void> navigateTo(Place place) async {
     routing = true;
+    preview = null;
     destination = place;
     notifyListeners();
     try {
       final r = await _router.route(position, place.position, headingDeg: fix?.bearingDeg, avoid: _blockedPoints);
-      // Une clé neuve à chaque trajet : les signalements de deux trajets ne
-      // peuvent pas être reliés.
-      tripKeys = KeyPair.generate();
-      _ownKeys.add(tripKeys.publicKey);
-      _setRoute(r);
-      await WakelockPlus.enable().catchError((_) {});
-      unawaited(_setBackgroundLocation(true));
+      _startTrip(r);
     } on Exception catch (e) {
       destination = null;
       _say('Itinéraire impossible : $e', speak: false);
@@ -318,6 +359,16 @@ class AppController extends ChangeNotifier {
       routing = false;
       notifyListeners();
     }
+  }
+
+  void _startTrip(TripRoute r) {
+    // Une clé neuve à chaque trajet : les signalements de deux trajets ne
+    // peuvent pas être reliés.
+    tripKeys = KeyPair.generate();
+    _ownKeys.add(tripKeys.publicKey);
+    _setRoute(r);
+    unawaited(WakelockPlus.enable().catchError((_) {}));
+    unawaited(_setBackgroundLocation(true));
   }
 
   void _setRoute(TripRoute r) {

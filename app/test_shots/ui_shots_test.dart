@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:roadto/ui/browse_panels.dart';
 import 'package:roadto/ui/navigation_panels.dart';
 import 'package:roadto/ui/report_sheet.dart';
+import 'package:roadto/ui/route_preview.dart';
+import 'package:roadto/state/trip_preview.dart';
 import 'package:roadto_core/roadto_core.dart';
 
 import 'shots.dart';
@@ -163,6 +165,43 @@ Widget report() => onMap(
   ),
 );
 
+/// The route preview: Bellecour to Part-Dieu, an accident and a jam on the way.
+Widget preview() => onMap(
+  'map-preview',
+  SafeArea(
+    bottom: false,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+          child: PreviewHeader(
+            place: const Place(name: 'Gare Part-Dieu', position: LatLon(45.7605, 4.8597)),
+            onBack: () {},
+          ),
+        ),
+        const Spacer(),
+        RoutePreviewSheet(
+          preview: TripPreview(
+            place: const Place(
+              name: 'Gare Part-Dieu',
+              detail: 'Boulevard Vivier-Merle, Lyon 3e',
+              position: LatLon(45.7605, 4.8597),
+            ),
+            route: TripRoute(shape: route.shape, maneuvers: route.maneuvers, lengthM: 3400, timeS: 660),
+            alerts: [AlertAhead(accident, 820), AlertAhead(accident, 1900)],
+            from: const LatLon(45.7578, 4.8320),
+            computedAt: DateTime(2026, 10, 20, 8, 14),
+          ),
+          now: DateTime(2026, 10, 20, 8, 14),
+          onGo: () {},
+          onCancel: () {},
+        ),
+      ],
+    ),
+  ),
+);
+
 void main() {
   setUpAll(loadFonts);
   final g = tripState(route);
@@ -173,5 +212,6 @@ void main() {
   }
   testWidgets('over speed', (t) => shoot(t, '$tag-overspeed', navigation(g, over: true), size: const Size(390, 760)));
   testWidgets('browse', (t) => shoot(t, '$tag-browse', browse(), size: const Size(390, 760)));
+  testWidgets('preview', (t) => shoot(t, '$tag-preview', preview(), size: const Size(390, 760)));
   testWidgets('report', (t) => shoot(t, '$tag-report', report(), size: const Size(390, 760)));
 }

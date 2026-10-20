@@ -5,11 +5,13 @@ import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:roadto_core/roadto_core.dart';
 
 import '../state/app_controller.dart';
+import '../state/trip_preview.dart';
 import 'browse_panels.dart';
 import 'favorite_name_dialog.dart';
 import 'map_layers.dart';
 import 'navigation_panels.dart';
 import 'report_sheet.dart';
+import 'route_preview.dart';
 import 'search_screen.dart';
 import 'settings_screen.dart';
 
@@ -34,6 +36,9 @@ class _MapScreenState extends State<MapScreen> {
   StreamSubscription<String>? _messages;
   Timer? _confirmTimeout;
   String? _lastRouteKey;
+
+  /// The route preview the camera last framed.
+  TripPreview? _framedPreview;
 
   /// Label layers of the current style, and whether they are set for a trip.
   List<String> _layerIds = const [];
@@ -177,15 +182,26 @@ class _MapScreenState extends State<MapScreen> {
       }
     }
     final g = app.guidance;
-    final routeKey = '${identityHashCode(app.route)}:${((g?.projection.alongM ?? 0) / 25).floor()}';
+    final preview = app.navigating ? null : app.preview;
+    final shown = app.route ?? preview?.route;
+    final routeKey = '${identityHashCode(shown)}:${((g?.projection.alongM ?? 0) / 25).floor()}';
     if (routeKey != _lastRouteKey) {
       _lastRouteKey = routeKey;
-      await map.setGeoJsonSource('route', routeGeoJson(app.route, alongM: g?.projection.alongM ?? 0));
+      await map.setGeoJsonSource('route', routeGeoJson(shown, alongM: g?.projection.alongM ?? 0));
     }
     await map.setGeoJsonSource('alerts', alertsGeoJson(app.visibleAlerts));
-    await map.setGeoJsonSource('destination', pointGeoJson(app.destination?.position));
+    await map.setGeoJsonSource('destination', pointGeoJson((app.destination ?? preview?.place)?.position));
     final pos = g?.offRoute ?? true ? app.position : g!.projection.point;
     await map.setGeoJsonSource('position', pointGeoJson(pos));
+    if (preview != null) {
+      // The whole route, once, between the header and the sheet.
+      if (!identical(preview, _framedPreview)) {
+        _framedPreview = preview;
+        await map.animateCamera(_frame(preview.route.shape), duration: const Duration(milliseconds: 900));
+      }
+      return;
+    }
+    _framedPreview = null;
     if (_follow) {
       final nav = app.navigating;
       await map.animateCamera(
@@ -200,6 +216,26 @@ class _MapScreenState extends State<MapScreen> {
         duration: const Duration(milliseconds: 900),
       );
     }
+  }
+
+  /// The camera showing all of [shape], clear of the preview's header (top)
+  /// and sheet (bottom).
+  CameraUpdate _frame(List<LatLon> shape) {
+    var s = shape.first.lat, n = s, w = shape.first.lon, e = w;
+    for (final p in shape) {
+      if (p.lat < s) s = p.lat;
+      if (p.lat > n) n = p.lat;
+      if (p.lon < w) w = p.lon;
+      if (p.lon > e) e = p.lon;
+    }
+    final pad = MediaQuery.paddingOf(context);
+    return CameraUpdate.newLatLngBounds(
+      LatLngBounds(southwest: LatLng(s, w), northeast: LatLng(n, e)),
+      left: 40,
+      right: 40,
+      top: pad.top + 110,
+      bottom: pad.bottom + 330,
+    );
   }
 
   void _onAppChanged() {
@@ -235,13 +271,18 @@ class _MapScreenState extends State<MapScreen> {
     );
     if (place != null) {
       setState(() => _follow = true);
-      await app.navigateTo(place);
+      await app.planTo(place);
     }
   }
 
   Future<void> _goTo(Place place) async {
     setState(() => _follow = true);
-    await app.navigateTo(place);
+    await app.planTo(place);
+  }
+
+  Future<void> _startPreview() async {
+    setState(() => _follow = true);
+    await app.startPreview();
   }
 
   Future<void> _onLongPress(LatLng at) async {
@@ -287,7 +328,7 @@ class _MapScreenState extends State<MapScreen> {
     if (!mounted) return;
     if (choice == 'go') {
       setState(() => _follow = true);
-      await app.navigateTo(favorite ?? Place(name: 'Point choisi', position: point));
+      await app.planTo(favorite ?? Place(name: 'Point choisi', position: point));
     } else if (choice == 'favorite') {
       final name = await askFavoriteName(context);
       if (name == null) return;
@@ -344,139 +385,157 @@ class _MapScreenState extends State<MapScreen> {
     final g = app.guidance;
     final mapKey = _currentMapKey;
     final navigating = app.navigating && g != null;
-    return Scaffold(
-      body: Stack(
-        children: [
-          Listener(
-            onPointerDown: (_) {
-              if (_follow) setState(() => _follow = false);
-            },
-            // Never set myLocationEnabled: MapLibre's location component would
-            // use its Play Services engine, which the Android build excludes.
-            // The position layer is drawn from DeviceLocation instead.
-            child: MapLibreMap(
-              key: ValueKey(mapKey),
-              styleString: app.mapStyle,
-              initialCameraPosition: CameraPosition(target: LatLng(app.position.lat, app.position.lon), zoom: 13),
-              compassEnabled: false,
-              // The app draws its own GeoJSON layers. The plugin's annotation
-              // managers would add theirs asynchronously on every new map,
-              // and fail on a map replaced meanwhile (embedded region install).
-              annotationOrder: const [],
-              onMapCreated: (c) {
-                _map = c;
-                _mapKey = mapKey;
-                _styleReady = false;
+    final preview = app.navigating ? null : app.preview;
+    return PopScope(
+      // Back from the route preview returns to the map.
+      canPop: preview == null,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) app.cancelPreview();
+      },
+      child: Scaffold(
+        body: Stack(
+          children: [
+            Listener(
+              onPointerDown: (_) {
+                if (_follow) setState(() => _follow = false);
               },
-              onStyleLoadedCallback: _onStyleLoaded,
-              onMapLongClick: (_, at) => _onLongPress(at),
+              // Never set myLocationEnabled: MapLibre's location component would
+              // use its Play Services engine, which the Android build excludes.
+              // The position layer is drawn from DeviceLocation instead.
+              child: MapLibreMap(
+                key: ValueKey(mapKey),
+                styleString: app.mapStyle,
+                initialCameraPosition: CameraPosition(target: LatLng(app.position.lat, app.position.lon), zoom: 13),
+                compassEnabled: false,
+                // The app draws its own GeoJSON layers. The plugin's annotation
+                // managers would add theirs asynchronously on every new map,
+                // and fail on a map replaced meanwhile (embedded region install).
+                annotationOrder: const [],
+                onMapCreated: (c) {
+                  _map = c;
+                  _mapKey = mapKey;
+                  _styleReady = false;
+                },
+                onStyleLoadedCallback: _onStyleLoaded,
+                onMapLongClick: (_, at) => _onLongPress(at),
+              ),
             ),
-          ),
-          SafeArea(
-            bottom: !navigating,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (navigating)
-                        ManeuverBanner(state: g, then: ManeuverBanner.thenOf(app.route!, g))
-                      else ...[
-                        DestinationBar(
-                          onSearch: _openSearch,
-                          onSettings: () =>
-                              Navigator.of(context).push(MaterialPageRoute(builder: (_) => SettingsScreen(app: app))),
-                          routing: app.routing,
-                          simulate: app.settings.simulate,
-                        ),
-                        if (!app.routing && app.favorites.all.isNotEmpty) ...[
-                          const SizedBox(height: 10),
-                          FavoriteShortcuts(favorites: app.favorites.all, onGo: _goTo),
+            SafeArea(
+              bottom: !navigating && preview == null,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (navigating)
+                          ManeuverBanner(state: g, then: ManeuverBanner.thenOf(app.route!, g))
+                        else if (preview != null)
+                          PreviewHeader(place: preview.place, onBack: app.cancelPreview)
+                        else ...[
+                          DestinationBar(
+                            onSearch: _openSearch,
+                            onSettings: () =>
+                                Navigator.of(context).push(MaterialPageRoute(builder: (_) => SettingsScreen(app: app))),
+                            routing: app.routing,
+                            simulate: app.settings.simulate,
+                          ),
+                          if (!app.routing && app.favorites.all.isNotEmpty) ...[
+                            const SizedBox(height: 10),
+                            FavoriteShortcuts(favorites: app.favorites.all, onGo: _goTo),
+                          ],
+                        ],
+                        if (app.ahead.isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: AlertAheadCard(
+                              ahead: app.ahead.first,
+                              confirmations: app.alerts.stillThere(app.ahead.first.alert.id),
+                              now: DateTime.now(),
+                            ),
+                          ),
                         ],
                       ],
-                      if (app.ahead.isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: AlertAheadCard(
-                            ahead: app.ahead.first,
-                            confirmations: app.alerts.stillThere(app.ahead.first.alert.id),
-                            now: DateTime.now(),
-                          ),
-                        ),
-                      ],
-                    ],
+                    ),
                   ),
-                ),
-                const Spacer(),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (app.pendingConfirmation != null) ...[
-                        _StillThereCard(alert: app.pendingConfirmation!, onAnswer: app.answerConfirmation),
-                        const SizedBox(height: 12),
-                      ],
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                  const Spacer(),
+                  if (preview != null)
+                    RoutePreviewSheet(
+                      preview: preview,
+                      now: DateTime.now(),
+                      onGo: _startPreview,
+                      onCancel: app.cancelPreview,
+                    )
+                  else
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          if (navigating) ...[
-                            if (app.speedLimit?.kph != null) ...[
-                              SpeedLimitSign(kph: app.speedLimit!.kph!, over: app.overSpeed),
-                              const SizedBox(width: 10),
+                          if (app.pendingConfirmation != null) ...[
+                            _StillThereCard(alert: app.pendingConfirmation!, onAnswer: app.answerConfirmation),
+                            const SizedBox(height: 12),
+                          ],
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              if (navigating) ...[
+                                if (app.speedLimit?.kph != null) ...[
+                                  SpeedLimitSign(kph: app.speedLimit!.kph!, over: app.overSpeed),
+                                  const SizedBox(width: 10),
+                                ],
+                                SpeedReadout(kph: ((app.fix?.speedMps ?? 0) * 3.6).round(), over: app.overSpeed),
+                              ],
+                              const Spacer(),
+                              if (!_follow)
+                                FloatingActionButton.small(
+                                  heroTag: 'recenter',
+                                  tooltip: 'Recentrer',
+                                  onPressed: () {
+                                    setState(() => _follow = true);
+                                    _syncMap();
+                                  },
+                                  child: const Icon(Icons.my_location),
+                                ),
+                              if (!navigating) ...[
+                                const SizedBox(width: 12),
+                                SizedBox(
+                                  width: 84,
+                                  height: 84,
+                                  child: FloatingActionButton(
+                                    heroTag: 'report',
+                                    tooltip: 'Signaler',
+                                    backgroundColor: NavColors.report,
+                                    foregroundColor: NavColors.onReport,
+                                    shape: const CircleBorder(),
+                                    onPressed: _openReport,
+                                    child: const Icon(Icons.campaign, size: 40),
+                                  ),
+                                ),
+                              ],
                             ],
-                            SpeedReadout(kph: ((app.fix?.speedMps ?? 0) * 3.6).round(), over: app.overSpeed),
-                          ],
-                          const Spacer(),
-                          if (!_follow)
-                            FloatingActionButton.small(
-                              heroTag: 'recenter',
-                              tooltip: 'Recentrer',
-                              onPressed: () {
-                                setState(() => _follow = true);
-                                _syncMap();
-                              },
-                              child: const Icon(Icons.my_location),
-                            ),
-                          if (!navigating) ...[
-                            const SizedBox(width: 12),
-                            SizedBox(
-                              width: 84,
-                              height: 84,
-                              child: FloatingActionButton(
-                                heroTag: 'report',
-                                tooltip: 'Signaler',
-                                backgroundColor: NavColors.report,
-                                foregroundColor: NavColors.onReport,
-                                shape: const CircleBorder(),
-                                onPressed: _openReport,
-                                child: const Icon(Icons.campaign, size: 40),
-                              ),
-                            ),
-                          ],
+                          ),
+                          const SizedBox(height: 12),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                    ],
-                  ),
-                ),
-                if (navigating)
-                  NavigationSheet(
-                    state: g,
-                    now: DateTime.now(),
-                    voiceOn: app.settings.voice,
-                    onToggleVoice: () => app.updateSettings(app.settings.copyWith(voice: !app.settings.voice)),
-                    onReport: _openReport,
-                    onOptions: _openTripOptions,
-                  ),
-              ],
+                    ),
+                  if (navigating)
+                    NavigationSheet(
+                      state: g,
+                      now: DateTime.now(),
+                      voiceOn: app.settings.voice,
+                      onToggleVoice: () => app.updateSettings(app.settings.copyWith(voice: !app.settings.voice)),
+                      onReport: _openReport,
+                      onOptions: _openTripOptions,
+                    ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
