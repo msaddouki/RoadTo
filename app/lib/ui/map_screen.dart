@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:roadto_core/roadto_core.dart';
 
@@ -74,15 +75,20 @@ class _MapScreenState extends State<MapScreen> {
   /// map, and the old one's native side goes away.
   bool _isCurrent(MapLibreMapController map) => identical(map, _map) && _mapKey == _currentMapKey;
 
+  /// The plugin answers MAP_NOT_READY while it rebuilds the native map (when
+  /// a region installs, or the activity comes back): nothing is lost, the
+  /// map loads its style again and [_onStyleLoaded] redraws everything.
+  static bool _mapNotReady(Object e) => e is PlatformException && e.code == 'MAP_NOT_READY';
+
   Future<void> _onStyleLoaded() async {
     final map = _map;
     if (map == null || !_isCurrent(map)) return;
     try {
       await _addLayers(map);
-    } on Exception {
+    } on Exception catch (e) {
       // The map was replaced while its layers were being added (installing
       // the embedded region at first start): the new map adds its own.
-      if (_isCurrent(map)) rethrow;
+      if (_isCurrent(map) && !_mapNotReady(e)) rethrow;
       return;
     }
     if (!_isCurrent(map)) return;
@@ -165,11 +171,11 @@ class _MapScreenState extends State<MapScreen> {
     if (map == null || !_styleReady || !_isCurrent(map)) return;
     try {
       await _writeMap(map);
-    } on Exception {
+    } on Exception catch (e) {
       // The map was replaced (new style or region) while this sync was still
       // writing to it: its native side is gone. The new map syncs once its
       // style is loaded.
-      if (_isCurrent(map)) rethrow;
+      if (_isCurrent(map) && !_mapNotReady(e)) rethrow;
     }
   }
 
