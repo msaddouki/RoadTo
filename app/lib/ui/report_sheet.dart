@@ -60,14 +60,17 @@ class _ReportSheetState extends State<ReportSheet> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text('Signaler', style: Theme.of(context).textTheme.titleLarge),
-                      const SizedBox(height: 12),
+                      Text(
+                        'Que voyez-vous ?',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+                      ),
+                      const SizedBox(height: 16),
                       GridView.count(
                         crossAxisCount: 3,
                         shrinkWrap: true,
-                        mainAxisSpacing: 12,
-                        crossAxisSpacing: 12,
-                        childAspectRatio: 1.1,
+                        mainAxisSpacing: 16,
+                        crossAxisSpacing: 8,
+                        childAspectRatio: 0.95,
                         physics: const NeverScrollableScrollPhysics(),
                         children: [for (final t in types) _Tile(type: t, onTap: () => _choose(t))],
                       ),
@@ -83,12 +86,30 @@ class _ReportSheetState extends State<ReportSheet> {
                 : Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(alertIcons[chosen], size: 64, color: alertColors[chosen]),
-                      const SizedBox(height: 8),
+                      // The time left to cancel, as a ring around the alert.
+                      SizedBox(
+                        width: 112,
+                        height: 112,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            SizedBox.expand(
+                              child: CircularProgressIndicator(
+                                value: _left / widget.cancelDelay.inSeconds,
+                                strokeWidth: 6,
+                                color: alertColors[chosen],
+                                backgroundColor: alertColors[chosen]!.withValues(alpha: 0.2),
+                              ),
+                            ),
+                            _Badge(type: chosen, size: 84),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
                       Text(
                         '${chosen.label} : envoi dans $_left s',
                         key: const Key('countdown'),
-                        style: Theme.of(context).textTheme.titleLarge,
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
                       ),
                       const SizedBox(height: 16),
                       SizedBox(
@@ -99,7 +120,7 @@ class _ReportSheetState extends State<ReportSheet> {
                             _timer?.cancel();
                             Navigator.of(context).pop();
                           },
-                          child: const Text('Annuler', style: TextStyle(fontSize: 20)),
+                          child: const Text('Annuler', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                         ),
                       ),
                     ],
@@ -107,6 +128,30 @@ class _ReportSheetState extends State<ReportSheet> {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// The alert's colour disc with its icon, as on the map.
+class _Badge extends StatelessWidget {
+  final AlertType type;
+  final double size;
+
+  const _Badge({required this.type, required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: alertColors[type],
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(color: alertColors[type]!.withValues(alpha: 0.35), blurRadius: 12, offset: const Offset(0, 4)),
+        ],
+      ),
+      child: Icon(alertIcons[type], size: size * 0.5, color: Colors.white),
     );
   }
 }
@@ -119,21 +164,21 @@ class _Tile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = alertColors[type]!;
-    return Material(
-      color: color.withValues(alpha: 0.16),
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(alertIcons[type], size: 40, color: color),
-            const SizedBox(height: 6),
-            Text(type.label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 15)),
-          ],
-        ),
+    return InkWell(
+      borderRadius: BorderRadius.circular(20),
+      onTap: onTap,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _Badge(type: type, size: 68),
+          const SizedBox(height: 8),
+          Text(
+            type.label,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
+          ),
+        ],
       ),
     );
   }

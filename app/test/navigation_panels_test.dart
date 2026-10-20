@@ -79,12 +79,12 @@ void main() {
     testWidgets('limit sign, white then red when over', (tester) async {
       await _pump(tester, const SpeedLimitSign(kph: 50, over: false));
       expect(find.bySemanticsLabel('Limitée à 50 km/h'), findsOneWidget);
-      var box = tester.widget<Container>(find.byType(Container)).decoration as BoxDecoration;
+      var box = tester.widget<Container>(find.byType(Container).first).decoration as BoxDecoration;
       expect(box.color, Colors.white);
 
       await _pump(tester, const SpeedLimitSign(kph: 30, over: true));
       expect(find.bySemanticsLabel('Limitée à 30 km/h, vitesse dépassée'), findsOneWidget);
-      box = tester.widget<Container>(find.byType(Container)).decoration as BoxDecoration;
+      box = tester.widget<Container>(find.byType(Container).first).decoration as BoxDecoration;
       expect(box.color, NavColors.limitRed);
     });
 
@@ -115,7 +115,8 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('arrivée'), findsOneWidget);
-    expect(find.text(NavigationSheet.remaining(g.remaining, g.remainingM)), findsOneWidget);
+    expect(find.text(NavigationSheet.timeLeft(g.remaining)), findsOneWidget);
+    expect(find.text(formatDistance(g.remainingM)), findsOneWidget);
 
     await tester.tap(find.byTooltip('Couper le guidage vocal'));
     await tester.tap(find.text('Signaler'));
@@ -124,7 +125,26 @@ void main() {
   });
 
   test('time left reads in minutes, then hours', () {
-    expect(NavigationSheet.remaining(const Duration(minutes: 18), 12400), '18 min · 12 km');
-    expect(NavigationSheet.remaining(const Duration(minutes: 65), 98000), '1 h 05 · 98 km');
+    expect(NavigationSheet.timeLeft(const Duration(minutes: 18)), '18 min');
+    expect(NavigationSheet.timeLeft(const Duration(minutes: 65)), '1 h 05');
+  });
+
+  testWidgets('narrow phone: nothing overflows, "Signaler" stays whole', (tester) async {
+    tester.view.physicalSize = const Size(320, 640) * 2;
+    tester.view.devicePixelRatio = 2;
+    addTearDown(tester.view.reset);
+    await _pump(
+      tester,
+      NavigationSheet(
+        state: GuidanceEngine(route).update(route.pointAt(30), speedMps: 13),
+        now: DateTime(2026, 10, 1, 23, 23),
+        voiceOn: false,
+        onToggleVoice: () {},
+        onReport: () {},
+        onOptions: () {},
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    expect(find.text('Signaler'), findsOneWidget);
   });
 }

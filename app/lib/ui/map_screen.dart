@@ -5,6 +5,7 @@ import 'package:maplibre_gl/maplibre_gl.dart';
 import 'package:roadto_core/roadto_core.dart';
 
 import '../state/app_controller.dart';
+import 'browse_panels.dart';
 import 'favorite_name_dialog.dart';
 import 'map_layers.dart';
 import 'navigation_panels.dart';
@@ -221,6 +222,11 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
+  Future<void> _goTo(Place place) async {
+    setState(() => _follow = true);
+    await app.navigateTo(place);
+  }
+
   Future<void> _onLongPress(LatLng at) async {
     final point = LatLon(at.latitude, at.longitude);
     final favorite = app.favorites.find(point);
@@ -361,14 +367,19 @@ class _MapScreenState extends State<MapScreen> {
                     children: [
                       if (navigating)
                         ManeuverBanner(state: g, then: ManeuverBanner.thenOf(app.route!, g))
-                      else
-                        _SearchBar(
+                      else ...[
+                        DestinationBar(
                           onSearch: _openSearch,
                           onSettings: () =>
                               Navigator.of(context).push(MaterialPageRoute(builder: (_) => SettingsScreen(app: app))),
                           routing: app.routing,
                           simulate: app.settings.simulate,
                         ),
+                        if (!app.routing && app.favorites.all.isNotEmpty) ...[
+                          const SizedBox(height: 10),
+                          FavoriteShortcuts(favorites: app.favorites.all, onGo: _goTo),
+                        ],
+                      ],
                       if (app.ahead.isNotEmpty) ...[
                         const SizedBox(height: 8),
                         Align(
@@ -401,7 +412,7 @@ class _MapScreenState extends State<MapScreen> {
                               SpeedLimitSign(kph: app.speedLimit!.kph!, over: app.overSpeed),
                               const SizedBox(width: 10),
                             ],
-                            SpeedReadout(kph: ((app.fix?.speedMps ?? 0) * 3.6).round()),
+                            SpeedReadout(kph: ((app.fix?.speedMps ?? 0) * 3.6).round(), over: app.overSpeed),
                           ],
                           const Spacer(),
                           if (!_follow)
@@ -448,54 +459,6 @@ class _MapScreenState extends State<MapScreen> {
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SearchBar extends StatelessWidget {
-  final VoidCallback onSearch;
-  final VoidCallback onSettings;
-  final bool routing;
-  final bool simulate;
-
-  const _SearchBar({required this.onSearch, required this.onSettings, required this.routing, required this.simulate});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Theme.of(context).colorScheme.surfaceContainerHigh,
-      borderRadius: BorderRadius.circular(28),
-      elevation: 3,
-      child: Row(
-        children: [
-          Expanded(
-            child: InkWell(
-              borderRadius: BorderRadius.circular(28),
-              onTap: onSearch,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-                child: Row(
-                  children: [
-                    routing
-                        ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2))
-                        : const Icon(Icons.search),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        routing ? 'Calcul de l’itinéraire…' : 'Où allez-vous ?',
-                        style: const TextStyle(fontSize: 17),
-                      ),
-                    ),
-                    if (simulate) const Chip(label: Text('Simulation'), visualDensity: VisualDensity.compact),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          IconButton(tooltip: 'Réglages', onPressed: onSettings, icon: const Icon(Icons.settings)),
-          const SizedBox(width: 4),
         ],
       ),
     );
