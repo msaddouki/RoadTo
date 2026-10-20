@@ -40,4 +40,25 @@ void main() {
     expect(c[0], closeTo(4.832, 0.001));
     expect(c[1], closeTo(45.7578, 0.001));
   });
+
+  test('noms de rues : en bulles pendant un trajet, le long des routes sinon', () {
+    const ids = [
+      'roadto-labels',
+      'street-name-main',
+      'street-name-main-nav',
+      'street-name-minor',
+      'street-name-minor-nav',
+      'place',
+    ];
+    expect(labelVisibility(ids, navigating: true), {
+      'street-name-main': false,
+      'street-name-main-nav': true,
+      'street-name-minor': false,
+      'street-name-minor-nav': true,
+    });
+    expect(labelVisibility(ids, navigating: false)['street-name-main-nav'], isFalse);
+    expect(labelVisibility(ids, navigating: false)['street-name-main'], isTrue);
+    // Online style without navigation labels: nothing to switch.
+    expect(labelVisibility(['road_label', 'water'], navigating: true), isEmpty);
+  });
 }

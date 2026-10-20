@@ -2,6 +2,7 @@ import base64
 import hashlib
 import json
 import sqlite3
+import struct
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -342,3 +343,60 @@ def test_routing_config_points_at_the_region_and_drops_build_paths():
     assert out["service_limits"] == built["service_limits"]
     assert out["loki"]["actions"] == ["route", "locate"]
     assert built["mjolnir"]["admin"].startswith("/data/"), "input left untouched"
+
+
+# --- RoadTo's style ---------------------------------------------------------
+
+from roadto_pipeline import drive_style, sprites  # noqa: E402
+
+
+def test_drive_style_names_streets_along_roads_and_in_bubbles_during_trips():
+    for palette in (drive_style.DAY, drive_style.NIGHT):
+        s = drive_style.drive_style(palette, "t")
+        layers = {layer["id"]: layer for layer in s["layers"]}
+        ids = [layer["id"] for layer in s["layers"]]
+        for kind in ("main", "minor"):
+            along, nav = layers[f"street-name-{kind}"], layers[f"street-name-{kind}-nav"]
+            assert along["layout"].get("visibility", "visible") == "visible"
+            assert nav["layout"]["visibility"] == "none"
+            assert nav["layout"]["icon-image"] in drive_style.BUBBLES
+            assert nav["layout"]["text-rotation-alignment"] == "viewport"
+        # The marker comes right before the first label: routes go under it.
+        first_symbol = next(i for i, layer in enumerate(s["layers"]) if layer["type"] == "symbol")
+        assert ids[first_symbol - 1] == drive_style.LABELS_MARKER
+        # Only the fonts the bundle carries, and RoadTo's sprite.
+        fonts = {f for layer in s["layers"] for f in layer.get("layout", {}).get("text-font", [])}
+        assert fonts <= {drive_style.REGULAR, drive_style.BOLD, drive_style.ITALIC}
+        assert s["sprite"].endswith("/sprites/roadto")
+        assert s["sources"]["openmaptiles"]["url"] == "pmtiles://@ROADTO_REGION_DIR@/map.pmtiles"
+        # No points of interest, no 3D.
+        assert not any(layer.get("source-layer") == "poi" for layer in s["layers"])
+        assert not any(layer["type"] == "fill-extrusion" for layer in s["layers"])
+
+
+def test_bubble_sprite_is_a_valid_stretchable_png(tmp_path):
+    sprites.write_sprite(tmp_path, drive_style.BUBBLES)
+    for suffix, ratio in (("", 1), ("@2x", 2)):
+        index = json.loads((tmp_path / f"roadto{suffix}.json").read_text())
+        png = (tmp_path / f"roadto{suffix}.png").read_bytes()
+        assert png.startswith(b"\x89PNG\r\n\x1a\n")
+        width, height = struct.unpack(">II", png[16:24])
+        assert set(index) == set(drive_style.BUBBLES)
+        for icon in index.values():
+            assert icon["pixelRatio"] == ratio
+            assert icon["x"] + icon["width"] <= width and icon["y"] + icon["height"] <= height
+            (x0, x1), (y0, y1) = icon["stretchX"][0], icon["stretchY"][0]
+            assert 0 < x0 < x1 < icon["width"] and 0 < y0 < y1 < icon["height"]
+
+
+def test_drive_bundle_files():
+    files = style.drive_files()
+    assert set(files) == {
+        "style.json",
+        "style-night.json",
+        "sprites/roadto.json",
+        "sprites/roadto.png",
+        "sprites/roadto@2x.json",
+        "sprites/roadto@2x.png",
+    }
+    assert json.loads(files["style-night.json"])["layers"][0]["paint"]["background-color"] == drive_style.NIGHT.background

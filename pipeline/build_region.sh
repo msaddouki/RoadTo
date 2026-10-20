@@ -87,7 +87,7 @@ step "Manifest"
 python3 -m roadto_pipeline manifest --region "$REGION_JSON" --dir "$OUT" \
   --version "$(date -u +%Y-%m-%d)" ${OSM_TIMESTAMP:+--osm-timestamp "$OSM_TIMESTAMP"} \
   --generator planetiler=$PLANETILER_VERSION --generator valhalla=$VALHALLA_VERSION \
-  --generator style=openfreemap-liberty
+  --generator style=roadto-drive
 
 if [[ -n "${ROADTO_SIGNING_KEY:-}" || ( -n "${VAULT_ADDR:-}" && -n "${ROADTO_VAULT_TRANSIT_KEY:-}" ) ]]; then
   step "Signature"

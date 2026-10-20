@@ -84,3 +84,21 @@ Map<String, dynamic> alertsGeoJson(Iterable<RoadAlert> alerts) => featureCollect
       'geometry': {'type': 'Point', 'coordinates': _coords(a.position)},
     },
 ]);
+
+/// Empty layer of RoadTo's style right under its labels: the route is drawn
+/// under it, so it never covers a name (pipeline/roadto_pipeline/drive_style.py).
+const labelsMarkerLayer = 'roadto-labels';
+
+/// Street name layers shown during a trip only (level, in bubbles); each
+/// replaces the layer of the same name without the suffix.
+const navLabelSuffix = '-nav';
+
+/// Which label layers to show or hide for [navigating], among the style's
+/// [layerIds]. Empty for styles without navigation labels (online ones).
+Map<String, bool> labelVisibility(Iterable<String> layerIds, {required bool navigating}) {
+  final ids = layerIds.toSet();
+  return {
+    for (final id in ids)
+      if (id.endsWith(navLabelSuffix)) id: navigating else if (ids.contains('$id$navLabelSuffix')) id: !navigating,
+  };
+}

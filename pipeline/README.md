@@ -11,19 +11,26 @@ manifest. Regions are defined in `regions/<id>.json`; the first one is
 | --- | --- | --- |
 | `map.pmtiles` | [Planetiler](https://github.com/onthegomap/planetiler) 0.10.2, OpenMapTiles schema | offline map (MapLibre `pmtiles://`) |
 | `places.sqlite` | `roadto_pipeline places` (pyosmium + SQLite FTS5) | offline address and place search |
-| `style.tar.gz` | `roadto_pipeline style` (OpenFreeMap Liberty, rewritten) | style, sprites and fonts, no network |
+| `style.tar.gz` | `roadto_pipeline style` (RoadTo's own style, `drive_style.py`) | style, sprite and fonts, no network |
 | `routing.tar` | [Valhalla](https://github.com/valhalla/valhalla) 3.9.1 | offline routing on Android (valhalla-mobile); optional |
 | `routing.json` | `roadto_pipeline routing-config` | Valhalla config for that graph, paths filled in by the app; optional |
 | `manifest.json` | `roadto_pipeline manifest` | size and SHA-256 of every file |
 | `manifest.json.sig` | `roadto_pipeline sign` | Ed25519 signature of the manifest |
 | `<id>.roadto` | `roadto_pipeline bundle` | the signed package as one file, to embed or import |
 
-The style bundle also holds `style-night.json`, the same style with night
-colours (`roadto_pipeline/night.py`): lightness inverted with the hue kept,
-roads kept lighter than the ground, map text lifted with dark halos, fill
-patterns toned down. The app shows it between sunset and sunrise (computed
-from the position, offline), or always or never as set. Apps that predate it
-ignore the file.
+The style is RoadTo's own (`roadto_pipeline/drive_style.py`), made for
+driving after Waze: a near-white ground, thick rounded roads coloured by
+importance (white streets, yellow main roads, orange fast roads), few
+buildings, no points of interest, bold street names. `style-night.json` is
+the same with a deep blue ground; the app shows it between sunset and
+sunrise (computed from the position, offline), or always or never as set.
+
+Street names run along the roads; during a trip the app switches to the
+`*-nav` layers instead, where names sit level in bubbles (the sprite drawn by
+`roadto_pipeline/sprites.py`). The empty `roadto-labels` layer marks where
+labels begin: the apps draw the route under it, so it never covers a name.
+`--style-url` still adapts another OpenMapTiles style (Liberty before), with
+`night.py` deriving its night colours.
 
 The style bundle only carries the glyph ranges for Latin, Greek and Cyrillic
 text plus punctuation and currency symbols (`LATIN_GLYPH_STARTS` in

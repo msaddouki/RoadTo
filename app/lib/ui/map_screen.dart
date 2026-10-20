@@ -35,6 +35,10 @@ class _MapScreenState extends State<MapScreen> {
   Timer? _confirmTimeout;
   String? _lastRouteKey;
 
+  /// Label layers of the current style, and whether they are set for a trip.
+  List<String> _layerIds = const [];
+  bool? _navLabels;
+
   AppController get app => widget.app;
 
   String get _currentMapKey => '${app.mapStyle}@${app.activeRegion?.version}';
@@ -79,10 +83,14 @@ class _MapScreenState extends State<MapScreen> {
     if (!_isCurrent(map)) return;
     _styleReady = true;
     _lastRouteKey = null;
+    _navLabels = null;
     await _syncMap();
   }
 
   Future<void> _addLayers(MapLibreMapController map) async {
+    _layerIds = [for (final id in await map.getLayerIds()) '$id'];
+    // Under the labels of RoadTo's style; on top of the others.
+    final belowLabels = _layerIds.contains(labelsMarkerLayer) ? labelsMarkerLayer : null;
     await map.addGeoJsonSource('route', routeGeoJson(null));
     await map.addGeoJsonSource('alerts', alertsGeoJson(const []));
     await map.addGeoJsonSource('destination', pointGeoJson(null));
@@ -91,6 +99,7 @@ class _MapScreenState extends State<MapScreen> {
       'route',
       'route-casing',
       const LineLayerProperties(lineColor: '#0B3D91', lineWidth: 12, lineJoin: 'round', lineCap: 'round'),
+      belowLayerId: belowLabels,
     );
     await map.addLineLayer(
       'route',
@@ -107,6 +116,7 @@ class _MapScreenState extends State<MapScreen> {
         lineJoin: 'round',
         lineCap: 'round',
       ),
+      belowLayerId: belowLabels,
     );
     await map.addCircleLayer(
       'destination',
@@ -159,6 +169,13 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Future<void> _writeMap(MapLibreMapController map) async {
+    if (app.navigating != _navLabels) {
+      _navLabels = app.navigating;
+      // During a trip, street names level in bubbles rather than along roads.
+      for (final e in labelVisibility(_layerIds, navigating: app.navigating).entries) {
+        await map.setLayerVisibility(e.key, e.value);
+      }
+    }
     final g = app.guidance;
     final routeKey = '${identityHashCode(app.route)}:${((g?.projection.alongM ?? 0) / 25).floor()}';
     if (routeKey != _lastRouteKey) {

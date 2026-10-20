@@ -1,7 +1,10 @@
 """Offline map style bundle (style.tar.gz).
 
-Takes an OpenMapTiles-schema style (OpenFreeMap "liberty" by default) and
-makes it work without network:
+By default the bundle holds RoadTo's own style (drive_style.py), day and
+night, with its sprite (sprites.py) and the Noto Sans glyphs it uses.
+
+``--style-url`` instead takes an OpenMapTiles-schema style (such as
+OpenFreeMap "liberty") and makes it work without network:
 
 - the vector source points at the region's PMTiles file;
 - other sources (raster relief, etc.) and their layers are dropped;
@@ -24,15 +27,20 @@ import io
 import json
 import re
 import tarfile
+import tempfile
 import urllib.error
 import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
+from . import drive_style
 from .night import night_style
+from .sprites import write_sprite
 
 DEFAULT_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty"
+# Glyphs of the fonts RoadTo's style uses (OpenFreeMap serves Noto Sans).
+GLYPHS_URL = "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf"
 VECTOR_SOURCE = "openmaptiles"
 REGION_DIR = "@ROADTO_REGION_DIR@"
 STYLE_DIR = "@ROADTO_STYLE_DIR@"
@@ -152,21 +160,66 @@ def _get(url: str) -> bytes | None:
         raise
 
 
+def _download(jobs: list[tuple[str, str]], workers: int) -> dict[str, bytes]:
+    files: dict[str, bytes] = {}
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        for path, data in zip((p for p, _ in jobs), pool.map(lambda j: _get(j[1]), jobs)):
+            if data is not None:
+                files[path] = data
+    return files
+
+
+def _write_tar(out_path: Path, files: dict[str, bytes]) -> None:
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    with tarfile.open(out_path, "w:gz") as tar:
+        for path in sorted(files):
+            info = tarfile.TarInfo(path)
+            info.size = len(files[path])
+            info.mtime = 0  # reproducible archive
+            tar.addfile(info, io.BytesIO(files[path]))
+
+
+def drive_files() -> dict[str, bytes]:
+    """RoadTo's style, day and night, and its sprite, as bundle files."""
+    files = {
+        "style.json": json.dumps(drive_style.drive_style(drive_style.DAY, "RoadTo"), ensure_ascii=False, indent=1).encode(),
+        "style-night.json": json.dumps(
+            drive_style.drive_style(drive_style.NIGHT, "RoadTo nuit"), ensure_ascii=False, indent=1
+        ).encode(),
+    }
+    with tempfile.TemporaryDirectory() as tmp:
+        write_sprite(Path(tmp), drive_style.BUBBLES)
+        for f in sorted(Path(tmp).iterdir()):
+            files[f"sprites/{f.name}"] = f.read_bytes()
+    return files
+
+
 def build_bundle(
     out_path: Path,
-    style_url: str = DEFAULT_STYLE_URL,
+    style_url: str | None = None,
     *,
     glyph_starts: tuple[int, ...] = LATIN_GLYPH_STARTS,
     workers: int = 16,
 ) -> dict:
-    """Downloads the style, its sprites and glyphs, and writes the bundle."""
+    """Writes the bundle: RoadTo's style, or the style at ``style_url`` made
+    offline (its sprites and glyphs downloaded)."""
+    if style_url is None:
+        files = drive_files()
+        fonts = {name.replace("_", " "): name for name in (drive_style.REGULAR, drive_style.BOLD, drive_style.ITALIC)}
+        glyphs = _download(glyph_jobs(fonts, GLYPHS_URL, glyph_starts), workers)
+        if not glyphs:
+            raise RuntimeError("no glyphs downloaded")
+        files |= glyphs
+        _write_tar(out_path, files)
+        return {"fonts": len(fonts), "glyph_files": len(glyphs), "sprites": 1}
+
     style = json.loads(_get(style_url) or b"null")
     if not style:
         raise RuntimeError(f"style not found: {style_url}")
     offline, fonts, sprites = rewrite_style(style)
     glyph_template = style["glyphs"]
 
-    files: dict[str, bytes] = {
+    files = {
         "style.json": json.dumps(offline, ensure_ascii=False, indent=1).encode(),
         # Same layers, night colours (night.py); apps older than it ignore it.
         "style-night.json": json.dumps(night_style(offline), ensure_ascii=False, indent=1).encode(),
@@ -177,21 +230,11 @@ def build_bundle(
         for suffix in (".json", ".png", "@2x.json", "@2x.png"):
             jobs.append((f"sprites/{sprite_id}{suffix}", url + suffix))
     jobs += glyph_jobs(fonts, glyph_template, glyph_starts)
-
-    with ThreadPoolExecutor(max_workers=workers) as pool:
-        for path, data in zip((p for p, _ in jobs), pool.map(lambda j: _get(j[1]), jobs)):
-            if data is not None:
-                files[path] = data
+    files |= _download(jobs, workers)
 
     missing_sprites = [p for p, _ in jobs if p.startswith("sprites/") and p not in files]
     if missing_sprites:
         raise RuntimeError(f"sprite files not found: {missing_sprites}")
 
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    with tarfile.open(out_path, "w:gz") as tar:
-        for path in sorted(files):
-            info = tarfile.TarInfo(path)
-            info.size = len(files[path])
-            info.mtime = 0  # reproducible archive
-            tar.addfile(info, io.BytesIO(files[path]))
+    _write_tar(out_path, files)
     return {"fonts": len(fonts), "glyph_files": sum(p.startswith("fonts/") for p in files), "sprites": len(sprites)}
