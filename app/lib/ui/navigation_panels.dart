@@ -21,9 +21,32 @@ abstract final class NavColors {
   static const limitRed = Color(0xFFD93A3A);
 }
 
-/// Figures (distances, speeds, times) in the monospaced face, so they do not
-/// jump as they change.
-const _mono = 'Atkinson Hyperlegible Mono';
+/// Figures (distances, speeds, times) with digits of equal width, so they do
+/// not jump as they change, in the app's own face (the monospaced one spread
+/// "260 m" out).
+const _figures = [FontFeature.tabularFigures()];
+
+/// "260 m" as a big number and a smaller unit, the way a driver reads it.
+Widget distanceText(String formatted, {required double size, Color color = Colors.white}) {
+  final i = formatted.lastIndexOf(' ');
+  final number = i < 0 ? formatted : formatted.substring(0, i);
+  final unit = i < 0 ? '' : formatted.substring(i);
+  return Text.rich(
+    TextSpan(
+      text: number,
+      style: TextStyle(fontSize: size, fontWeight: FontWeight.w800, fontFeatures: _figures, height: 1),
+      children: [
+        TextSpan(
+          text: unit,
+          style: TextStyle(fontSize: size * 0.55, fontWeight: FontWeight.w700),
+        ),
+      ],
+    ),
+    style: TextStyle(color: color),
+    maxLines: 1,
+    softWrap: false,
+  );
+}
 
 IconData maneuverIcon(Maneuver? m) => switch (m?.type) {
   null => Icons.straight,
@@ -46,8 +69,9 @@ IconData maneuverIcon(Maneuver? m) => switch (m?.type) {
 String _maneuverLabel(Maneuver m) =>
     m.isArrival ? 'Arrivée' : (m.streetNames.isNotEmpty ? m.streetNames.first : m.instruction);
 
-/// Next maneuver: distance and street, and the one after it when it comes
-/// soon after ("Puis ↰ Rue Pasteur").
+/// Next maneuver, as Waze shows it: the arrow with its distance under it,
+/// the street in big letters, and the turn after it in the same card when
+/// it comes soon after ("Puis ↰ Rue Pasteur").
 class ManeuverBanner extends StatelessWidget {
   final GuidanceState state;
   final Maneuver? then;
@@ -66,71 +90,73 @@ class ManeuverBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final m = state.nextManeuver;
     final then = this.then;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Material(
-          color: NavColors.banner,
-          borderRadius: BorderRadius.circular(20),
-          elevation: 6,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    return Material(
+      color: NavColors.banner,
+      borderRadius: BorderRadius.circular(24),
+      clipBehavior: Clip.antiAlias,
+      elevation: 8,
+      shadowColor: Colors.black54,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 12, 16, 12),
             child: Row(
               children: [
-                Icon(maneuverIcon(m), size: 56, color: Colors.white),
-                const SizedBox(width: 14),
-                Expanded(
+                SizedBox(
+                  width: 84,
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        state.offRoute ? 'Hors itinéraire' : formatDistance(state.distanceToNextM),
-                        style: TextStyle(
-                          fontFamily: state.offRoute ? null : _mono,
-                          fontSize: state.offRoute ? 28 : 38,
-                          fontWeight: FontWeight.w700,
-                          height: 1,
-                          color: Colors.white,
+                      Icon(state.offRoute ? Icons.wrong_location : maneuverIcon(m), size: 52, color: Colors.white),
+                      const SizedBox(height: 2),
+                      if (!state.offRoute)
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: distanceText(formatDistance(state.distanceToNextM), size: 26),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        m == null ? 'Continuez' : _maneuverLabel(m),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w700, color: Colors.white),
-                      ),
                     ],
                   ),
                 ),
-              ],
-            ),
-          ),
-        ),
-        if (then != null && !state.offRoute) ...[
-          const SizedBox(height: 6),
-          Container(
-            padding: const EdgeInsets.fromLTRB(10, 6, 12, 6),
-            decoration: BoxDecoration(color: NavColors.bannerThen, borderRadius: BorderRadius.circular(12)),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text('Puis', style: TextStyle(fontSize: 15, color: NavColors.thenText)),
                 const SizedBox(width: 8),
-                Icon(maneuverIcon(then), size: 20, color: NavColors.thenText),
-                const SizedBox(width: 8),
-                Flexible(
+                Expanded(
                   child: Text(
-                    _maneuverLabel(then),
+                    state.offRoute ? 'Hors itinéraire' : (m == null ? 'Continuez' : _maneuverLabel(m)),
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 15, color: NavColors.thenText),
+                    style: const TextStyle(
+                      fontSize: 25,
+                      height: 1.15,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
+          if (then != null && !state.offRoute)
+            Container(
+              color: NavColors.bannerThen,
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 10),
+              child: Row(
+                children: [
+                  const Text('Puis', style: TextStyle(fontSize: 15, color: NavColors.thenText)),
+                  const SizedBox(width: 8),
+                  Icon(maneuverIcon(then), size: 22, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      _maneuverLabel(then),
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
-      ],
+      ),
     );
   }
 }
@@ -160,37 +186,50 @@ class AlertAheadCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final t = ahead.alert.type;
-    return Container(
-      padding: const EdgeInsets.fromLTRB(10, 10, 16, 10),
-      decoration: BoxDecoration(
-        color: NavColors.panel,
-        border: Border.all(color: NavColors.panelBorder),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(color: alertColors[t], shape: BoxShape.circle),
-            child: Icon(alertIcons[t], color: Colors.white, size: 24),
-          ),
-          const SizedBox(width: 12),
-          Flexible(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '${t.label} · ${formatDistance(ahead.distanceM)}',
-                  style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: Colors.white),
-                ),
-                Text(detail, style: const TextStyle(fontSize: 13, color: NavColors.muted)),
-              ],
+    return Material(
+      color: NavColors.panel,
+      borderRadius: BorderRadius.circular(22),
+      elevation: 4,
+      shadowColor: Colors.black45,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(8, 8, 16, 8),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(color: alertColors[t], shape: BoxShape.circle),
+              child: Icon(alertIcons[t], color: Colors.white, size: 26),
             ),
-          ),
-        ],
+            const SizedBox(width: 12),
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '${t.label} · ${formatDistance(ahead.distanceM)}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
+                      fontFeatures: _figures,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    detail,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 13, color: NavColors.muted),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -209,20 +248,21 @@ class SpeedLimitSign extends StatelessWidget {
       label: 'Limitée à $kph km/h${over ? ', vitesse dépassée' : ''}',
       excludeSemantics: true,
       child: Container(
-        width: 66,
-        height: 66,
+        width: 64,
+        height: 64,
         alignment: Alignment.center,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: over ? NavColors.limitRed : Colors.white,
-          border: Border.all(color: NavColors.limitRed, width: 7),
-          boxShadow: const [BoxShadow(blurRadius: 6, color: Colors.black45)],
+          border: Border.all(color: NavColors.limitRed, width: 6),
+          boxShadow: const [BoxShadow(blurRadius: 8, color: Colors.black38, offset: Offset(0, 2))],
         ),
         child: Text(
           '$kph',
           style: TextStyle(
-            fontSize: kph >= 100 ? 22 : 26,
+            fontSize: kph >= 100 ? 21 : 25,
             fontWeight: FontWeight.w800,
+            fontFeatures: _figures,
             color: over ? Colors.white : const Color(0xFF111111),
           ),
         ),
@@ -231,11 +271,12 @@ class SpeedLimitSign extends StatelessWidget {
   }
 }
 
-/// Current speed, next to the limit.
+/// Current speed in a round dial next to the limit; red when over it.
 class SpeedReadout extends StatelessWidget {
   final int kph;
+  final bool over;
 
-  const SpeedReadout({super.key, required this.kph});
+  const SpeedReadout({super.key, required this.kph, this.over = false});
 
   @override
   Widget build(BuildContext context) {
@@ -243,22 +284,28 @@ class SpeedReadout extends StatelessWidget {
       label: 'Vitesse : $kph km/h',
       excludeSemantics: true,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(color: NavColors.panel, borderRadius: BorderRadius.circular(14)),
+        width: 64,
+        height: 64,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: over ? NavColors.limitRed : NavColors.panel,
+          border: Border.all(color: over ? Colors.white : NavColors.panelBorder, width: 2),
+          boxShadow: const [BoxShadow(blurRadius: 8, color: Colors.black38, offset: Offset(0, 2))],
+        ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
               '$kph',
               style: const TextStyle(
-                fontFamily: _mono,
-                fontSize: 28,
-                fontWeight: FontWeight.w700,
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                fontFeatures: _figures,
                 height: 1,
                 color: Colors.white,
               ),
             ),
-            const Text('km/h', style: TextStyle(fontSize: 12, color: NavColors.muted)),
+            Text('km/h', style: TextStyle(fontSize: 11, color: over ? Colors.white : NavColors.muted)),
           ],
         ),
       ),
@@ -266,8 +313,9 @@ class SpeedReadout extends StatelessWidget {
   }
 }
 
-/// Bottom of the screen while navigating: arrival time, what is left, and
-/// the three driving buttons (voice, report, trip options).
+/// Bottom of the screen while navigating: time left, arrival time and
+/// distance left side by side, readable at a glance, and the three driving
+/// buttons (voice, report, trip options).
 class NavigationSheet extends StatelessWidget {
   final GuidanceState state;
   final DateTime now;
@@ -286,10 +334,10 @@ class NavigationSheet extends StatelessWidget {
     required this.onOptions,
   });
 
-  static String remaining(Duration d, double metres) {
+  /// "18 min", or "1 h 05" from an hour.
+  static String timeLeft(Duration d) {
     final minutes = (d.inSeconds / 60).ceil();
-    final time = minutes < 60 ? '$minutes min' : '${minutes ~/ 60} h ${(minutes % 60).toString().padLeft(2, '0')}';
-    return '$time · ${formatDistance(metres)}';
+    return minutes < 60 ? '$minutes min' : '${minutes ~/ 60} h ${(minutes % 60).toString().padLeft(2, '0')}';
   }
 
   @override
@@ -298,49 +346,32 @@ class NavigationSheet extends StatelessWidget {
     final hh = eta.hour.toString().padLeft(2, '0'), mm = eta.minute.toString().padLeft(2, '0');
     final bottom = MediaQuery.paddingOf(context).bottom;
     return Container(
-      padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottom),
+      padding: EdgeInsets.fromLTRB(16, 14, 16, 16 + bottom),
       decoration: const BoxDecoration(
         color: NavColors.sheet,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        border: Border(top: BorderSide(color: NavColors.sheetBorder)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        boxShadow: [BoxShadow(blurRadius: 16, color: Colors.black38)],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Text(
-                  state.arrived ? 'Arrivé' : '$hh:$mm',
-                  style: const TextStyle(
-                    fontFamily: _mono,
-                    fontSize: 30,
-                    fontWeight: FontWeight.w700,
-                    color: NavColors.eta,
-                  ),
+          Row(
+            children: [
+              Expanded(
+                child: _Figure(value: timeLeft(state.remaining), label: 'restant'),
+              ),
+              Expanded(
+                child: _Figure(
+                  value: state.arrived ? 'Arrivé' : '$hh:$mm',
+                  label: state.arrived ? '' : 'arrivée',
+                  color: NavColors.eta,
+                  big: true,
                 ),
-                if (!state.arrived) ...[
-                  const SizedBox(width: 8),
-                  const Text('arrivée', style: TextStyle(fontSize: 14, color: NavColors.muted)),
-                ],
-                const Spacer(),
-                // Shrinks rather than overflows on narrow phones (320 dp: the
-                // sheet leaves 276 px, short of "1 h 05 · 12,3 km" at full size).
-                Flexible(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      remaining(state.remaining, state.remainingM),
-                      style: const TextStyle(fontFamily: _mono, fontSize: 18, color: NavColors.figures),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+              Expanded(
+                child: _Figure(value: formatDistance(state.remainingM), label: 'à parcourir'),
+              ),
+            ],
           ),
           const SizedBox(height: 14),
           Row(
@@ -353,17 +384,27 @@ class NavigationSheet extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: SizedBox(
-                  height: 68,
-                  child: FilledButton.icon(
+                  height: 64,
+                  child: FilledButton(
                     style: FilledButton.styleFrom(
                       backgroundColor: NavColors.report,
                       foregroundColor: NavColors.onReport,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                      textStyle: const TextStyle(fontSize: 21, fontWeight: FontWeight.w800),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
                     ),
                     onPressed: onReport,
-                    icon: const Icon(Icons.warning_amber_rounded, size: 26),
-                    label: const Text('Signaler'),
+                    // Never cut in two ("Signa / ler") on a narrow phone.
+                    child: const FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.campaign, size: 28),
+                          SizedBox(width: 8),
+                          Text('Signaler', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -373,6 +414,45 @@ class NavigationSheet extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// One figure of the sheet: the value big, what it is under it.
+class _Figure extends StatelessWidget {
+  final String value;
+  final String label;
+  final Color color;
+  final bool big;
+
+  const _Figure({required this.value, required this.label, this.color = NavColors.figures, this.big = false});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Same height for the three, so their labels line up.
+        SizedBox(
+          height: 38,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            // "9 min", "1,1 km": number and unit; "1 h 05" and the time as they are.
+            child: big || !RegExp(r'^[\d,]+ \S+$').hasMatch(value)
+                ? Text(
+                    value,
+                    style: TextStyle(
+                      fontSize: big ? 30 : 22,
+                      fontWeight: FontWeight.w800,
+                      fontFeatures: _figures,
+                      color: color,
+                    ),
+                  )
+                : distanceText(value, size: 22, color: color),
+          ),
+        ),
+        Text(label, style: const TextStyle(fontSize: 13, color: NavColors.muted)),
+      ],
     );
   }
 }
@@ -387,15 +467,11 @@ class _SquareButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 68,
-      height: 68,
+      width: 64,
+      height: 64,
       child: IconButton.filled(
         tooltip: tooltip,
-        style: IconButton.styleFrom(
-          backgroundColor: NavColors.button,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        ),
+        style: IconButton.styleFrom(backgroundColor: NavColors.button, foregroundColor: Colors.white),
         iconSize: 28,
         onPressed: onPressed,
         icon: Icon(icon),
