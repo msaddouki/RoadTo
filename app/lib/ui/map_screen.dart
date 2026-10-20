@@ -195,7 +195,7 @@ class _MapScreenState extends State<MapScreen> {
     await map.setGeoJsonSource('position', pointGeoJson(pos));
     if (preview != null) {
       // The whole route, once, between the header and the sheet.
-      if (!identical(preview, _framedPreview)) {
+      if (_follow && !identical(preview, _framedPreview)) {
         _framedPreview = preview;
         await map.animateCamera(_frame(preview.route.shape), duration: const Duration(milliseconds: 900));
       }
@@ -221,16 +221,10 @@ class _MapScreenState extends State<MapScreen> {
   /// The camera showing all of [shape], clear of the preview's header (top)
   /// and sheet (bottom).
   CameraUpdate _frame(List<LatLon> shape) {
-    var s = shape.first.lat, n = s, w = shape.first.lon, e = w;
-    for (final p in shape) {
-      if (p.lat < s) s = p.lat;
-      if (p.lat > n) n = p.lat;
-      if (p.lon < w) w = p.lon;
-      if (p.lon > e) e = p.lon;
-    }
+    final b = routeBounds(shape);
     final pad = MediaQuery.paddingOf(context);
     return CameraUpdate.newLatLngBounds(
-      LatLngBounds(southwest: LatLng(s, w), northeast: LatLng(n, e)),
+      LatLngBounds(southwest: LatLng(b.s, b.w), northeast: LatLng(b.n, b.e)),
       left: 40,
       right: 40,
       top: pad.top + 110,
@@ -462,14 +456,32 @@ class _MapScreenState extends State<MapScreen> {
                     ),
                   ),
                   const Spacer(),
-                  if (preview != null)
+                  if (preview != null) ...[
+                    // Moved the map: one tap back to the whole route.
+                    if (!_follow)
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: FloatingActionButton.extended(
+                            heroTag: 'whole-route',
+                            onPressed: () {
+                              setState(() => _follow = true);
+                              _framedPreview = null;
+                              _syncMap();
+                            },
+                            icon: const Icon(Icons.zoom_out_map),
+                            label: const Text('Voir tout le trajet'),
+                          ),
+                        ),
+                      ),
                     RoutePreviewSheet(
                       preview: preview,
                       now: DateTime.now(),
                       onGo: _startPreview,
                       onCancel: app.cancelPreview,
-                    )
-                  else
+                    ),
+                  ] else
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Column(

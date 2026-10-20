@@ -61,4 +61,16 @@ void main() {
     // Online style without navigation labels: nothing to switch.
     expect(labelVisibility(['road_label', 'water'], navigating: true), isEmpty);
   });
+
+  test('aperçu : un trajet court montre au moins 1,5 km autour, un long tout entier', () {
+    const short = [LatLon(45.7578, 4.8320), LatLon(45.7585, 4.8330)];
+    final b = routeBounds(short);
+    expect(distanceM(LatLon(b.s, b.w), LatLon(b.n, b.w)), closeTo(1500, 5));
+    expect(distanceM(LatLon(b.s, b.w), LatLon(b.s, b.e)), closeTo(1500, 5));
+    expect((b.s + b.n) / 2, closeTo(45.75815, 1e-6));
+
+    const long = [LatLon(45.75, 4.83), LatLon(45.99, 4.72)];
+    final l = routeBounds(long);
+    expect((l.s, l.w, l.n, l.e), (45.75, 4.72, 45.99, 4.83));
+  });
 }

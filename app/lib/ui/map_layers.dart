@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:roadto_core/roadto_core.dart';
 
@@ -101,4 +103,31 @@ Map<String, bool> labelVisibility(Iterable<String> layerIds, {required bool navi
     for (final id in ids)
       if (id.endsWith(navLabelSuffix)) id: navigating else if (ids.contains('$id$navLabelSuffix')) id: !navigating,
   };
+}
+
+/// South, west, north and east edges around [shape], widened to at least
+/// [minSpanM] each way so a short trip shows its neighbourhood instead of
+/// zooming in on a few streets.
+({double s, double w, double n, double e}) routeBounds(List<LatLon> shape, {double minSpanM = 1500}) {
+  var s = shape.first.lat, n = s, w = shape.first.lon, e = w;
+  for (final p in shape) {
+    if (p.lat < s) s = p.lat;
+    if (p.lat > n) n = p.lat;
+    if (p.lon < w) w = p.lon;
+    if (p.lon > e) e = p.lon;
+  }
+  const mPerDegLat = 111320.0;
+  final mPerDegLon = mPerDegLat * cos((s + n) / 2 * pi / 180);
+  final minLat = minSpanM / mPerDegLat, minLon = minSpanM / mPerDegLon;
+  if (n - s < minLat) {
+    final c = (s + n) / 2;
+    s = c - minLat / 2;
+    n = c + minLat / 2;
+  }
+  if (e - w < minLon) {
+    final c = (w + e) / 2;
+    w = c - minLon / 2;
+    e = c + minLon / 2;
+  }
+  return (s: s, w: w, n: n, e: e);
 }
