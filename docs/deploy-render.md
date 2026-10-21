@@ -19,12 +19,14 @@ within 12 hours anyway.
 1. In Render: **New > Blueprint**, connect GitHub and pick this repository
    (Render's GitHub app also reads private repositories).
 2. Render lists the two services; set **ROADTO_CONTACT** (the beta contact
-   address, shown on the home page) when asked, then **Apply**.
+   address, shown on the home page) and **ROADTO_RELAYS**
+   (`wss://roadto-relay.onrender.com`, the relay's public address shown on
+   its page once created; adjust and redeploy the site if Render added a
+   suffix) when asked, then **Apply**.
 3. When both are live:
    - the site is at `https://roadto-site.onrender.com` (or the custom
      domain set in the service's settings);
-   - its live map already reads the relay (`ROADTO_RELAYS` comes from the
-     relay's host);
+   - its live map reads the relay listed in `ROADTO_RELAYS`;
    - in the app, Réglages > Relais: `wss://roadto-relay.onrender.com`.
 4. Check the relay from the repository:
    `cd relay/strfry_policy && dart run tool/smoke.dart wss://roadto-relay.onrender.com wss://roadto-relay.onrender.com`

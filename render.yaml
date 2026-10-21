@@ -11,13 +11,11 @@ services:
     buildFilter:
       paths: [web/**, pipeline/roadto_pipeline/**, app/assets/fonts/**, docs/beta/**, render.yaml]
     envVars:
-      # The relay below, as wss://<its host>; more relays can be listed in
-      # ROADTO_RELAYS by hand (comma separated).
+      # The relay's public address, set in the dashboard: wss://<the relay's
+      # onrender.com host> (comma separated for several). Render's fromService
+      # host is the private network name, which browsers cannot reach.
       - key: ROADTO_RELAYS
-        fromService:
-          type: web
-          name: roadto-relay
-          property: host
+        sync: false
       - key: ROADTO_CONTACT
         sync: false # set in the dashboard: the beta contact address
     headers:
