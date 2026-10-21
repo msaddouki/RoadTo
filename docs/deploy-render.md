@@ -39,8 +39,11 @@ Every push to master redeploys what changed (`buildFilter`).
   Python 3, both in Render's build image). `ROADTO_RELAYS` and
   `ROADTO_CONTACT` end up in `config.js`.
 - Strict headers on the site: a Content Security Policy allowing only the
-  site itself, the OpenFreeMap tiles and `wss://` relays; no referrer;
-  no camera, microphone or location.
+  site itself, the OpenFreeMap tiles, `wss://` relays and, for the route
+  page, the public Valhalla and Photon servers; no referrer; no camera or
+  microphone, and the location only for the site itself (the route page's
+  "Ma position" button). With your own routing or search server
+  (`ROADTO_ROUTING_URL`, `ROADTO_GEOCODER_URL`), add it to `connect-src`.
 - The relay listens on 7777 (`PORT`), behind Render's TLS. Its rate limit
   reads the client address from `X-Forwarded-For` (`REAL_IP_HEADER`) and
   never writes it out. Render's own request logs are outside our control:

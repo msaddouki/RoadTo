@@ -1,7 +1,7 @@
 // A shared place: shown on the map, with a way to open it in RoadTo.
 import * as maplibregl from 'maplibre-gl';
 
-import { appLink, parsePlace } from '../links.js';
+import { appLink, parsePlace, routeLink } from '../links.js';
 import { mapStyle, watchColorScheme } from '../site.js';
 
 const place = parsePlace(location.hash);
@@ -14,6 +14,7 @@ if (!place) {
   card.querySelector('h1').textContent = place.name ?? 'Lieu partagé';
   card.querySelector('.coords').textContent = `${place.lat.toFixed(5)}, ${place.lon.toFixed(5)}`;
   document.getElementById('open').href = appLink(place);
+  document.getElementById('route').href = routeLink('.', { to: place });
   document.getElementById('alerts').href = `carte.html#${place.lat.toFixed(4)},${place.lon.toFixed(4)},13.0`;
   document.title = `${place.name ?? 'Lieu partagé'} · RoadTo`;
 }

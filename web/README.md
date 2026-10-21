@@ -6,12 +6,16 @@ A static companion site for the apps, with nothing to run on a server:
 | --- | --- |
 | `index.html` | What RoadTo is, the privacy promises, the closed beta |
 | `carte.html` | **Live alerts**, read only: the relays' alerts for the area on screen, verified (id, Schnorr signature, proof of work), not expired and trusted enough, as the app shows them |
-| `lieu.html#lat,lon,name` | A **shared place**, with "Ouvrir dans RoadTo" (`roadto://place?…`). The place is in the fragment, which browsers never send to the server |
+| `itineraire.html#de=…&vers=…` | **Route preview**, like the app's before "Partir": search (Photon), route (Valhalla), time, length, arrival, and the alerts on the way from the relays; roads reported closed or blocked are avoided. Guidance stays in the app ("Ouvrir dans RoadTo"). Both ends are in the fragment; "Ma position" is never put in the link |
+| `lieu.html#lat,lon,name` | A **shared place**, with "Ouvrir dans RoadTo" (`roadto://place?…`) and "Itinéraire". The place is in the fragment, which browsers never send to the server |
 | `confidentialite.html`, `cgu.html` | The privacy policy and terms, built from `docs/beta/` |
 
-Nothing comes from a third party but the map tiles (OpenFreeMap): the map
-library, the signature check and the app's font are bundled at build time,
-no CDN, no Google Fonts, no analytics.
+Nothing comes from a third party but the map tiles (OpenFreeMap) and, on the
+route page only, the search and routing servers: the public Photon and
+Valhalla (FOSSGIS) ones the app falls back to, or your own
+(`ROADTO_GEOCODER_URL`, `ROADTO_ROUTING_URL`, also to allow in the Content
+Security Policy). The map library, the signature check and the app's font
+are bundled at build time: no CDN, no Google Fonts, no analytics.
 
 ## Build and try
 
@@ -30,8 +34,9 @@ relay with `carte.html?relais=wss://relay.example.org`.
 
 ## How it fits
 
-- `src/alerts.js`, `src/geohash.js`: a port of `packages/roadto_core`
-  (event format, AlertStore, reliability). `test/fixtures/core.json` comes
+- `src/alerts.js`, `src/geohash.js`, `src/routing.js`, `src/geocoder.js`:
+  a port of `packages/roadto_core` (event format, AlertStore, reliability;
+  Valhalla request and answer, projection on the route, Photon labels). `test/fixtures/core.json` comes
   from the Dart core (`packages/roadto_core/tool/web_fixtures.dart`), so the
   tests fail if the two drift apart; regenerate it when the rules change.
 - The map style is RoadTo's own (`pipeline/roadto_pipeline/drive_style.py`)
@@ -47,6 +52,10 @@ works too: build with `ROADTO_RELAYS` and `ROADTO_CONTACT` set, or edit
 
 ## Not done yet
 
+- The public Valhalla and Photon servers are for testing (fair use, no
+  guarantee). For the beta, host Valhalla with the regions' graphs
+  (`routing.tar` of the region packages) and point `ROADTO_ROUTING_URL` at
+  it.
 - Hosting: any static host works (the files in `dist/`), as long as it
   serves `.mjs` files as JavaScript (the map's worker). With a domain, the
   apps can open `https://<domain>/lieu.html#…` links directly (Android App

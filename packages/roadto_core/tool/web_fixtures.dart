@@ -1,6 +1,9 @@
-// Reference values for the web site's port of the alert logic (web/src):
+// Reference values for the web site's port of the alert and route logic
+// (web/src), the route from a real Valhalla answer
+// (web/test/fixtures/valhalla-route.json):
 //   dart run tool/web_fixtures.dart > ../../web/test/fixtures/core.json
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:roadto_core/roadto_core.dart';
 
@@ -71,6 +74,16 @@ void main() {
   final nows = [t0, t0 + 1200, t0 + 3000];
   DateTime at(int s) => DateTime.fromMillisecondsSinceEpoch(s * 1000, isUtc: true);
   final points = [(45.7578, 4.8320), (48.8566, 2.3522), (-33.8688, 151.2093)];
+  final route = parseValhallaRoute(
+    jsonDecode(File('../../web/test/fixtures/valhalla-route.json').readAsStringSync()) as Map<String, dynamic>,
+  );
+  // On the route, beside it, and far from it.
+  final probes = [
+    route.pointAt(1000),
+    route.pointAt(2500),
+    const LatLon(45.7600, 4.8450),
+    const LatLon(45.7400, 4.8000),
+  ];
   print(
     const JsonEncoder.withIndent(' ').convert({
       'events': [for (final e in events) e.toJson()],
@@ -86,6 +99,25 @@ void main() {
         for (final (lat, lon) in points)
           {'lat': lat, 'lon': lon, 'hash': geohashEncode(LatLon(lat, lon), precision: 7)},
       ],
+      'route': {
+        'lengthM': route.lengthM,
+        'timeS': route.timeS,
+        'points': route.shape.length,
+        'shapeLengthM': route.shapeLengthM,
+        'maneuvers': [for (final m in route.maneuvers) m.beginShapeIndex],
+        'probes': [
+          for (final p in probes)
+            {
+              'lat': p.lat,
+              'lon': p.lon,
+              'alongM': projectOnRoute(route, p)!.alongM,
+              'offsetM': projectOnRoute(route, p)!.offsetM,
+            },
+        ],
+        'formatDistance': {
+          for (final m in [42.4, 856.0, 4231.0, 37400.0]) '$m': formatDistance(m),
+        },
+      },
     }),
   );
 }

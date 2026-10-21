@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Itinéraire · RoadTo</title>
+<link rel="stylesheet" href="assets/maplibre-gl.css">
+<link rel="stylesheet" href="site.css">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<script src="config.js"></script>
+</head>
+<body>
+<div id="map" class="fullmap"></div>
+<div class="planner">
+  <form class="card ends" id="ends" autocomplete="off">
+    <a class="brand" href="./"><svg viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="10" fill="#1B3A73"/><path d="M17 6l9 21-9-5-9 5z" fill="#F5B83D"/></svg> Itinéraire</a>
+    <div class="field">
+      <span class="dot from" aria-hidden="true"></span>
+      <label class="sr" for="from">Départ</label>
+      <input id="from" type="search" placeholder="Départ" enterkeyhint="next" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="from-list">
+      <button class="locate" id="locate" type="button" title="Partir de ma position" aria-label="Partir de ma position"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg></button>
+      <ul class="suggestions" id="from-list" role="listbox" hidden></ul>
+    </div>
+    <div class="field">
+      <span class="dot to" aria-hidden="true"></span>
+      <label class="sr" for="to">Arrivée</label>
+      <input id="to" type="search" placeholder="Où allez-vous ?" enterkeyhint="go" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="to-list">
+      <button class="swap" id="swap" type="button" title="Inverser" aria-label="Inverser départ et arrivée"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16M3 8l4-4 4 4M17 20V4M13 16l4 4 4-4"/></svg></button>
+      <ul class="suggestions" id="to-list" role="listbox" hidden></ul>
+    </div>
+    <p class="message" id="message" role="status"></p>
+  </form>
+  <section class="card trip" id="trip" hidden aria-live="polite">
+    <div class="figures"><strong id="duration"></strong><span id="figures"></span></div>
+    <ul class="alerts-on-route" id="on-route"></ul>
+    <p class="note" id="avoided" hidden></p>
+    <div class="actions">
+      <a class="button primary" id="open" href="#">Ouvrir dans RoadTo</a>
+      <button class="button ghost" id="copy" type="button">Copier le lien</button>
+    </div>
+    <details class="steps-list">
+      <summary id="steps-title">Étapes</summary>
+      <ol id="steps"></ol>
+    </details>
+    <p class="note" id="relays"></p>
+  </section>
+</div>
+<script type="module" src="assets/itineraire.js"></script>
+</body>
+</html>

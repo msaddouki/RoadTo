@@ -42,6 +42,7 @@ await esbuild.build({
     index: join(here, 'src/pages/index.js'),
     carte: join(here, 'src/pages/carte.js'),
     lieu: join(here, 'src/pages/lieu.js'),
+    itineraire: join(here, 'src/pages/itineraire.js'),
   },
   bundle: true,
   minify: true,
@@ -75,15 +76,23 @@ for (const [md, out] of [
 }
 // Deployment settings from the environment (Render: render.yaml), else the
 // placeholder config.js stays: ROADTO_RELAYS (comma separated wss:// URLs
-// or bare hosts) and ROADTO_CONTACT.
+// or bare hosts), ROADTO_CONTACT, and ROADTO_ROUTING_URL /
+// ROADTO_GEOCODER_URL (Valhalla and Photon servers, public ones otherwise).
 const relays = (process.env.ROADTO_RELAYS ?? '')
   .split(',')
   .map((r) => r.trim())
   .filter(Boolean)
   .map((r) => (r.includes('://') ? r : `wss://${r}`));
 const contact = process.env.ROADTO_CONTACT?.trim();
-if (relays.length || contact) {
-  const settings = { ...(relays.length ? { relays } : {}), ...(contact ? { contact } : {}) };
+const routingUrl = process.env.ROADTO_ROUTING_URL?.trim();
+const geocoderUrl = process.env.ROADTO_GEOCODER_URL?.trim();
+if (relays.length || contact || routingUrl || geocoderUrl) {
+  const settings = {
+    ...(relays.length ? { relays } : {}),
+    ...(contact ? { contact } : {}),
+    ...(routingUrl ? { routingUrl } : {}),
+    ...(geocoderUrl ? { geocoderUrl } : {}),
+  };
   writeFileSync(join(dist, 'config.js'), `window.ROADTO_CONFIG = ${JSON.stringify(settings, null, 2)};\n`);
 }
 console.log(`site -> ${dist}`);

@@ -78,6 +78,13 @@ s'adresse à des services publics fondés sur OpenStreetMap :
 | Recherche Photon (Komoot) | le texte recherché, une position approximative pour classer les résultats | recherche hors région |
 | Itinéraires Valhalla (FOSSGIS) | le départ, l'arrivée et votre cap | itinéraire hors région, et toujours sur iPhone pendant la bêta |
 
+Sur le site, la page **Itinéraire** utilise les mêmes services, depuis
+votre navigateur : Photon reçoit le texte tapé dans les champs de départ et
+d'arrivée, Valhalla le départ et l'arrivée choisis. « Ma position » n'est
+demandée qu'à l'appui sur le bouton, ne sert qu'au calcul et ne figure pas
+dans le lien à copier. Le site lui-même ne reçoit ni les lieux ni le trajet :
+ils restent dans l'adresse de la page, après le `#`.
+
 Ces services ont leurs propres politiques de confidentialité. [Liens à
 ajouter.]
 

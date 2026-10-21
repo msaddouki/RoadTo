@@ -19,10 +19,12 @@ services:
       - key: ROADTO_CONTACT
         sync: false # set in the dashboard: the beta contact address
     headers:
-      # Only the site itself, the map tiles and the relays: no third party.
+      # The site itself, the map tiles, the relays, and the routing and
+      # search servers of the route page (ROADTO_ROUTING_URL /
+      # ROADTO_GEOCODER_URL: list yours here when you set them).
       - path: /*
         name: Content-Security-Policy
-        value: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://tiles.openfreemap.org; font-src 'self'; connect-src 'self' https://tiles.openfreemap.org wss:; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'"
+        value: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://tiles.openfreemap.org; font-src 'self'; connect-src 'self' https://tiles.openfreemap.org https://valhalla1.openstreetmap.de https://photon.komoot.io wss:; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'"
       - path: /*
         name: Referrer-Policy
         value: no-referrer
@@ -31,7 +33,7 @@ services:
         value: nosniff
       - path: /*
         name: Permissions-Policy
-        value: geolocation=(), camera=(), microphone=()
+        value: geolocation=(self), camera=(), microphone=()
 
   # A RoadTo relay (relay/strfry): strfry and the RoadTo write policy.
   # Render terminates TLS: wss://<name>.onrender.com.
