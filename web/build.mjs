@@ -73,4 +73,17 @@ for (const [md, out] of [
   const title = /^# (.+)$/m.exec(text)?.[1] ?? 'RoadTo';
   writeFileSync(join(dist, out), template.replace('{{title}}', title).replace('{{body}}', html));
 }
+// Deployment settings from the environment (Render: render.yaml), else the
+// placeholder config.js stays: ROADTO_RELAYS (comma separated wss:// URLs
+// or bare hosts) and ROADTO_CONTACT.
+const relays = (process.env.ROADTO_RELAYS ?? '')
+  .split(',')
+  .map((r) => r.trim())
+  .filter(Boolean)
+  .map((r) => (r.includes('://') ? r : `wss://${r}`));
+const contact = process.env.ROADTO_CONTACT?.trim();
+if (relays.length || contact) {
+  const settings = { ...(relays.length ? { relays } : {}), ...(contact ? { contact } : {}) };
+  writeFileSync(join(dist, 'config.js'), `window.ROADTO_CONFIG = ${JSON.stringify(settings, null, 2)};\n`);
+}
 console.log(`site -> ${dist}`);

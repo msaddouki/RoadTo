@@ -38,6 +38,13 @@ relay with `carte.html?relais=wss://relay.example.org`.
   on online tiles (`roadto_pipeline.web_style`), the same as the app's.
 - CI builds and tests the site (job "Web site", artifact `roadto-web`).
 
+## Deploying
+
+`render.yaml` deploys the site and a relay on Render
+([docs/deploy-render.md](../docs/deploy-render.md)). Any other static host
+works too: build with `ROADTO_RELAYS` and `ROADTO_CONTACT` set, or edit
+`dist/config.js`.
+
 ## Not done yet
 
 - Hosting: any static host works (the files in `dist/`), as long as it
