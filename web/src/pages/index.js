@@ -1,11 +1,11 @@
 // The home page's phone: RoadTo's map with a trip on it, not interactive.
-import maplibregl from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
 
 import { mapStyle } from '../site.js';
 
 const map = new maplibregl.Map({
   container: 'hero-map',
-  style: mapStyle(),
+  style: await mapStyle(),
   center: [4.8445, 45.7545],
   zoom: 13.3,
   interactive: false,

@@ -15,11 +15,16 @@ export function config() {
 
 const dark = () => matchMedia('(prefers-color-scheme: dark)').matches;
 
-/** RoadTo's style (pipeline web-style), day or night as the device is set. */
-export function mapStyle() {
-  return new URL(`styles/roadto-${dark() ? 'night' : 'day'}.json`, location.href).href;
+/**
+ * RoadTo's style (pipeline web_style), day or night as the device is set,
+ * with its sprite made absolute as MapLibre requires.
+ */
+export async function mapStyle() {
+  const url = new URL(`styles/roadto-${dark() ? 'night' : 'day'}.json`, location.href);
+  const style = await (await fetch(url)).json();
+  return { ...style, sprite: new URL(style.sprite, url.href.replace(/styles\/[^/]*$/, '')).href };
 }
 
 export function watchColorScheme(onChange) {
-  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => onChange(mapStyle()));
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', async () => onChange(await mapStyle()));
 }

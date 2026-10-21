@@ -40,7 +40,8 @@ relay with `carte.html?relais=wss://relay.example.org`.
 
 ## Not done yet
 
-- Hosting: any static host works (the files in `dist/`). With a domain, the
+- Hosting: any static host works (the files in `dist/`), as long as it
+  serves `.mjs` files as JavaScript (the map's worker). With a domain, the
   apps can open `https://<domain>/lieu.html#…` links directly (Android App
   Links, iOS universal links) and share them.
 - The apps do not handle `roadto://place` links yet, nor share places.

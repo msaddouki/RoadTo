@@ -1,5 +1,5 @@
 // A shared place: shown on the map, with a way to open it in RoadTo.
-import maplibregl from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
 
 import { appLink, parsePlace } from '../links.js';
 import { mapStyle, watchColorScheme } from '../site.js';
@@ -20,7 +20,7 @@ if (!place) {
 
 const map = new maplibregl.Map({
   container: 'map',
-  style: mapStyle(),
+  style: await mapStyle(),
   center: place ? [place.lon, place.lat] : [4.84, 45.758],
   zoom: place ? 15 : 11,
   attributionControl: { compact: true },

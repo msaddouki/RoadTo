@@ -1,6 +1,6 @@
 // Live alerts: the alerts the relays carry for the area on screen, as the
 // app shows them (verified, not expired, trusted enough). Read only.
-import maplibregl from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
 
 import { AlertStore, ago, alertFilter } from '../alerts.js';
 import { cellsCovering } from '../geohash.js';
@@ -16,7 +16,7 @@ const hint = document.getElementById('hint');
 const view = parseView(location.hash) ?? { lat: 45.758, lon: 4.84, zoom: 12 };
 const map = new maplibregl.Map({
   container: 'map',
-  style: mapStyle(),
+  style: await mapStyle(),
   center: [view.lon, view.lat],
   zoom: view.zoom,
   attributionControl: { compact: true },

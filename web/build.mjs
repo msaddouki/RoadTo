@@ -47,11 +47,15 @@ await esbuild.build({
   minify: true,
   format: 'esm',
   splitting: true,
-  target: ['es2020'],
+  target: ['es2022'],
   outdir: join(dist, 'assets'),
   legalComments: 'linked',
 });
-cpSync(join(here, 'node_modules/maplibre-gl/dist/maplibre-gl.css'), join(dist, 'assets/maplibre-gl.css'));
+// MapLibre 6 starts its worker from ./maplibre-gl-worker.mjs next to the
+// script that loads it (import.meta.url), and the worker imports the shared code.
+for (const f of ['maplibre-gl.css', 'maplibre-gl-worker.mjs', 'maplibre-gl-shared.mjs']) {
+  cpSync(join(here, 'node_modules/maplibre-gl/dist', f), join(dist, 'assets', f));
+}
 
 // Legal pages, from the drafts in docs/beta.
 const template = readFileSync(join(here, 'src/legal.html'), 'utf8');
