@@ -3,6 +3,7 @@ package org.roadto.roadto
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.valhalla.api.models.RouteRequest
@@ -69,6 +70,17 @@ class ValhallaChannel(private val context: Context, messenger: BinaryMessenger) 
      * requests, so the JSON goes through its models both ways.
      */
     private fun route(configPath: String, requestJson: String): String {
+        // Alternatives (to weigh reported jams) are not in the typed answer:
+        // those requests go to the engine as they are, in the server's own
+        // format, and fall back to one typed route if that fails.
+        if (JSONObject(requestJson).optInt("alternates", 0) > 0) {
+            try {
+                val raw = engine(configPath).routeRaw(requestJson)
+                if (JSONObject(raw).has("trip")) return raw
+            } catch (e: Exception) {
+                Log.w("RoadTo", "Raw route with alternatives failed, one route instead", e)
+            }
+        }
         val request = moshi.adapter(RouteRequest::class.java).fromJson(toModelJson(requestJson))
             ?: throw IllegalArgumentException("empty route request")
         return when (val response = engine(configPath).route(request)) {

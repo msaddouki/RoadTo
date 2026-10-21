@@ -130,6 +130,7 @@ class CarLink {
 Map<String, Object?> carStateOf(AppController app) => carState(
   guidance: app.guidance,
   route: app.route,
+  remaining: app.remaining,
   position: app.position,
   bearingDeg: app.fix?.bearingDeg,
   speedMps: app.fix?.speedMps,
@@ -168,6 +169,7 @@ Place? placeFromMap(Map<String, Object?> m) {
 Map<String, Object?> carState({
   required GuidanceState? guidance,
   required TripRoute? route,
+  Duration? remaining,
   required LatLon position,
   double? bearingDeg,
   double? speedMps,
@@ -194,8 +196,8 @@ Map<String, Object?> carState({
       },
     if (navigating) ...{
       'remainingM': g.remainingM,
-      'remainingS': g.remaining.inSeconds,
-      'arrivalEpochMs': g.eta(now).millisecondsSinceEpoch,
+      'remainingS': (remaining ?? g.remaining).inSeconds,
+      'arrivalEpochMs': now.add(remaining ?? g.remaining).millisecondsSinceEpoch,
     },
     'lat': position.lat,
     'lon': position.lon,

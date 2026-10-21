@@ -18,6 +18,7 @@ export 'src/regions/manifest.dart';
 export 'src/regions/package_source.dart';
 export 'src/regions/region_store.dart';
 export 'src/routing/gpx.dart';
+export 'src/routing/eta.dart';
 export 'src/routing/guidance.dart';
 export 'src/routing/replay.dart';
 export 'src/routing/route.dart';

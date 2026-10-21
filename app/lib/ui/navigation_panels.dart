@@ -319,6 +319,10 @@ class SpeedReadout extends StatelessWidget {
 class NavigationSheet extends StatelessWidget {
   final GuidanceState state;
   final DateTime now;
+
+  /// Time left as estimated (AppController.remaining); the engine's own
+  /// otherwise.
+  final Duration? remaining;
   final bool voiceOn;
   final VoidCallback onToggleVoice;
   final VoidCallback onReport;
@@ -328,6 +332,7 @@ class NavigationSheet extends StatelessWidget {
     super.key,
     required this.state,
     required this.now,
+    this.remaining,
     required this.voiceOn,
     required this.onToggleVoice,
     required this.onReport,
@@ -342,7 +347,8 @@ class NavigationSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final eta = state.eta(now);
+    final left = remaining ?? state.remaining;
+    final eta = now.add(left);
     final hh = eta.hour.toString().padLeft(2, '0'), mm = eta.minute.toString().padLeft(2, '0');
     final bottom = MediaQuery.paddingOf(context).bottom;
     return Container(
@@ -358,7 +364,7 @@ class NavigationSheet extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: TripFigure(value: timeLeft(state.remaining), label: 'restant'),
+                child: TripFigure(value: timeLeft(left), label: 'restant'),
               ),
               Expanded(
                 child: TripFigure(
