@@ -48,6 +48,19 @@ void main() {
       expect((s['arrivalEpochMs']! as int) % 60000, 0);
       expect(s['arrived'], isFalse);
       expect(s.containsKey('alert'), isFalse);
+
+      // The estimated time left, when the app has one, sets the arrival.
+      final later = liveActivityState(
+        guidance: g,
+        route: route,
+        remaining: g.remaining + const Duration(minutes: 7),
+        destination: home,
+        now: now,
+      )!;
+      expect(
+        (later['arrivalEpochMs']! as int) - (s['arrivalEpochMs']! as int),
+        closeTo(const Duration(minutes: 7).inMilliseconds, 60000),
+      );
     });
 
     test('an alert ahead is shown with its distance', () {

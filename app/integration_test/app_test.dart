@@ -98,6 +98,13 @@ void main() {
     expect(longer.lengthM, inInclusiveRange(25000, 60000));
     step('route_device_long');
 
+    // With alternatives (to weigh reported jams): the engine's own JSON.
+    final several = await native.routes(_bellecour, destination.position);
+    expect(several, isNotEmpty);
+    expect(several.first.lengthM, closeTo(city.lengthM, city.lengthM * 0.05));
+    debugPrint('On-device alternatives: ${several.length} routes');
+    step('route_device_alternatives');
+
     // A trip in the app: the controller routes on the device too, then the
     // simulator drives along the route.
     expect(app.settings.simulate, isTrue);

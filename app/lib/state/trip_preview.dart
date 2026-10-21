@@ -14,15 +14,24 @@ class TripPreview {
   final LatLon from;
   final DateTime computedAt;
 
+  /// Time of the trip as estimated ([EtaEstimator]: the driver's own pace,
+  /// the jams on the way); the routing engine's own time when not given.
+  final Duration? estimated;
+
+  /// The part of [duration] the jams reported on the way add.
+  final Duration jamDelay;
+
   const TripPreview({
     required this.place,
     required this.route,
     required this.alerts,
     required this.from,
     required this.computedAt,
+    this.estimated,
+    this.jamDelay = Duration.zero,
   });
 
-  Duration get duration => Duration(seconds: route.timeS.round());
+  Duration get duration => estimated ?? Duration(seconds: route.timeS.round());
 
   DateTime arrival(DateTime now) => now.add(duration);
 

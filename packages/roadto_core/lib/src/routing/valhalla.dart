@@ -13,6 +13,18 @@ abstract interface class RouteEngine {
   Future<TripRoute> route(LatLon from, LatLon to, {double? headingDeg, List<LatLon> avoid = const []});
 }
 
+/// Several routes at once: the best one first, then up to [alternates]
+/// others, to weigh the jams reported on each ([fastestWithJams]).
+abstract interface class AlternativeRoutes {
+  Future<List<TripRoute>> routes(
+    LatLon from,
+    LatLon to, {
+    double? headingDeg,
+    List<LatLon> avoid = const [],
+    int alternates = 2,
+  });
+}
+
 /// Speed limits along a route computed by the same engine.
 abstract interface class SpeedLimitSource {
   Future<SpeedLimits> speedLimits(TripRoute route);
@@ -35,6 +47,7 @@ Map<String, dynamic> valhallaRouteRequest(
   double? headingDeg,
   List<LatLon> avoid = const [],
   String language = 'fr-FR',
+  int alternates = 0,
 }) => {
   'locations': [
     {
@@ -52,6 +65,7 @@ Map<String, dynamic> valhallaRouteRequest(
   // Small squares (~40 m) around closed roads and blocking accidents, which
   // the route must avoid.
   if (avoid.isNotEmpty) 'exclude_polygons': [for (final p in avoid) _square(p, 20)],
+  if (alternates > 0) 'alternates': alternates,
 };
 
 List<List<double>> _square(LatLon c, double halfM) {
@@ -67,7 +81,7 @@ List<List<double>> _square(LatLon c, double halfM) {
 }
 
 /// Client of a Valhalla server's /route and /trace_attributes APIs.
-class ValhallaRouter implements RouteEngine, SpeedLimitSource {
+class ValhallaRouter implements RouteEngine, AlternativeRoutes, SpeedLimitSource {
   final Uri baseUrl;
   final http.Client _client;
   final String language;
@@ -83,6 +97,20 @@ class ValhallaRouter implements RouteEngine, SpeedLimitSource {
   @override
   Future<TripRoute> route(LatLon from, LatLon to, {double? headingDeg, List<LatLon> avoid = const []}) async =>
       parseValhallaRoute(await _post('route', buildRequest(from, to, headingDeg: headingDeg, avoid: avoid)));
+
+  @override
+  Future<List<TripRoute>> routes(
+    LatLon from,
+    LatLon to, {
+    double? headingDeg,
+    List<LatLon> avoid = const [],
+    int alternates = 2,
+  }) async => parseValhallaRoutes(
+    await _post(
+      'route',
+      valhallaRouteRequest(from, to, headingDeg: headingDeg, avoid: avoid, language: language, alternates: alternates),
+    ),
+  );
 
   @override
   Future<SpeedLimits> speedLimits(TripRoute route) async =>
@@ -114,7 +142,7 @@ class ValhallaRouter implements RouteEngine, SpeedLimitSource {
 /// installed region. [call] sends a /route request JSON to the platform and
 /// returns the response JSON, [traceAttributes] the same for
 /// /trace_attributes; the app provides them over a MethodChannel.
-class NativeValhallaRouter implements RouteEngine, SpeedLimitSource {
+class NativeValhallaRouter implements RouteEngine, AlternativeRoutes, SpeedLimitSource {
   final String configPath;
   final Future<String> Function(String configPath, String requestJson) call;
   final Future<String> Function(String configPath, String requestJson)? traceAttributes;
@@ -128,6 +156,20 @@ class NativeValhallaRouter implements RouteEngine, SpeedLimitSource {
       valhallaRouteRequest(from, to, headingDeg: headingDeg, avoid: avoid, language: language),
     );
     return parseValhallaRoute(await _run(call, request));
+  }
+
+  @override
+  Future<List<TripRoute>> routes(
+    LatLon from,
+    LatLon to, {
+    double? headingDeg,
+    List<LatLon> avoid = const [],
+    int alternates = 2,
+  }) async {
+    final request = jsonEncode(
+      valhallaRouteRequest(from, to, headingDeg: headingDeg, avoid: avoid, language: language, alternates: alternates),
+    );
+    return parseValhallaRoutes(await _run(call, request));
   }
 
   @override
@@ -157,7 +199,7 @@ class NativeValhallaRouter implements RouteEngine, SpeedLimitSource {
 
 /// Tries [primary] (on the device) and falls back to [fallback] (online) when
 /// it fails, e.g. for a destination outside the installed region.
-class FallbackRouter implements RouteEngine, SpeedLimitSource {
+class FallbackRouter implements RouteEngine, AlternativeRoutes, SpeedLimitSource {
   final RouteEngine primary;
   final RouteEngine fallback;
 
@@ -176,6 +218,31 @@ class FallbackRouter implements RouteEngine, SpeedLimitSource {
     }
   }
 
+  /// From the primary when it can give several, else one route from it
+  /// (alternatives are a plus), else from the fallback.
+  @override
+  Future<List<TripRoute>> routes(
+    LatLon from,
+    LatLon to, {
+    double? headingDeg,
+    List<LatLon> avoid = const [],
+    int alternates = 2,
+  }) async {
+    Future<List<TripRoute>> ask(RouteEngine e) async {
+      if (e case final AlternativeRoutes several) {
+        return several.routes(from, to, headingDeg: headingDeg, avoid: avoid, alternates: alternates);
+      }
+      return [await e.route(from, to, headingDeg: headingDeg, avoid: avoid)];
+    }
+
+    try {
+      return await ask(primary);
+    } on RoutingException catch (e) {
+      onFallback?.call(e);
+      return ask(fallback);
+    }
+  }
+
   /// From the primary when it can, else from the fallback.
   @override
   Future<SpeedLimits> speedLimits(TripRoute route) async {
@@ -190,6 +257,13 @@ class FallbackRouter implements RouteEngine, SpeedLimitSource {
     throw RoutingException('Limitations de vitesse indisponibles');
   }
 }
+
+/// The route of a Valhalla response, then its alternatives, if any.
+List<TripRoute> parseValhallaRoutes(Map<String, dynamic> json) => [
+  parseValhallaRoute(json),
+  for (final alt in (json['alternates'] as List? ?? const []))
+    if (alt case {'trip': final Map<String, dynamic> _}) parseValhallaRoute(alt as Map<String, dynamic>),
+];
 
 /// Converts a Valhalla response into a [TripRoute], joining the legs.
 TripRoute parseValhallaRoute(Map<String, dynamic> json) {

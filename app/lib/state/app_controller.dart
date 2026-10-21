@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -15,6 +16,7 @@ import '../services/embedded_region.dart';
 import '../services/favorites.dart';
 import '../services/identity_store.dart';
 import '../services/location_source.dart';
+import '../services/pace_store.dart';
 import '../services/settings_store.dart';
 import '../services/voice.dart';
 import 'trip_preview.dart';
@@ -54,6 +56,15 @@ class AppController extends ChangeNotifier {
 
   /// Posted speed limits along [route], filled in shortly after it starts.
   SpeedLimits speedLimits = SpeedLimits.none;
+
+  /// How the driver's trips compare with the routing engine, learned on the
+  /// phone (Réglages > Temps de trajet).
+  LearnedPace learnedPace = LearnedPace.none;
+  EtaEstimator? _eta;
+  final Map<RoadBand, PaceSample> _tripDriven = {};
+
+  /// Jams reported on [route], with the time each adds.
+  List<TrafficDelay> jams = const [];
 
   /// Alerte croisée à laquelle on demande « toujours là ? ».
   RoadAlert? pendingConfirmation;
@@ -103,14 +114,25 @@ class AppController extends ChangeNotifier {
       wantedKinds: {'map', 'places', 'style', if (DeviceRouting.supported) ...DeviceRouting.kinds},
     );
     final favorites = await Favorites.load();
+    final pace = await PaceStore.load();
     final stations = StationsStore(Directory('${support.path}/stations'), trustedKeys: Defaults.trustedRegionKeys);
     return AppController._(settings, identity.keys, store, regions, stations)
       ..hasRecoveryPhrase = identity.hasRecoveryPhrase
       ..favorites = favorites
+      ..learnedPace = pace
       ..crashReports = crashReports;
   }
 
   bool get navigating => route != null;
+
+  /// Time to arrival as estimated: the engine's time corrected by the
+  /// driver's own pace (learned, and of the last minutes) and the jams
+  /// reported ahead.
+  Duration? get remaining {
+    final e = _eta, g = guidance;
+    if (e == null || g == null) return null;
+    return e.remaining(g, delays: jams);
+  }
 
   /// On the device when the installed region carries a routing graph
   /// (Android), with the online server as fallback, e.g. for a destination
@@ -261,6 +283,7 @@ class AppController extends ChangeNotifier {
     final engine = _guidance;
     if (engine != null) {
       final g = guidance = engine.update(f.position, speedMps: f.speedMps);
+      _eta?.observe(DateTime.now(), g);
       if (g.announcement != null) _voice.say(g.announcement!);
       if (g.arrived) {
         _finishTrip();
@@ -310,13 +333,15 @@ class AppController extends ChangeNotifier {
     notifyListeners();
     try {
       final from = position;
-      final r = await _router.route(from, place.position, headingDeg: fix?.bearingDeg, avoid: _blockedPoints);
+      final (r, delays) = await _routeWithJams(from, place.position);
       preview = TripPreview(
         place: place,
         route: r,
-        alerts: alertsAhead(r, 0, alerts.visible()),
+        alerts: alertsAhead(r, 0, alerts.visible(), horizonM: r.shapeLengthM),
         from: from,
         computedAt: DateTime.now(),
+        estimated: EtaEstimator(r, learned: learnedPace).total(delays: delays),
+        jamDelay: delays.fold(Duration.zero, (sum, d) => sum + d.delay),
       );
     } on Exception catch (e) {
       _say('Itinéraire impossible : $e', speak: false);
@@ -350,7 +375,7 @@ class AppController extends ChangeNotifier {
     destination = place;
     notifyListeners();
     try {
-      final r = await _router.route(position, place.position, headingDeg: fix?.bearingDeg, avoid: _blockedPoints);
+      final (r, _) = await _routeWithJams(position, place.position);
       _startTrip(r);
     } on Exception catch (e) {
       destination = null;
@@ -361,7 +386,28 @@ class AppController extends ChangeNotifier {
     }
   }
 
+  /// The route from [from] to [to]; when jams are reported on it, the
+  /// engine's alternatives too, and the fastest once the jams are counted.
+  Future<(TripRoute, List<TrafficDelay>)> _routeWithJams(LatLon from, LatLon to) async {
+    final router = _router;
+    final visible = alerts.visible();
+    final r = await router.route(from, to, headingDeg: fix?.bearingDeg, avoid: _blockedPoints);
+    final delays = trafficDelays(r, visible);
+    if (delays.isEmpty) return (r, delays);
+    if (router case final AlternativeRoutes several) {
+      try {
+        final all = await several.routes(from, to, headingDeg: fix?.bearingDeg, avoid: _blockedPoints);
+        return fastestWithJams(all, visible, learned: learnedPace);
+      } on RoutingException catch (e) {
+        debugPrint('No alternatives: ${e.message}');
+      }
+    }
+    return (r, delays);
+  }
+
   void _startTrip(TripRoute r) {
+    _eta = null;
+    _tripDriven.clear();
     // Une clé neuve à chaque trajet : les signalements de deux trajets ne
     // peuvent pas être reliés.
     tripKeys = KeyPair.generate();
@@ -373,6 +419,9 @@ class AppController extends ChangeNotifier {
 
   void _setRoute(TripRoute r) {
     route = r;
+    _bankDriving();
+    _eta = EtaEstimator(r, learned: learnedPace, carry: _eta?.live ?? LivePace.none);
+    jams = trafficDelays(r, alerts.visible());
     speedLimits = SpeedLimits.none;
     unawaited(_loadSpeedLimits(r));
     _guidance = GuidanceEngine(r);
@@ -392,7 +441,7 @@ class AppController extends ChangeNotifier {
     _rerouting = true;
     _lastReroute = DateTime.now();
     try {
-      final r = await _router.route(position, dest.position, headingDeg: fix?.bearingDeg, avoid: _blockedPoints);
+      final (r, _) = await _routeWithJams(position, dest.position);
       if (route == null) return;
       _say(reason);
       _setRoute(r);
@@ -430,6 +479,7 @@ class AppController extends ChangeNotifier {
 
   void stopNavigation() {
     _stopSimulator();
+    _learnFromTrip();
     route = null;
     speedLimits = SpeedLimits.none;
     _guidance = null;
@@ -440,6 +490,37 @@ class AppController extends ChangeNotifier {
     WakelockPlus.disable().catchError((_) {});
     unawaited(_setBackgroundLocation(false));
     _updateSubscription();
+    notifyListeners();
+  }
+
+  /// What the current route's estimator saw, kept for the whole trip.
+  void _bankDriving() {
+    final e = _eta;
+    if (e == null) return;
+    for (final d in e.driven.entries) {
+      _tripDriven[d.key] = (_tripDriven[d.key] ?? PaceSample.zero) + d.value;
+    }
+    e.driven.clear();
+  }
+
+  /// Once a trip ends: its pace per kind of road joins what was learned.
+  /// Simulated drives and trips of a couple of minutes teach nothing.
+  void _learnFromTrip() {
+    _bankDriving();
+    _eta = null;
+    jams = const [];
+    final planned = _tripDriven.values.fold(0.0, (s, p) => s + p.plannedS);
+    if (!settings.simulate && planned >= 120) {
+      learnedPace = learnedPace.add(_tripDriven);
+      unawaited(PaceStore.save(learnedPace));
+    }
+    _tripDriven.clear();
+  }
+
+  /// Réglages > Temps de trajet: forget what the trips taught.
+  Future<void> forgetLearnedPace() async {
+    learnedPace = LearnedPace.none;
+    await PaceStore.clear();
     notifyListeners();
   }
 
@@ -460,6 +541,8 @@ class AppController extends ChangeNotifier {
     // on cherche un autre chemin.
     if (alert != null && alert.type.blocksRoad && ahead.any((a) => a.alert.id == alert.id)) {
       _reroute('${alert.type.label} signalé sur votre route, recalcul');
+    } else if (alert != null && alert.type == AlertType.traffic && jams.any((j) => j.alert.id == alert.id)) {
+      unawaited(_considerDetour());
     }
     notifyListeners();
   }
@@ -467,6 +550,37 @@ class AppController extends ChangeNotifier {
   void _refreshAhead() {
     final r = route, g = guidance;
     ahead = r == null || g == null ? const [] : alertsAhead(r, g.projection.alongM, alerts.visible());
+    jams = r == null ? const [] : trafficDelays(r, alerts.visible());
+  }
+
+  /// A jam reported ahead: a clearly faster way from here, if there is one
+  /// ([fastestWithJams]), else the same route with the jam in the time.
+  Future<void> _considerDetour() async {
+    final dest = destination, current = route, left = remaining;
+    if (dest == null || current == null || left == null || _rerouting) return;
+    if (DateTime.now().difference(_lastReroute) < const Duration(seconds: 15)) return;
+    if (_router case final AlternativeRoutes several) {
+      await _detour(several, dest, current, left);
+    }
+  }
+
+  Future<void> _detour(AlternativeRoutes several, Place dest, TripRoute current, Duration left) async {
+    _rerouting = true;
+    _lastReroute = DateTime.now();
+    try {
+      final visible = alerts.visible();
+      final all = await several.routes(position, dest.position, headingDeg: fix?.bearingDeg, avoid: _blockedPoints);
+      final (best, delays) = fastestWithJams(all, visible, learned: learnedPace);
+      final time = EtaEstimator(best, learned: learnedPace, carry: _eta?.live ?? LivePace.none).total(delays: delays);
+      final gain = left - time;
+      if (route != current || gain < Duration(seconds: math.max(120, (left.inSeconds * 0.05).round()))) return;
+      _say('Bouchon signalé sur votre route : itinéraire plus rapide');
+      _setRoute(best);
+    } on RoutingException catch (e) {
+      debugPrint('No detour: ${e.message}');
+    } finally {
+      _rerouting = false;
+    }
   }
 
   void _checkConfirmations() {

@@ -36,6 +36,21 @@ void main() {
     expect(p.alertSummary.map((e) => e.$2), ['Bouchon ×2', 'Accident']);
   });
 
+  test('the estimated time when given, jams included, else the engine’s', () {
+    expect(preview(const []).duration, const Duration(seconds: 1500));
+    final p = TripPreview(
+      place: gare,
+      route: route,
+      alerts: const [],
+      from: const LatLon(45.75, 4.83),
+      computedAt: now,
+      estimated: const Duration(seconds: 1700),
+      jamDelay: const Duration(seconds: 200),
+    );
+    expect(p.duration, const Duration(seconds: 1700));
+    expect(p.arrival(now), now.add(const Duration(seconds: 1700)));
+  });
+
   test('stale after 10 min or 300 m away: computed again on start', () {
     final p = preview(const []);
     expect(p.fresh(const LatLon(45.7505, 4.8305), now.add(const Duration(minutes: 3))), isTrue);

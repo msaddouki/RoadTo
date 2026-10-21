@@ -85,6 +85,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onChanged: (v) => setState(() => _s = _s.copyWith(voice: v)),
             ),
             const Divider(height: 32),
+            Text('Temps de trajet', style: text.titleMedium),
+            const SizedBox(height: 4),
+            Text(
+              'RoadTo compare ses temps à ceux de vos trajets et corrige ses estimations, '
+              'en ville, sur route et sur voie rapide. Appris sur ce téléphone, jamais envoyé ; '
+              'pas pendant la conduite simulée.',
+              style: text.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            for (final band in RoadBand.values)
+              Text('${_capitalized(band.label)} : ${paceText(app.learnedPace, band)}'),
+            if (!app.learnedPace.isEmpty)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton(onPressed: app.forgetLearnedPace, child: const Text('Oublier ce qui a été appris')),
+              ),
+            const Divider(height: 32),
             Text('Relais Nostr', style: text.titleMedium),
             const SizedBox(height: 4),
             Text(
@@ -299,4 +316,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
+}
+
+String _capitalized(String s) => s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
+
+/// "pas encore assez de trajets", "12 % plus rapide que prévu", "comme prévu".
+@visibleForTesting
+String paceText(LearnedPace pace, RoadBand band) {
+  final f = pace.factor(band);
+  if (f == 1) return 'pas encore assez de trajets';
+  final percent = ((1 - f) * 100).round();
+  if (percent == 0) return 'comme prévu';
+  return percent > 0 ? '$percent % plus rapide que prévu' : '${-percent} % plus lent que prévu';
 }
