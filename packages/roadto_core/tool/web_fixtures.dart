@@ -4,6 +4,7 @@
 //   dart run tool/web_fixtures.dart > ../../web/test/fixtures/core.json
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:roadto_core/roadto_core.dart';
 
@@ -77,6 +78,47 @@ void main() {
   final route = parseValhallaRoute(
     jsonDecode(File('../../web/test/fixtures/valhalla-route.json').readAsStringSync()) as Map<String, dynamic>,
   );
+  // A drive along the route at 50 km/h, one fix a second, that leaves it
+  // for a while (80 m aside) halfway and comes back.
+  final engine = GuidanceEngine(route);
+  final drive = <Map<String, Object?>>[];
+  for (var t = 0; ; t++) {
+    final d = t * 50 / 3.6;
+    var p = route.pointAt(d);
+    if (t >= 140 && t < 150) {
+      final b = route.bearingAt(d) + 90;
+      p = LatLon(
+        p.lat + 80 / 111320 * math.cos(b * math.pi / 180),
+        p.lon + 80 / (111320 * math.cos(p.lat * math.pi / 180)) * math.sin(b * math.pi / 180),
+      );
+    }
+    final g = engine.update(p, speedMps: 50 / 3.6);
+    drive.add({
+      'lat': p.lat,
+      'lon': p.lon,
+      'alongM': g.projection.alongM,
+      'next': g.nextManeuverIndex,
+      'distanceToNextM': g.distanceToNextM,
+      'remainingM': g.remainingM,
+      'remainingS': g.remaining.inSeconds,
+      'offRoute': g.offRoute,
+      'arrived': g.arrived,
+      'say': g.announcement,
+    });
+    if (g.arrived || d > route.shapeLengthM + 50) break;
+  }
+  // A trace_attributes answer on the route's shape: 50, 50, none, 30.
+  final n = route.shape.length - 1;
+  final trace = {
+    'shape': encodePolyline(route.shape),
+    'edges': [
+      {'speed_limit': 50, 'begin_shape_index': 0, 'end_shape_index': n ~/ 4},
+      {'speed_limit': 50, 'begin_shape_index': n ~/ 4, 'end_shape_index': n ~/ 2},
+      {'begin_shape_index': n ~/ 2, 'end_shape_index': 3 * n ~/ 4},
+      {'speed_limit': 30, 'begin_shape_index': 3 * n ~/ 4, 'end_shape_index': n},
+    ],
+  };
+  final limits = parseSpeedLimits(trace);
   // On the route, beside it, and far from it.
   final probes = [
     route.pointAt(1000),
@@ -113,6 +155,11 @@ void main() {
               'alongM': projectOnRoute(route, p)!.alongM,
               'offsetM': projectOnRoute(route, p)!.offsetM,
             },
+        ],
+        'drive': drive,
+        'trace': trace,
+        'limits': [
+          for (final s in limits.spans) {'startM': s.startM, 'endM': s.endM, 'kph': s.kph},
         ],
         'formatDistance': {
           for (final m in [42.4, 856.0, 4231.0, 37400.0]) '$m': formatDistance(m),

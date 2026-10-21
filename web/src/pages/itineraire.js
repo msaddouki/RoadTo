@@ -14,6 +14,7 @@ import {
 } from '../routing.js';
 import { config, mapStyle, watchColorScheme } from '../site.js';
 import { verifyEvent } from '../verify.js';
+import { Navigation } from '../navigation.js';
 
 const settings = config();
 const $ = (id) => document.getElementById(id);
@@ -44,17 +45,22 @@ function addLayers() {
   const below = map.getLayer('roadto-labels') ? 'roadto-labels' : undefined;
   const layout = { 'line-cap': 'round', 'line-join': 'round' };
   map.addLayer({ id: 'route-casing', type: 'line', source: 'route', layout, paint: { 'line-color': '#0B3D91', 'line-width': 12 } }, below);
-  map.addLayer({ id: 'route-line', type: 'line', source: 'route', layout, paint: { 'line-color': '#3D8BFF', 'line-width': 8 } }, below);
+  // During a trip, the part already driven greys out.
+  const color = ['match', ['get', 'part'], 'done', '#7A8699', '#3D8BFF'];
+  map.addLayer({ id: 'route-line', type: 'line', source: 'route', layout, paint: { 'line-color': color, 'line-width': 8 } }, below);
 }
 map.on('load', addLayers);
 watchColorScheme((style) => {
   map.setStyle(style);
-  map.once('styledata', addLayers);
+  map.once('styledata', () => {
+    addLayers();
+    nav?.restyled();
+  });
 });
 
 function routeData() {
   if (!state.route) return EMPTY;
-  return { type: 'Feature', geometry: { type: 'LineString', coordinates: state.route.shape.map((p) => [p.lon, p.lat]) } };
+  return { type: 'Feature', properties: { part: 'ahead' }, geometry: { type: 'LineString', coordinates: state.route.shape.map((p) => [p.lon, p.lat]) } };
 }
 
 const endMarkers = { from: null, to: null };
@@ -327,6 +333,10 @@ setInterval(onAlerts, 30_000);
 
 function onAlerts() {
   store.purge();
+  if (nav) {
+    nav.onAlerts();
+    return;
+  }
   if (!state.route) return;
   // A road reported closed or blocked on the way: around it, as the app
   // does. Alerts sit at the centre of their cell (~150 m), often beside
@@ -378,6 +388,39 @@ function drawAlerts(onRoute) {
   }
   list.replaceChildren(...items);
 }
+
+// ---- Guidance, in the browser.
+
+let nav = null;
+// ?simulation (or ?simulation=90 for 90 km/h) drives along the route instead
+// of following the GPS, to try the guidance at a desk.
+const simulation = new URLSearchParams(location.search).get('simulation');
+
+$('go').addEventListener('click', () => {
+  if (!state.route || nav) return;
+  for (const m of pins.splice(0)) m.remove();
+  endMarkers.from?.getElement().classList.add('faded');
+  nav = new Navigation({
+    map,
+    settings,
+    route: state.route,
+    destination: state.to,
+    store,
+    avoid: state.avoid,
+    simulateKmh: simulation === null ? null : Number(simulation) || 50,
+    onRoute: (route) => {
+      state.route = route;
+      listen(route);
+    },
+    onEnd: () => {
+      nav = null;
+      endMarkers.from?.getElement().classList.remove('faded');
+      drawRoute();
+      frame();
+    },
+  });
+  nav.start();
+});
 
 // ---- Sharing.
 

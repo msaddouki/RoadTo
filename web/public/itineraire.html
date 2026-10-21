@@ -35,7 +35,8 @@
     <ul class="alerts-on-route" id="on-route"></ul>
     <p class="note" id="avoided" hidden></p>
     <div class="actions">
-      <a class="button primary" id="open" href="#">Ouvrir dans RoadTo</a>
+      <button class="button go" id="go" type="button">Démarrer</button>
+      <a class="button ghost" id="open" href="#">Ouvrir dans RoadTo</a>
       <button class="button ghost" id="copy" type="button">Copier le lien</button>
     </div>
     <details class="steps-list">
@@ -44,6 +45,32 @@
     </details>
     <p class="note" id="relays"></p>
   </section>
+</div>
+<div class="nav" id="nav" hidden>
+  <div class="nav-top">
+    <div class="nav-banner" role="status" aria-live="polite">
+      <div class="main">
+        <div class="maneuver"><span class="arrow" id="nav-arrow"></span><span class="dist" id="nav-dist"></span></div>
+        <div class="street" id="nav-street"></div>
+      </div>
+      <div class="then" id="nav-then" hidden>Puis <span class="arrow" id="nav-then-arrow"></span> <span id="nav-then-street"></span></div>
+    </div>
+    <div class="nav-alert" id="nav-alert" hidden></div>
+    <p class="nav-message" id="nav-message" hidden></p>
+    <p class="nav-message" id="nav-awake" hidden>Gardez cette page ouverte et l’écran allumé pendant le trajet.</p>
+  </div>
+  <div class="nav-speed" id="nav-speed"><span class="limit" id="nav-limit" hidden></span><span class="now" id="nav-now"><strong>0</strong><small>km/h</small></span></div>
+  <button class="nav-recenter" id="nav-recenter" type="button" hidden>Recentrer</button>
+  <div class="nav-bar">
+    <button class="round" id="nav-stop" type="button" aria-label="Arrêter le guidage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div class="figures"><strong id="nav-eta"></strong><span id="nav-left"></span></div>
+    <button class="round" id="nav-voice" type="button" aria-pressed="true" aria-label="Couper la voix"><svg class="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg><svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9l5 6M22 9l-5 6"/></svg></button>
+  </div>
+  <div class="nav-arrived" id="nav-arrived" hidden>
+    <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M14 42V7" stroke="#fff" stroke-width="4" stroke-linecap="round"/><path d="M14 9h22l-5 7 5 7H14z" fill="#7FE0A0"/></svg>
+    <strong>Vous êtes arrivé</strong>
+    <span id="nav-arrived-name"></span>
+  </div>
 </div>
 <script type="module" src="assets/itineraire.js"></script>
 </body>

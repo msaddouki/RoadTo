@@ -80,10 +80,15 @@ s'adresse à des services publics fondés sur OpenStreetMap :
 
 Sur le site, la page **Itinéraire** utilise les mêmes services, depuis
 votre navigateur : Photon reçoit le texte tapé dans les champs de départ et
-d'arrivée, Valhalla le départ et l'arrivée choisis. « Ma position » n'est
+d'arrivée, Valhalla le départ et l'arrivée choisis, puis le tracé de
+l'itinéraire (pour les limitations de vitesse). « Ma position » n'est
 demandée qu'à l'appui sur le bouton, ne sert qu'au calcul et ne figure pas
-dans le lien à copier. Le site lui-même ne reçoit ni les lieux ni le trajet :
-ils restent dans l'adresse de la page, après le `#`.
+dans le lien à copier. Pendant le **guidage** dans le navigateur, votre
+position reste dans la page ; seul un recalcul (sortie de l'itinéraire,
+route bloquée signalée) envoie à Valhalla votre position et votre cap du
+moment, comme l'app. Le site lui-même ne reçoit ni les lieux, ni le
+trajet, ni votre position : ils restent dans votre navigateur et dans
+l'adresse de la page, après le `#`.
 
 Ces services ont leurs propres politiques de confidentialité. [Liens à
 ajouter.]
