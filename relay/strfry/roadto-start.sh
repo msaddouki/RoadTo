@@ -26,6 +26,10 @@ if [[ -n "${REAL_IP_HEADER:-}" ]]; then
   sed -i "s|^\([[:space:]]*realIpHeader[[:space:]]*=[[:space:]]*\).*|\1\"${REAL_IP_HEADER}\"|" /etc/strfry.conf
 fi
 
+# The database directory: a volume in Docker Compose and Kubernetes, but
+# hosts without a disk (Render's free plan) start without it.
+mkdir -p /app/strfry-db
+
 peers=()
 if [[ -n "${PEERS:-}" ]]; then
   IFS=',' read -ra listed <<< "$PEERS"
