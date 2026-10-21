@@ -107,6 +107,61 @@ void main() {
     });
     if (g.arrived || d > route.shapeLengthM + 50) break;
   }
+  // The time to arrival over a drive at 0.8 times the engine's time, one
+  // fix every 2 s, with a learned pace and a jam ahead.
+  final learned = LearnedPace.none.add({
+    RoadBand.town: const PaceSample(3600, 3240),
+    RoadBand.road: const PaceSample(1200, 1080),
+  });
+  final jam = RoadAlert(
+    id: 'jam',
+    author: 'x',
+    type: AlertType.traffic,
+    geohash: geohashEncode(route.pointAt(3000), precision: 7),
+    createdAt: DateTime.utc(2026),
+    expiresAt: DateTime.utc(2027),
+  );
+  final delays = trafficDelays(route, [jam]);
+  final eta = EtaEstimator(route, learned: learned);
+  final etaEngine = GuidanceEngine(route);
+  final etaDrive = <Map<String, Object?>>[];
+  var clock = DateTime.utc(2026, 10, 21, 8);
+  for (var along = 0.0; along < route.shapeLengthM - 30;) {
+    final p = route.pointAt(along);
+    final g = etaEngine.update(p, speedMps: 10);
+    eta.observe(clock, g);
+    etaDrive.add({
+      'lat': p.lat,
+      'lon': p.lon,
+      'atMs': clock.millisecondsSinceEpoch,
+      'remainingS': eta.remaining(g, delays: delays).inSeconds,
+      'ratio': eta.live.ratio,
+      'weight': eta.live.weight,
+    });
+    var i = 0;
+    for (var k = 0; k < route.maneuvers.length; k++) {
+      if (route.maneuverStartM(k) <= along) i = k;
+    }
+    final m = route.maneuvers[i];
+    final kph = m.timeS <= 0 ? 30 : m.lengthM / m.timeS * 3.6;
+    along += kph / 3.6 * 2 / 0.8;
+    clock = clock.add(const Duration(seconds: 2));
+  }
+  final alternates = parseValhallaRoutes(
+    jsonDecode(File('../../web/test/fixtures/valhalla-alternates.json').readAsStringSync()) as Map<String, dynamic>,
+  );
+  final altJams = [
+    for (final d in [800.0, 2000.0, 3500.0])
+      RoadAlert(
+        id: 'j$d',
+        author: 'x',
+        type: AlertType.traffic,
+        geohash: geohashEncode(alternates[2].pointAt(d), precision: 7),
+        createdAt: DateTime.utc(2026),
+        expiresAt: DateTime.utc(2027),
+      ),
+  ];
+
   // A trace_attributes answer on the route's shape: 50, 50, none, 30.
   final n = route.shape.length - 1;
   final trace = {
@@ -157,6 +212,28 @@ void main() {
             },
         ],
         'drive': drive,
+        'eta': {
+          'learned': learned.toJson(),
+          'factors': {for (final b in RoadBand.values) b.name: learned.factor(b)},
+          'jam': {'lat': jam.position.lat, 'lon': jam.position.lon},
+          'delays': [for (final d in delays) d.delay.inSeconds],
+          'totalS': eta.total(delays: delays).inSeconds,
+          'plannedS': EtaEstimator(route, learned: learned).plannedRemainingS(0),
+          'drive': etaDrive,
+          'driven': {
+            for (final e in eta.driven.entries) e.key.name: [e.value.plannedS, e.value.actualS],
+          },
+          'alternates': {
+            'noJams': alternates.indexOf(fastestWithJams(alternates, const []).$1),
+            'noJams3min': alternates.indexOf(
+              fastestWithJams(alternates, const [], minGain: const Duration(minutes: 3)).$1,
+            ),
+            'jams': [
+              for (final j in altJams) {'lat': j.position.lat, 'lon': j.position.lon},
+            ],
+            'withJams': alternates.indexOf(fastestWithJams(alternates, altJams).$1),
+          },
+        },
         'trace': trace,
         'limits': [
           for (final s in limits.spans) {'startM': s.startM, 'endM': s.endM, 'kph': s.kph},

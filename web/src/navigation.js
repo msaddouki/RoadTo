@@ -5,19 +5,42 @@
 // location in the background, which is what the app is for.
 import * as maplibregl from 'maplibre-gl';
 
+import { EtaEstimator, LearnedPace, fastestWithJams, trafficDelays } from './eta.js';
 import { GuidanceEngine, MANEUVER_ICONS, maneuverKind, maneuverLabel, thenOf } from './guidance.js';
 import { ICONS } from './icons.js';
 import {
-  BLOCKING, alertsOnRoute, bearingAt, bearingDeg, distanceM, distanceText, durationText, fetchRoute, fetchSpeedLimits,
+  BLOCKING, alertsOnRoute, bearingAt, bearingDeg, distanceM, distanceText, durationText, fetchRoute, fetchRoutes, fetchSpeedLimits,
   isOverLimit, limitAt, pointAt, projectOnRoute, shapeLengthM,
 } from './routing.js';
 
 const NAV_SUFFIX = '-nav';
+const PACE_KEY = 'roadto.pace';
+
+/** What this visitor's trips taught ([LearnedPace]), kept in this browser only. */
+export function loadPace() {
+  try {
+    return LearnedPace.fromJson(JSON.parse(localStorage.getItem(PACE_KEY) ?? '{}'));
+  } catch {
+    return new LearnedPace();
+  }
+}
+
+export function savePace(pace) {
+  try {
+    if (pace.isEmpty && Object.keys(pace.bands).length === 0) localStorage.removeItem(PACE_KEY);
+    else localStorage.setItem(PACE_KEY, JSON.stringify(pace.toJson()));
+  } catch {
+    // Private mode: learned again next time.
+  }
+}
 const REROUTE_EVERY_MS = 15_000;
 const AHEAD_M = 5000;
 
 export class Navigation {
   #engine;
+  #eta;
+  #driven = {}; // this trip's driving per kind of road, across reroutes
+  #jams = [];
   #state = null;
   #fix = null; // {lat, lon, headingDeg, speedMps}
   #watch = null;
@@ -43,10 +66,12 @@ export class Navigation {
    * @param onEnd called once guidance stops
    * @param simulateKmh drive along the route at this speed instead of GPS
    */
-  constructor({ map, settings, route, destination, store, avoid = [], onRoute, onEnd, simulateKmh = null }) {
-    Object.assign(this, { map, settings, route, destination, store, onRoute, onEnd, simulateKmh });
+  constructor({ map, settings, route, destination, store, avoid = [], learned = new LearnedPace(), onRoute, onEnd, onLearned, simulateKmh = null }) {
+    Object.assign(this, { map, settings, route, destination, store, learned, onRoute, onEnd, onLearned, simulateKmh });
     this.#avoid = [...avoid];
     this.#engine = new GuidanceEngine(route);
+    this.#eta = new EtaEstimator(route, { learned });
+    this.#jams = trafficDelays(route, store.visible());
     this.voice = new Voice();
     this.ui = new NavigationUi(this);
   }
@@ -69,6 +94,7 @@ export class Navigation {
   stop() {
     if (this.#ended) return;
     this.#ended = true;
+    this.#learn();
     if (this.#watch !== null) navigator.geolocation.clearWatch(this.#watch);
     clearInterval(this.#sim);
     this.voice.stop();
@@ -153,11 +179,12 @@ export class Navigation {
     if (this.#ended) return;
     this.#fix = fix;
     const g = (this.#state = this.#engine.update(fix, { speedMps: fix.speedMps }));
+    this.#eta.observe(Date.now(), g);
     if (g.announcement) this.voice.say(g.announcement);
     this.#drawRouteProgress(g);
     this.#puck.setLngLat([fix.lon, fix.lat]).setRotation(fix.headingDeg ?? 0).addTo(this.map);
     this.#camera(false);
-    this.ui.update(g, fix, this.#limitHere(g), this.#ahead(g));
+    this.ui.update(g, fix, this.#limitHere(g), this.#ahead(g), this.#remainingS(g));
     if (g.arrived) {
       this.ui.arrived(this.destination);
       clearInterval(this.#sim);
@@ -177,7 +204,16 @@ export class Navigation {
     this.#lastReroute = Date.now();
     this.ui.message(reason);
     try {
-      const route = await fetchRoute(this.settings.routingUrl, fix, this.destination, { avoid: this.#avoid, headingDeg: fix.headingDeg });
+      let route = await fetchRoute(this.settings.routingUrl, fix, this.destination, { avoid: this.#avoid, headingDeg: fix.headingDeg });
+      // Jams on the new route: its alternatives too, as the app does.
+      if (trafficDelays(route, this.store.visible()).length) {
+        try {
+          const all = await fetchRoutes(this.settings.routingUrl, fix, this.destination, { avoid: this.#avoid, headingDeg: fix.headingDeg });
+          route = fastestWithJams(all, this.store.visible(), { learned: this.learned }).route;
+        } catch {
+          // The route found first.
+        }
+      }
       if (this.#ended) return;
       this.voice.say(reason);
       this.#setRoute(route);
@@ -191,6 +227,9 @@ export class Navigation {
 
   #setRoute(route) {
     this.route = route;
+    this.#bank();
+    this.#eta = new EtaEstimator(route, { learned: this.learned, carry: this.#eta.live });
+    this.#jams = trafficDelays(route, this.store.visible());
     this.#engine = new GuidanceEngine(route);
     this.#state = null;
     this.#limits = [];
@@ -230,6 +269,54 @@ export class Navigation {
     });
   }
 
+  // ---- Time to arrival.
+
+  #remainingS(g) {
+    return this.#eta.remainingS(g, this.#jams);
+  }
+
+  /** The current route's driving, kept for the whole trip. */
+  #bank() {
+    for (const [band, s] of Object.entries(this.#eta.driven)) {
+      const t = this.#driven[band] ?? { plannedS: 0, actualS: 0 };
+      this.#driven[band] = { plannedS: t.plannedS + s.plannedS, actualS: t.actualS + s.actualS };
+    }
+    this.#eta.driven = {};
+  }
+
+  /** Once the trip ends, its pace joins what was learned; not a simulated one. */
+  #learn() {
+    this.#bank();
+    const planned = Object.values(this.#driven).reduce((s, d) => s + d.plannedS, 0);
+    if (this.simulateKmh || planned < 120) return;
+    this.learned = this.learned.add(this.#driven);
+    savePace(this.learned);
+    this.onLearned?.(this.learned);
+  }
+
+  /** A jam reported ahead: a clearly faster way from here, if any. */
+  async #considerDetour() {
+    const fix = this.#fix, g = this.#state;
+    if (!fix || !g || this.#rerouting || this.#ended) return;
+    if (Date.now() - this.#lastReroute < REROUTE_EVERY_MS) return;
+    this.#rerouting = true;
+    this.#lastReroute = Date.now();
+    const current = this.route;
+    try {
+      const all = await fetchRoutes(this.settings.routingUrl, fix, this.destination, { avoid: this.#avoid, headingDeg: fix.headingDeg });
+      const best = fastestWithJams(all, this.store.visible(), { learned: this.learned });
+      const time = new EtaEstimator(best.route, { learned: this.learned, carry: this.#eta.live }).totalS(best.delays);
+      const left = this.#remainingS(g);
+      if (this.#ended || this.route !== current || left - time < Math.max(120, left * 0.05)) return;
+      this.voice.say('Bouchon signalé sur votre route : itinéraire plus rapide');
+      this.#setRoute(best.route);
+    } catch {
+      // The same route, the jam in its time.
+    } finally {
+      this.#rerouting = false;
+    }
+  }
+
   // ---- Alerts.
 
   #ahead(g) {
@@ -247,6 +334,10 @@ export class Navigation {
   onAlerts() {
     const g = this.#state;
     if (!g || this.#ended) return;
+    const known = new Set(this.#jams.map((j) => j.alert.id));
+    this.#jams = trafficDelays(this.route, this.store.visible());
+    const along = g.offRoute ? 0 : g.projection.alongM;
+    if (this.#jams.some((j) => !known.has(j.alert.id) && j.alongM > along)) this.#considerDetour();
     const ahead = this.#ahead(g);
     const fresh = ahead.filter(({ alert }) => BLOCKING.has(alert.type) && !this.#avoid.some((b) => b.id === alert.id));
     if (fresh.length) {
@@ -257,7 +348,7 @@ export class Navigation {
       this.#reroute(`${fresh[0].alert.label} signalé sur votre route, recalcul`, { force: true });
       return;
     }
-    this.ui.update(g, this.#fix, this.#limitHere(g), ahead);
+    this.ui.update(g, this.#fix, this.#limitHere(g), ahead, this.#remainingS(g));
   }
 
   #drawPins(list) {
@@ -441,7 +532,7 @@ class NavigationUi {
     this.el.awake.hidden = on;
   }
 
-  update(g, fix, limit, ahead) {
+  update(g, fix, limit, ahead, remainingS = g.remainingS) {
     const route = this.nav.route;
     const m = g.nextManeuver;
     if (fix && this.el.message.textContent === 'Recherche de votre position…') this.message('');
@@ -482,9 +573,9 @@ class NavigationUi {
       this.el.alert.append(text);
     }
 
-    const arrival = new Date(Date.now() + g.remainingS * 1000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    const arrival = new Date(Date.now() + remainingS * 1000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
     this.el.eta.textContent = arrival;
-    this.el.left.textContent = g.arrived ? 'Arrivé' : `${durationText(g.remainingS)} · ${distanceText(g.remainingM)}`;
+    this.el.left.textContent = g.arrived ? 'Arrivé' : `${durationText(remainingS)} · ${distanceText(g.remainingM)}`;
   }
 
   arrived(destination) {
