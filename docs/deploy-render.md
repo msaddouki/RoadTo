@@ -5,12 +5,14 @@
 | Service | What | Plan |
 | --- | --- | --- |
 | `roadto-site` | the companion site (`web/`), static, HTTPS | free |
-| `roadto-relay` | a RoadTo relay (`relay/strfry`), `wss://roadto-relay.onrender.com` | Starter (paid) |
+| `roadto-relay` | a RoadTo relay (`relay/strfry`), `wss://roadto-relay.onrender.com` | free (testing) |
 
-The relay is on a paid plan on purpose: free web services sleep after
-15 minutes without traffic and take about a minute to wake, so phones would
-fail to reach it. Without a disk, a redeploy forgets the alerts, which
-expire within 12 hours anyway.
+Everything is free for testing. A free web service sleeps after 15 minutes
+without traffic and takes about a minute to wake on the next connection:
+the app retries on its own, so alerts come through once it is up. For the
+beta, move the relay to Starter (`plan: starter`) so it stays awake.
+Without a disk, a redeploy or a sleep forgets the alerts, which expire
+within 12 hours anyway.
 
 ## First deployment
 

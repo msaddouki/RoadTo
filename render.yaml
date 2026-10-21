@@ -40,7 +40,9 @@ services:
   - type: web
     runtime: docker
     name: roadto-relay
-    plan: starter # the free plan sleeps after 15 min idle: phones could not connect
+    # Free while testing: it sleeps after 15 min without traffic and wakes in
+    # about a minute on the next connection. Starter keeps it awake (beta).
+    plan: free
     dockerfilePath: relay/strfry/Dockerfile
     dockerContext: .
     healthCheckPath: /
