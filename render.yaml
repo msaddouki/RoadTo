@@ -1,0 +1,57 @@
+# Render Blueprint (https://render.com/docs/blueprint-spec): the companion
+# site and one RoadTo relay. In Render: New > Blueprint, pick this
+# repository; see docs/deploy-render.md.
+services:
+  # The site (web/): static, built on Render, served over HTTPS.
+  - type: web
+    runtime: static
+    name: roadto-site
+    buildCommand: cd web && npm ci && npm run build
+    staticPublishPath: web/dist
+    buildFilter:
+      paths: [web/**, pipeline/roadto_pipeline/**, app/assets/fonts/**, docs/beta/**, render.yaml]
+    envVars:
+      # The relay below, as wss://<its host>; more relays can be listed in
+      # ROADTO_RELAYS by hand (comma separated).
+      - key: ROADTO_RELAYS
+        fromService:
+          type: web
+          name: roadto-relay
+          property: host
+      - key: ROADTO_CONTACT
+        sync: false # set in the dashboard: the beta contact address
+    headers:
+      # Only the site itself, the map tiles and the relays: no third party.
+      - path: /*
+        name: Content-Security-Policy
+        value: "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://tiles.openfreemap.org; font-src 'self'; connect-src 'self' https://tiles.openfreemap.org wss:; worker-src 'self' blob:; frame-ancestors 'none'; base-uri 'self'"
+      - path: /*
+        name: Referrer-Policy
+        value: no-referrer
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Permissions-Policy
+        value: geolocation=(), camera=(), microphone=()
+
+  # A RoadTo relay (relay/strfry): strfry and the RoadTo write policy.
+  # Render terminates TLS: wss://<name>.onrender.com.
+  - type: web
+    runtime: docker
+    name: roadto-relay
+    plan: starter # the free plan sleeps after 15 min idle: phones could not connect
+    dockerfilePath: relay/strfry/Dockerfile
+    dockerContext: .
+    healthCheckPath: /
+    buildFilter:
+      paths: [relay/**, packages/roadto_core/**, render.yaml]
+    envVars:
+      - key: PORT
+        value: "7777"
+      # Render's proxy gives the client address in X-Forwarded-For: the
+      # rate limit must see clients, not the proxy (never logged).
+      - key: REAL_IP_HEADER
+        value: x-forwarded-for
+      - key: ROADTO_RATE_PER_MINUTE
+        value: "30"

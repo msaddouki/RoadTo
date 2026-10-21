@@ -54,17 +54,7 @@
   <span>Cartes © les contributeurs <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> · tuiles <a href="https://openfreemap.org">OpenFreeMap</a></span>
   <span><a href="confidentialite.html">Confidentialité</a> · <a href="cgu.html">Conditions d’utilisation</a></span>
 </div></footer>
-<script>
-  const c = window.ROADTO_CONFIG?.contact;
-  if (c) {
-    const p = document.getElementById('contact');
-    p.textContent = 'Pour rejoindre la bêta, écrivez à ';
-    const a = document.createElement('a');
-    a.href = 'mailto:' + c;
-    a.textContent = c;
-    p.append(a, '.');
-  }
-</script>
+<script src="home.js"></script>
 <script type="module" src="assets/index.js"></script>
 </body>
 </html>
