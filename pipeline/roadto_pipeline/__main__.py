@@ -33,6 +33,12 @@ def _cmd_style(a: argparse.Namespace) -> None:
     print(f"style: {stats} -> {a.out}")
 
 
+def _cmd_web_style(a: argparse.Namespace) -> None:
+    from . import web_style
+
+    web_style.write(Path(a.out))
+
+
 def _cmd_manifest(a: argparse.Namespace) -> None:
     region = json.loads(Path(a.region).read_text(encoding="utf-8"))
     generator = dict(kv.split("=", 1) for kv in a.generator)
@@ -108,6 +114,10 @@ def main(argv: list[str] | None = None) -> None:
         help=f"adapt this style instead of RoadTo's own (e.g. {style.DEFAULT_STYLE_URL})",
     )
     s.set_defaults(func=_cmd_style)
+
+    w = sub.add_parser("web-style", help="write RoadTo's style on online tiles (web site, online map)")
+    w.add_argument("--out", required=True)
+    w.set_defaults(func=_cmd_web_style)
 
     s = sub.add_parser("manifest", help="write manifest.json for a package directory")
     s.add_argument("--region", required=True, help="region definition (regions/<id>.json)")

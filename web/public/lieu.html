@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lieu partagé · RoadTo</title>
+<link rel="stylesheet" href="assets/maplibre-gl.css">
+<link rel="stylesheet" href="site.css">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+</head>
+<body>
+<div id="map" class="fullmap"></div>
+<div class="overlay"><div class="panel"><a class="brand" href="./"><svg viewBox="0 0 34 34" aria-hidden="true"><rect width="34" height="34" rx="10" fill="#1B3A73"/><path d="M17 6l9 21-9-5-9 5z" fill="#F5B83D"/></svg> RoadTo</a></div></div>
+<section class="sheet" id="card">
+  <div class="inner">
+    <h1>Lieu partagé</h1>
+    <p class="coords"></p>
+    <div class="actions">
+      <a class="button primary" id="open" href="#">Ouvrir dans RoadTo</a>
+      <button class="button ghost" id="copy" type="button">Copier le lien</button>
+      <a class="button ghost" id="alerts" href="carte.html">Alertes autour</a>
+    </div>
+    <p class="note">Le lieu est dans le lien lui-même : ce site ne le reçoit pas.</p>
+  </div>
+</section>
+<script type="module" src="assets/lieu.js"></script>
+</body>
+</html>
