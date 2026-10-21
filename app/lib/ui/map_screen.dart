@@ -76,9 +76,12 @@ class _MapScreenState extends State<MapScreen> {
   bool _isCurrent(MapLibreMapController map) => identical(map, _map) && _mapKey == _currentMapKey;
 
   /// The plugin answers MAP_NOT_READY while it rebuilds the native map (when
-  /// a region installs, or the activity comes back): nothing is lost, the
-  /// map loads its style again and [_onStyleLoaded] redraws everything.
-  static bool _mapNotReady(Object e) => e is PlatformException && e.code == 'MAP_NOT_READY';
+  /// a region installs, or the activity comes back), and the map's channel
+  /// is missing once its native side is gone, before the widget learns it:
+  /// nothing is lost, the map loads its style again and [_onStyleLoaded]
+  /// redraws everything.
+  static bool _mapNotReady(Object e) =>
+      (e is PlatformException && e.code == 'MAP_NOT_READY') || e is MissingPluginException;
 
   Future<void> _onStyleLoaded() async {
     final map = _map;
