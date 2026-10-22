@@ -177,8 +177,15 @@ class AlertAheadCard extends StatelessWidget {
   }
 
   String get detail {
-    final c = confirmations;
-    if (c.count == 0 || c.latest == null) return 'Signalé ${ago(now.difference(ahead.alert.createdAt))}';
+    final a = ahead.alert, c = confirmations;
+    final length = a.lengthM == null ? null : 'sur ${formatDistance(a.lengthM!.toDouble())}';
+    // Open data (Bison Futé): the source and how fresh, no drivers to count.
+    if (a.sourceLabel case final source?) {
+      return [source, ?length, ago(now.difference(a.createdAt))].join(' · ');
+    }
+    if (c.count == 0 || c.latest == null) {
+      return [?length, 'Signalé ${ago(now.difference(a.createdAt))}'].join(' · ');
+    }
     final who = c.count == 1 ? '1 conducteur' : '${c.count} conducteurs';
     return 'Confirmé par $who · ${ago(now.difference(c.latest!))}';
   }
@@ -209,7 +216,7 @@ class AlertAheadCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    '${t.label} · ${formatDistance(ahead.distanceM)}',
+                    '${ahead.alert.headline} · ${formatDistance(ahead.distanceM)}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(

@@ -206,7 +206,12 @@ Map<String, Object?> carState({
     'speedLimitKph': speedLimitKph,
     'mapStyle': mapStyle,
     if (ahead != null)
-      'alert': {'label': ahead.alert.type.label, 'distanceM': ahead.distanceM, 'confirmations': confirmations},
+      'alert': {
+        'label': ahead.alert.headline,
+        'distanceM': ahead.distanceM,
+        'confirmations': confirmations,
+        if (ahead.alert.sourceLabel != null) 'source': ahead.alert.sourceLabel,
+      },
     if (pending != null) 'confirmation': {'id': pending.id, 'label': pending.type.label},
     'places': [for (final p in places.take(CarLink.maxPlaces)) placeToMap(p)],
     'routing': routing,

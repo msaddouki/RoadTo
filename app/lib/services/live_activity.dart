@@ -120,7 +120,7 @@ Map<String, Object?>? liveActivityState({
     'remaining': formatDistance(g.remainingM),
     // To the minute, as shown.
     'arrivalEpochMs': arrival.millisecondsSinceEpoch ~/ 60000 * 60000,
-    if (ahead != null) 'alert': '${ahead.alert.type.label} à ${formatDistance(ahead.distanceM)}',
+    if (ahead != null) 'alert': '${ahead.alert.headline} à ${formatDistance(ahead.distanceM)}',
     'arrived': g.arrived,
   };
 }

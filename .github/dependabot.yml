@@ -9,6 +9,7 @@ updates:
       - /packages/roadto_core
       - /relay/dev_relay
       - /relay/strfry_policy
+      - /relay/traffic_bot
     schedule:
       interval: weekly
       day: monday

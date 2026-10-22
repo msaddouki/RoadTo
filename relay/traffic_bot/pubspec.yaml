@@ -1,0 +1,23 @@
+name: roadto_traffic_bot
+description: Publishes jams from open traffic data (Bison Futé) as RoadTo alerts.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.8.0
+
+dependencies:
+  http: ^1.6.0
+  roadto_core:
+    path: ../../packages/roadto_core
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.25.6
+
+# The robot never touches SQLite; use the system library so no prebuilt
+# binary is fetched when resolving roadto_core's dependencies.
+hooks:
+  user_defines:
+    sqlite3:
+      source: system

@@ -11,6 +11,10 @@
 #   REAL_IP_HEADER                 header with the client address behind a
 #                                  proxy or an ingress (e.g. x-forwarded-for),
 #                                  so the rate limit sees clients, not the proxy.
+#   ROADTO_TRAFFIC_KEY             the traffic robot's private key: it then
+#                                  publishes jams from Bison Futé's open data
+#                                  on this relay (docs/traffic-feed.md);
+#                                  ROADTO_TRAFFIC_FEEDS picks the areas.
 set -euo pipefail
 
 # Every log line, from strfry and from this script, goes through
@@ -68,6 +72,18 @@ if (( ${#peers[@]} )); then
         ./strfry sync "$peer" --dir both >/dev/null 2>&1 || echo "sync with a peer failed, retrying later" >&2
       done
       sleep "${SYNC_INTERVAL_SECONDS:-300}"
+    done
+  ) &
+fi
+
+# The traffic robot, on this relay once it is up; started again if it stops.
+if [[ -n "${ROADTO_TRAFFIC_KEY:-}" ]]; then
+  (
+    sleep 10
+    while true; do
+      ROADTO_TRAFFIC_RELAYS="${ROADTO_TRAFFIC_RELAYS:-ws://127.0.0.1:7777}" /app/roadto-traffic || true
+      echo "traffic robot stopped, starting again in 30 s" >&2
+      sleep 30
     done
   ) &
 fi

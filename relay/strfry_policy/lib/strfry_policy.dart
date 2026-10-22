@@ -15,6 +15,8 @@
 /// Rules are [checkWritePolicy] from roadto_core, exactly what the dev relay
 /// and the app tests enforce, plus a per-source rate limit. Client addresses
 /// are only kept in memory for the rate limit and are never written out.
+/// RoadTo's traffic robot ([TrafficSources.keys], relay/traffic_bot) is not
+/// rate limited: it publishes a whole area's jams each minute.
 library;
 
 import 'dart:convert';
@@ -30,12 +32,19 @@ class WritePolicyPlugin {
   final int ratePerMinute;
   final bool policeAllowed;
 
+  /// Authors not rate limited (strfry has checked their signature).
+  final Set<String> unlimitedAuthors;
+
   final _windows = <String, (int, int)>{}; // address -> (minute, count)
 
   /// Decision counters, served on /metrics by the entry point.
   final PolicyMetrics metrics = PolicyMetrics();
 
-  WritePolicyPlugin({this.ratePerMinute = 30, this.policeAllowed = FeatureFlags.policeAlerts}) {
+  WritePolicyPlugin({
+    this.ratePerMinute = 30,
+    this.policeAllowed = FeatureFlags.policeAlerts,
+    this.unlimitedAuthors = TrafficSources.keys,
+  }) {
     metrics.rateLimitedSources = () => _windows.length;
   }
 
@@ -63,7 +72,7 @@ class WritePolicyPlugin {
     // Events replicated from our other relays (Stream, Sync) or imported by an
     // operator are not rate limited: the original relay already was.
     final source = request['sourceType'];
-    if (source == 'IP4' || source == 'IP6') {
+    if ((source == 'IP4' || source == 'IP6') && !unlimitedAuthors.contains(eventJson['pubkey'])) {
       final address = '${request['sourceInfo']}';
       final minute = t.millisecondsSinceEpoch ~/ 60000;
       final (window, count) = _windows[address] ?? (minute, 0);

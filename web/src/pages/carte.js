@@ -3,6 +3,7 @@
 import * as maplibregl from 'maplibre-gl';
 
 import { AlertStore, ago, alertFilter } from '../alerts.js';
+import { distanceText } from '../routing.js';
 import { cellsCovering } from '../geohash.js';
 import { ICONS } from '../icons.js';
 import { RelayPool } from '../relays.js';
@@ -100,9 +101,12 @@ function details(a) {
   const title = document.createElement('strong');
   title.textContent = a.label;
   const when = document.createElement('span');
-  when.textContent =
-    c.count === 0
-      ? `Signalé ${ago(now - a.createdAt)}`
+  const length = a.lengthM ? `sur ${distanceText(a.lengthM)}` : null;
+  // Open data (Bison Futé): its source and how fresh; drivers' reports: who confirmed.
+  when.textContent = a.sourceLabel
+    ? [a.sourceLabel, length, ago(now - a.createdAt)].filter(Boolean).join(' · ')
+    : c.count === 0
+      ? [length, `Signalé ${ago(now - a.createdAt)}`].filter(Boolean).join(' · ')
       : `Confirmé par ${c.count === 1 ? '1 conducteur' : `${c.count} conducteurs`} · ${ago(now - c.latest)}`;
   const score = document.createElement('meter');
   score.min = 0;

@@ -11,12 +11,15 @@ Only RoadTo alerts (kind 4550) and "still there?" answers (kind 4551) with:
 - a valid signature and the minimum proof of work (12 and 8 bits);
 - an expiry bounded by the alert type (NIP-40). Expired events are dropped by strfry.
 - consistent geohash tags, at most 7 characters (about 150 m);
-- no free text, and no police alerts while that feature is off.
+- no free text, and no police alerts while that feature is off;
+- for jams, a valid `level` and `length`, and a well-formed `src`.
 
 On top of that, a rate limit applies: 30 events per minute per client
 address (`ROADTO_RATE_PER_MINUTE`). The limit is kept in memory only and
 the plugin never writes addresses out. Events replicated between our relays
-are not rate limited.
+are not rate limited, nor is RoadTo's traffic robot (`TrafficSources.keys`),
+which the image also carries: with `ROADTO_TRAFFIC_KEY` set, it publishes
+the jams of Bison Futé's open data on this relay (docs/traffic-feed.md).
 
 ## Logs without client addresses
 

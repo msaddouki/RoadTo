@@ -80,7 +80,7 @@ Map<String, dynamic> alertsGeoJson(Iterable<RoadAlert> alerts) => featureCollect
       'properties': {
         'alertId': a.id,
         'type': a.type.code,
-        'label': a.type.label,
+        'label': a.headline,
         'color': hexColor(alertColors[a.type]!),
       },
       'geometry': {'type': 'Point', 'coordinates': _coords(a.position)},

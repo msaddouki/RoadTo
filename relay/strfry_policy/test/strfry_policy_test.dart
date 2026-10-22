@@ -59,6 +59,33 @@ void main() {
     expect(send('Sync', ''), ['accept', 'accept', 'accept']);
   });
 
+  test('the traffic robot is not rate limited; its rules still apply', () {
+    final robot = KeyPair.generate();
+    final plugin = WritePolicyPlugin(ratePerMinute: 2, unlimitedAuthors: {robot.publicKey});
+    String send(KeyPair keys, int i, {int? length}) =>
+        plugin.handle(
+              request(
+                buildAlertEvent(
+                  keys: keys,
+                  type: AlertType.traffic,
+                  position: LatLon(45.75 + i / 100, 4.83),
+                  now: now,
+                  level: JamLevel.jam,
+                  lengthM: length,
+                  source: 'bison-fute/S$i',
+                ),
+                source: 'IP4',
+                info: '127.0.0.1',
+              ),
+              now: now,
+            )['action']
+            as String;
+    expect([for (var i = 0; i < 5; i++) send(robot, i, length: 800)], everyElement('accept'));
+    expect(send(robot, 9, length: 99999), 'reject');
+    final someone = KeyPair.generate();
+    expect([for (var i = 0; i < 3; i++) send(someone, i)], ['accept', 'accept', 'reject']);
+  });
+
   test('garbage lines are answered, never crash', () {
     final plugin = WritePolicyPlugin();
     expect(jsonDecode(plugin.handleLine('not json')), {

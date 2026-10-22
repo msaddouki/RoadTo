@@ -565,9 +565,14 @@ class NavigationUi {
       const strong = document.createElement('strong');
       strong.textContent = `${first.alert.label} · ${distanceText(first.distanceM)}`;
       text.append(strong);
-      if (c.count > 0) {
+      const a = first.alert;
+      const length = a.lengthM ? `sur ${distanceText(a.lengthM)}` : null;
+      const line = a.sourceLabel
+        ? [a.sourceLabel, length].filter(Boolean).join(' · ')
+        : [length, c.count > 0 ? `Confirmé par ${c.count === 1 ? '1 conducteur' : `${c.count} conducteurs`}` : null].filter(Boolean).join(' · ');
+      if (line) {
         const small = document.createElement('small');
-        small.textContent = `Confirmé par ${c.count === 1 ? '1 conducteur' : `${c.count} conducteurs`}`;
+        small.textContent = line;
         text.append(small);
       }
       this.el.alert.append(text);

@@ -162,6 +162,24 @@ void main() {
       ),
   ];
 
+  // Jams from the traffic robot (a test key here): level, length, source,
+  // the newer replacing the older, and the delay each adds.
+  final sensor = KeyPair.fromPrivateKey('5' * 64);
+  NostrEvent sensorJam(DateTime at, JamLevel level, int length) => buildAlertEvent(
+    keys: sensor,
+    type: AlertType.traffic,
+    position: route.pointAt(1500),
+    bearing: route.bearingAt(1500),
+    now: at,
+    level: level,
+    lengthM: length,
+    source: 'bison-fute/MY269.D1',
+    lasting: const Duration(minutes: 10),
+  );
+  final sensorOld = sensorJam(DateTime.utc(2026, 10, 22, 8), JamLevel.slow, 600);
+  final sensorNew = sensorJam(DateTime.utc(2026, 10, 22, 8, 5), JamLevel.stopped, 1500);
+  final sensorAlert = RoadAlert.fromEvent(sensorNew, trustedSources: {sensor.publicKey})!;
+
   // A trace_attributes answer on the route's shape: 50, 50, none, 30.
   final n = route.shape.length - 1;
   final trace = {
@@ -212,6 +230,11 @@ void main() {
             },
         ],
         'drive': drive,
+        'sensor': {
+          'key': sensor.publicKey,
+          'events': [sensorOld.toJson(), sensorNew.toJson()],
+          'delayS': trafficDelays(route, [sensorAlert]).single.delay.inSeconds,
+        },
         'eta': {
           'learned': learned.toJson(),
           'factors': {for (final b in RoadBand.values) b.name: learned.factor(b)},

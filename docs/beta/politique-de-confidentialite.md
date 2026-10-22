@@ -93,6 +93,13 @@ l'adresse de la page, après le `#`.
 Ces services ont leurs propres politiques de confidentialité. [Liens à
 ajouter.]
 
+### Info trafic des capteurs publics
+
+Des alertes « Bouchon » viennent aussi des capteurs du réseau routier
+national (données ouvertes Bison Futé, Licence Ouverte), publiées sur nos
+relais par le robot de RoadTo. Elles indiquent leur source. Elles ne
+concernent aucun conducteur et le robot ne reçoit rien de vous.
+
 ### Téléchargements
 
 Les régions hors ligne et les prix des carburants sont téléchargés depuis

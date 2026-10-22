@@ -41,7 +41,7 @@
     ]
    ],
    "content": "",
-   "sig": "73896c17f351f4bd19fa580bcab26ef7485b0bab1c1cfce489f69ce02959083a50375da1b1c9ea2fd56dbf4550ebd0c4903d49a0be2e6e8f6c656efad980c603"
+   "sig": "bc5400a6053a5a48fe8eece0a4d69df7f9c946537e7296b9cb8a567cda464264aebc6295ec8393ffaeccb6ac22abf8518adb7436c002607d115e21d75db1b3d6"
   },
   {
    "id": "00003ef1ef0fca7ce78a39b9fdcbc0dbeb940f0baa78650b34ce609caee57a44",
@@ -68,7 +68,7 @@
     ]
    ],
    "content": "",
-   "sig": "04f4bc9c5e88811b39888b6ea93695b4961978c1cd81261738b8fc40427ab9a9e750301f56bfb929e2d0b31a25ee462cf18a179bd4adeaad5ea659b14ecbf336"
+   "sig": "658c550e42e30ab07dba22b1af3d22f07e98f03f4347654dcfcbaef07194aad9218af6ce8b53e002f20b0c20015d15a4de0c9d79c1fa617a045b0abe4e9b5f93"
   },
   {
    "id": "00d17916cabae4605fefa19defc03e5251e5b6167771a102290aed21909b1caf",
@@ -91,7 +91,7 @@
     ]
    ],
    "content": "",
-   "sig": "692af6269ae60a47db45e8cba61a3478ee7a5723f525b0143775f415cbbb6803ed45f956e44d4de1926a46913a4c80e9845ad9fae92f418bb3744c7b2989443b"
+   "sig": "23c230466eece7f70619f1ddb467aaf57566d4f59adc4d7c390d054b5049ceceeeb1da98d29359db7d9ed33f3be5815297ab63869547942ffb34c3b849a9be3c"
   },
   {
    "id": "00cce0a181d3a262820997e976747e53678d0b5c51c66cd078ca2bc8a74dbf5e",
@@ -114,7 +114,7 @@
     ]
    ],
    "content": "",
-   "sig": "0125f95c9cafd03072af346c975b4cae520f66dd5eb74aa06cd1b7994e61c132359ee105cc9d8251991f4093bf70114e3d47e731f54d1354149b5ac3e6a9880f"
+   "sig": "9cf960551e25784593659835439fb90dc796c4aec6a07349d501360e327a81ee13d597c3226b04dec0ae7d41e39a0283aed7eeb949ae8b771dd4de2bbb49039d"
   },
   {
    "id": "0071d2ed8da4f9df803e6880b3068593ac18c8515cc9a1971a5a7ebee691db6c",
@@ -137,7 +137,7 @@
     ]
    ],
    "content": "",
-   "sig": "b89ac6b76abad4877602e0225a0050f7694290e1e86f7055ea1f91d5d864032997a27508ec3380577e1554e812119aa253404e45e27dc4e6ee777856cedfb58a"
+   "sig": "f60625609b0993cdccf7f911f9dc39e393cd1d901f5a58e8cd89172581d1dbee7870e94872e422f62be6338d8f6f4bd5ef9e54cfbd193f05d1438b0c7d0155d3"
   },
   {
    "id": "00d063b4f3a31d8260a13ac753662df450426473605afcdc75bb36b41ca0e7dd",
@@ -160,7 +160,7 @@
     ]
    ],
    "content": "",
-   "sig": "b0082c27a23aad51a8107062e35bfc3b01acae2c665c7940c5f7e157f834be088e0845c152067fee745d240e4b242c126d1cfbf0134ccc9b313a5fcf5f7d14d6"
+   "sig": "3bb86bfed8525ca3ada29831980efe027b3df802ba79e332e5445538ec185105b1d8c5dc05806f45e911bc5807a561adc9252f01431a5b652c3bbb7204be0624"
   },
   {
    "id": "00ae1c4e9365a235f8c883c32ecf88f16cb3cab928cd7f02d421a47d85afcb08",
@@ -183,7 +183,7 @@
     ]
    ],
    "content": "",
-   "sig": "824899b717505f52957ce923c3704e5f724d4336e397ae33614a4647c6fc27421947890b609089846632f0ba69d4ee2210fed8e4aa0120163cca36814c5206ac"
+   "sig": "bf3b612ac46bc1fe80fdd589703ed26b780c0c12344d8135225d87856b59d5eca084343e4307fc0ccaa9efd1d3ee97b0c952c2235c5b2fed497488ffde9588a5"
   }
  ],
  "reliability": {
@@ -3933,6 +3933,122 @@
     "say": "Votre destination est sur la droite."
    }
   ],
+  "sensor": {
+   "key": "9ac20335eb38768d2052be1dbbc3c8f6178407458e51e6b4ad22f1d91758895b",
+   "events": [
+    {
+     "id": "000c298de5255010e2a2926e55abac404b766fdbe5021a346e06c8f0fba97034",
+     "pubkey": "9ac20335eb38768d2052be1dbbc3c8f6178407458e51e6b4ad22f1d91758895b",
+     "created_at": 1792656000,
+     "kind": 4550,
+     "tags": [
+      [
+       "t",
+       "traffic"
+      ],
+      [
+       "g",
+       "u05k"
+      ],
+      [
+       "g",
+       "u05kq"
+      ],
+      [
+       "g",
+       "u05kq1"
+      ],
+      [
+       "g",
+       "u05kq1e"
+      ],
+      [
+       "expiration",
+       "1792656600"
+      ],
+      [
+       "bearing",
+       "110"
+      ],
+      [
+       "level",
+       "slow"
+      ],
+      [
+       "length",
+       "600"
+      ],
+      [
+       "src",
+       "bison-fute/MY269.D1"
+      ],
+      [
+       "nonce",
+       "1714",
+       "12"
+      ]
+     ],
+     "content": "",
+     "sig": "bf8a73287160eee819b5b620f15463297c034af38e9195016c268e86c08f769a26d468ef7f95a3f22f084f7f98262eb16c5ca8e366f1df983a747a740f6fd4e5"
+    },
+    {
+     "id": "0007dd42de751ac55113df1f2e2c7cffa8acdb57ad2c5ac88de257984e5264a5",
+     "pubkey": "9ac20335eb38768d2052be1dbbc3c8f6178407458e51e6b4ad22f1d91758895b",
+     "created_at": 1792656300,
+     "kind": 4550,
+     "tags": [
+      [
+       "t",
+       "traffic"
+      ],
+      [
+       "g",
+       "u05k"
+      ],
+      [
+       "g",
+       "u05kq"
+      ],
+      [
+       "g",
+       "u05kq1"
+      ],
+      [
+       "g",
+       "u05kq1e"
+      ],
+      [
+       "expiration",
+       "1792656900"
+      ],
+      [
+       "bearing",
+       "110"
+      ],
+      [
+       "level",
+       "stopped"
+      ],
+      [
+       "length",
+       "1500"
+      ],
+      [
+       "src",
+       "bison-fute/MY269.D1"
+      ],
+      [
+       "nonce",
+       "2667",
+       "12"
+      ]
+     ],
+     "content": "",
+     "sig": "4bb3e2643f7ad4fa8502e891aeabe89a243bb8fe33720a22805bef46629b8c98e78fcd7528889f96f3f6918063b021c948f6b9dc8c9ab45c10722fa5d02c3872"
+    }
+   ],
+   "delayS": 772
+  },
   "eta": {
    "learned": {
     "town": [

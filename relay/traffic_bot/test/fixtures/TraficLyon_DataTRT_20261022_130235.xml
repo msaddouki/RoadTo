@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?><d2LogicalModel xmlns="http://datex2.eu/schema/2/2_0" xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" modelBaseVersion="2" xsi:schemaLocation="http://datex2.eu/schema/2/2_0 DATEXIISchema_2_2_3.xsd">
+    <exchange>
+        <clientIdentification>TIPI</clientIdentification>
+        <supplierIdentification>
+            <country>fr</country>
+            <nationalIdentifier>TraficLyon</nationalIdentifier>
+        </supplierIdentification>
+    </exchange>
+    <payloadPublication xsi:type="MeasuredDataPublication" lang="fr">
+        <publicationTime>2026-10-22T13:02:35.349+02:00</publicationTime>
+        <publicationCreator>
+            <country>fr</country>
+            <nationalIdentifier>TraficLyon</nationalIdentifier>
+        </publicationCreator>
+        <measurementSiteTableReference targetClass="MeasurementSiteTable" id="TraficLyon" version="1"/>
+        <headerInformation>
+            <confidentiality>noRestriction</confidentiality>
+            <informationStatus>real</informationStatus>
+        </headerInformation>
+        <siteMeasurements>
+  <measurementSiteReference targetClass="MeasurementSiteRecord" id="MQA01.E1" version="1.0"/>
+  <measurementTimeDefault>2026-10-22T13:00:00+02:00</measurementTimeDefault>
+  <measuredValue index="0">
+    <measuredValue>
+      <basicData xsi:type="TrafficStatus">
+        <trafficStatus numberOfInputValuesUsed="0">
+          <trafficStatusValue>freeFlow</trafficStatusValue>
+        </trafficStatus>
+      </basicData>
+    </measuredValue>
+  </measuredValue>
+</siteMeasurements>
+<siteMeasurements>
+  <measurementSiteReference targetClass="MeasurementSiteRecord" id="MY269.D2" version="1.0"/>
+  <measurementTimeDefault>2026-10-22T13:00:00+02:00</measurementTimeDefault>
+  <measuredValue index="0">
+    <measuredValue>
+      <basicData xsi:type="TrafficStatus">
+        <trafficStatus numberOfInputValuesUsed="0">
+          <trafficStatusValue>freeFlow</trafficStatusValue>
+        </trafficStatus>
+      </basicData>
+    </measuredValue>
+  </measuredValue>
+</siteMeasurements>
+    </payloadPublication>
+</d2LogicalModel>
