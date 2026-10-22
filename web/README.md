@@ -31,7 +31,12 @@ the browser's location (`watchPosition`) with:
 - the next alert ahead from the relays; a road reported closed or an
   accident ahead reroutes, as does leaving the route (3 fixes off, at most
   every 15 s);
-- the screen kept on (Screen Wake Lock), the arrival screen.
+- the screen kept on (Screen Wake Lock), the arrival screen;
+- the time to arrival as the app computes it (`src/eta.js`, docs/eta.md):
+  the engine's time corrected by the visitor's own pace (learned from
+  their trips, in this browser only, never in `?simulation`; "Oublier" on
+  the route card), the pace of the last minutes and the jams reported on
+  the way, with the engine's alternatives weighed when there are jams.
 
 Browsers stop the location when the page is hidden or the screen locks,
 and there is no car screen: the page says to keep it open; the apps are

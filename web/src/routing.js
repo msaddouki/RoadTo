@@ -22,7 +22,7 @@ export function bearingDeg(a, b) {
 }
 
 /** Body of a Valhalla /route request (valhallaRouteRequest in the core). */
-export function routeRequest(from, to, { avoid = [], headingDeg = null, language = 'fr-FR' } = {}) {
+export function routeRequest(from, to, { avoid = [], headingDeg = null, language = 'fr-FR', alternates = 0 } = {}) {
   const start = { lat: from.lat, lon: from.lon };
   if (headingDeg !== null && headingDeg !== undefined) Object.assign(start, { heading: Math.round(headingDeg), heading_tolerance: 45 });
   return {
@@ -33,6 +33,7 @@ export function routeRequest(from, to, { avoid = [], headingDeg = null, language
     directions_options: { units: 'kilometers', language },
     // Small squares (~40 m) around closed roads and blocking accidents.
     ...(avoid.length ? { exclude_polygons: avoid.map((p) => square(p, 20)) } : {}),
+    ...(alternates > 0 ? { alternates } : {}),
   };
 }
 
@@ -71,6 +72,11 @@ export function decodePolyline(encoded, precision = 6) {
 }
 
 export class RoutingError extends Error {}
+
+/** The route of a Valhalla answer, then its alternatives. */
+export function parseRoutes(json) {
+  return [parseRoute(json), ...(json.alternates ?? []).filter((a) => a?.trip).map(parseRoute)];
+}
 
 /** A Valhalla answer as {shape, maneuvers, lengthM, timeS, cumulative}, legs joined. */
 export function parseRoute(json) {
@@ -214,6 +220,11 @@ export function bounds(shape) {
  */
 export async function fetchRoute(baseUrl, from, to, { avoid = [], headingDeg = null, signal, fetchImpl = globalThis.fetch } = {}) {
   return parseRoute(await post(baseUrl, 'route', routeRequest(from, to, { avoid, headingDeg }), { signal, fetchImpl }));
+}
+
+/** The engine's route and up to [alternates] others. */
+export async function fetchRoutes(baseUrl, from, to, { avoid = [], headingDeg = null, alternates = 2, signal, fetchImpl = globalThis.fetch } = {}) {
+  return parseRoutes(await post(baseUrl, 'route', routeRequest(from, to, { avoid, headingDeg, alternates }), { signal, fetchImpl }));
 }
 
 async function post(baseUrl, action, body, { signal, fetchImpl }) {

@@ -205,3 +205,5 @@ body.navigating .planner { display: none; }
   .nav-banner .street { font-size: 1.3rem; }
 }
 body.navigating .maplibregl-ctrl-bottom-right { display: none; }
+.trip .jams { margin: -6px 0 0; color: #FF9F1C; font-weight: 700; font-size: .95rem; }
+.trip .note .link { background: none; border: 0; padding: 0; color: var(--accent); font: inherit; text-decoration: underline; cursor: pointer; }

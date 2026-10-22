@@ -10,11 +10,13 @@ import { ICONS } from '../icons.js';
 import { appLink, parseRoute, routeLink } from '../links.js';
 import { RelayPool } from '../relays.js';
 import {
-  BLOCKING, RoutingError, alertSummary, alertsOnRoute, bounds, distanceText, durationText, fetchRoute, projectOnRoute,
+  BLOCKING, RoutingError, alertSummary, alertsOnRoute, bounds, distanceText, durationText, fetchRoute, fetchRoutes,
+  projectOnRoute,
 } from '../routing.js';
 import { config, mapStyle, watchColorScheme } from '../site.js';
 import { verifyEvent } from '../verify.js';
-import { Navigation } from '../navigation.js';
+import { Navigation, loadPace, savePace } from '../navigation.js';
+import { BAND_LABELS, BANDS, EtaEstimator, LearnedPace, fastestWithJams, trafficDelays } from '../eta.js';
 
 const settings = config();
 const $ = (id) => document.getElementById(id);
@@ -26,7 +28,10 @@ const state = {
   to: ends.to,
   route: null,
   avoid: [], // {id, lat, lon}: where a blocking alert meets the route, to go around
+  weighed: new Set(), // jams the route choice already counted
 };
+// How this visitor's trips compare with the engine, learned in this browser.
+let learned = loadPace();
 
 const map = new maplibregl.Map({
   container: 'map',
@@ -219,6 +224,7 @@ async function update() {
     return;
   }
   state.avoid = [];
+  state.weighed = new Set();
   await computeRoute();
 }
 
@@ -238,6 +244,20 @@ async function computeRoute() {
       route = await ask([]);
     }
     if (controller.signal.aborted) return;
+    // Jams reported on it: the engine's alternatives too, and the fastest
+    // once the jams are counted, as the app does.
+    const visible = store.visible();
+    const jams = trafficDelays(route, visible);
+    for (const j of jams) state.weighed.add(j.alert.id);
+    if (jams.length) {
+      try {
+        const all = await fetchRoutes(settings.routingUrl, state.from, state.to, { avoid: state.avoid, signal: controller.signal });
+        route = fastestWithJams(all, visible, { learned }).route;
+      } catch (e) {
+        if (e.name === 'AbortError') return;
+      }
+      if (controller.signal.aborted) return;
+    }
     state.route = route;
     say('');
     drawRoute();
@@ -267,9 +287,16 @@ function drawRoute() {
     return;
   }
   const r = state.route;
-  $('duration').textContent = durationText(r.timeS);
-  const arrival = new Date(Date.now() + r.timeS * 1000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  // The engine's time corrected by this visitor's pace and the jams on the way.
+  const jams = trafficDelays(r, store.visible());
+  const seconds = new EtaEstimator(r, { learned }).totalS(jams);
+  $('duration').textContent = durationText(seconds);
+  const arrival = new Date(Date.now() + seconds * 1000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
   $('figures').textContent = `${distanceText(r.lengthM)} · arrivée ${arrival}`;
+  const jamS = jams.reduce((s, j) => s + j.delayS, 0);
+  $('jams').hidden = jamS < 60;
+  $('jams').textContent = `dont ${Math.round(jamS / 60)} min de bouchons signalés`;
+  drawPace();
   $('open').href = appLink(state.to);
   $('steps-title').textContent = `Étapes (${r.maneuvers.length})`;
   $('steps').replaceChildren(
@@ -352,7 +379,33 @@ function onAlerts() {
     computeRoute();
     return;
   }
+  // A jam newly reported on the route: weigh the alternatives again.
+  if (trafficDelays(state.route, store.visible()).some((j) => !state.weighed.has(j.alert.id))) {
+    computeRoute();
+    return;
+  }
   drawRoute();
+}
+
+/** "Temps ajusté à vos trajets : ville 7 % plus rapide · Oublier". */
+function drawPace() {
+  const el = $('pace');
+  el.hidden = learned.isEmpty;
+  if (learned.isEmpty) return;
+  const parts = BANDS.filter((b) => learned.factor(b) !== 1).map((b) => {
+    const pct = Math.round((1 - learned.factor(b)) * 100);
+    return `${BAND_LABELS[b]} ${Math.abs(pct)} % plus ${pct >= 0 ? 'rapide' : 'lent'}`;
+  });
+  const forget = document.createElement('button');
+  forget.type = 'button';
+  forget.className = 'link';
+  forget.textContent = 'Oublier';
+  forget.onclick = () => {
+    learned = new LearnedPace();
+    savePace(learned);
+    drawRoute();
+  };
+  el.replaceChildren(`Temps ajusté à vos trajets : ${parts.join(', ')}. `, forget);
 }
 
 const pins = [];
@@ -407,7 +460,11 @@ $('go').addEventListener('click', () => {
     destination: state.to,
     store,
     avoid: state.avoid,
+    learned,
     simulateKmh: simulation === null ? null : Number(simulation) || 50,
+    onLearned: (pace) => {
+      learned = pace;
+    },
     onRoute: (route) => {
       state.route = route;
       listen(route);
