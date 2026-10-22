@@ -98,9 +98,10 @@ class TrafficDelay {
   const TrafficDelay(this.alert, this.alongM, this.delay);
 }
 
-/// Jams reported on [route]: each about [jamM] long, crawled at [jamKph]
-/// instead of the planned speed there. Reports made heading the other way
-/// (more than 60° off the route) are for the other side of the road.
+/// Jams reported on [route]: as long and as slow as the report says
+/// ([RoadAlert.lengthM], [RoadAlert.level]), else about [jamM] crawled at
+/// [jamKph], instead of the planned speed there. Reports made heading the
+/// other way (more than 60° off the route) are for the other side of the road.
 List<TrafficDelay> trafficDelays(
   TripRoute route,
   Iterable<RoadAlert> alerts, {
@@ -118,7 +119,9 @@ List<TrafficDelay> trafficDelays(
       if (diff > 60) continue;
     }
     final planned = _plannedKphAt(route, p.alongM);
-    final extra = jamM / (jamKph / 3.6) - jamM / (math.max(planned, jamKph) / 3.6);
+    final length = a.lengthM?.toDouble() ?? jamM;
+    final crawl = a.level?.kph ?? jamKph;
+    final extra = math.max(0.0, length / (crawl / 3.6) - length / (math.max(planned, crawl) / 3.6));
     out.add(TrafficDelay(a, p.alongM, Duration(seconds: extra.round())));
   }
   out.sort((x, y) => x.alongM.compareTo(y.alongM));

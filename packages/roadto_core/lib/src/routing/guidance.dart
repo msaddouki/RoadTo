@@ -213,7 +213,8 @@ List<AlertAhead> alertsAhead(
 
 /// Alertes que le conducteur vient de croiser, à qui demander « toujours là ? ».
 /// Une alerte n'est proposée qu'une fois ([alreadyAsked]) et jamais à son
-/// auteur ([ownKeys]).
+/// auteur ([ownKeys]). Open data from sensors ([RoadAlert.source]) is not
+/// asked about: the sensors say when it ends.
 List<RoadAlert> alertsToConfirm(
   LatLon position,
   Iterable<RoadAlert> alerts, {
@@ -222,5 +223,9 @@ List<RoadAlert> alertsToConfirm(
   double radiusM = 150,
 }) => [
   for (final a in alerts)
-    if (!alreadyAsked.contains(a.id) && !ownKeys.contains(a.author) && distanceM(position, a.position) <= radiusM) a,
+    if (a.source == null &&
+        !alreadyAsked.contains(a.id) &&
+        !ownKeys.contains(a.author) &&
+        distanceM(position, a.position) <= radiusM)
+      a,
 ];

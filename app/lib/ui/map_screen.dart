@@ -37,6 +37,7 @@ class _MapScreenState extends State<MapScreen> {
   StreamSubscription<String>? _messages;
   Timer? _confirmTimeout;
   String? _lastRouteKey;
+  String? _lastJamsKey;
 
   /// The route preview the camera last framed.
   TripPreview? _framedPreview;
@@ -97,6 +98,7 @@ class _MapScreenState extends State<MapScreen> {
     if (!_isCurrent(map)) return;
     _styleReady = true;
     _lastRouteKey = null;
+    _lastJamsKey = null;
     _navLabels = null;
     await _syncMap();
   }
@@ -107,6 +109,7 @@ class _MapScreenState extends State<MapScreen> {
     final belowLabels = _layerIds.contains(labelsMarkerLayer) ? labelsMarkerLayer : null;
     await map.addGeoJsonSource('route', routeGeoJson(null));
     await map.addGeoJsonSource('alerts', alertsGeoJson(const []));
+    await map.addGeoJsonSource('jams', jamsGeoJson(const []));
     await map.addGeoJsonSource('destination', pointGeoJson(null));
     await map.addGeoJsonSource('position', pointGeoJson(null));
     await map.addLineLayer(
@@ -127,6 +130,51 @@ class _MapScreenState extends State<MapScreen> {
           '#3D8BFF',
         ],
         lineWidth: 8,
+        lineJoin: 'round',
+        lineCap: 'round',
+      ),
+      belowLayerId: belowLabels,
+    );
+    // Jams over the roads and the route, under the names, with a dark edge
+    // so they stand out even on an orange motorway.
+    await map.addLineLayer(
+      'jams',
+      'jams-casing',
+      const LineLayerProperties(
+        lineColor: '#2A0E05',
+        lineWidth: [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          10,
+          5,
+          14,
+          9,
+          17,
+          13,
+        ],
+        lineOpacity: 0.85,
+        lineJoin: 'round',
+        lineCap: 'round',
+      ),
+      belowLayerId: belowLabels,
+    );
+    await map.addLineLayer(
+      'jams',
+      'jams',
+      const LineLayerProperties(
+        lineColor: ['get', 'color'],
+        lineWidth: [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          10,
+          3,
+          14,
+          6,
+          17,
+          9,
+        ],
         lineJoin: 'round',
         lineCap: 'round',
       ),
@@ -198,7 +246,16 @@ class _MapScreenState extends State<MapScreen> {
       _lastRouteKey = routeKey;
       await map.setGeoJsonSource('route', routeGeoJson(shown, alongM: g?.projection.alongM ?? 0));
     }
-    await map.setGeoJsonSource('alerts', alertsGeoJson(app.visibleAlerts));
+    final alerts = app.visibleAlerts;
+    await map.setGeoJsonSource('alerts', alertsGeoJson(alerts));
+    final jamsKey = [
+      for (final a in alerts)
+        if (a.shape != null) a.id,
+    ].join(',');
+    if (jamsKey != _lastJamsKey) {
+      _lastJamsKey = jamsKey;
+      await map.setGeoJsonSource('jams', jamsGeoJson(alerts));
+    }
     await map.setGeoJsonSource('destination', pointGeoJson((app.destination ?? preview?.place)?.position));
     final pos = g?.offRoute ?? true ? app.position : g!.projection.point;
     await map.setGeoJsonSource('position', pointGeoJson(pos));

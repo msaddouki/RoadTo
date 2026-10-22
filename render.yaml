@@ -57,3 +57,10 @@ services:
         value: x-forwarded-for
       - key: ROADTO_RATE_PER_MINUTE
         value: "30"
+      # The traffic robot (docs/traffic-feed.md): its private key, set in the
+      # dashboard; without it the relay runs alone. It reads Bison Futé's
+      # open data every minute and publishes the jams around these areas.
+      - key: ROADTO_TRAFFIC_KEY
+        sync: false
+      - key: ROADTO_TRAFFIC_FEEDS
+        value: TraficLyon

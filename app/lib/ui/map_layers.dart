@@ -80,11 +80,26 @@ Map<String, dynamic> alertsGeoJson(Iterable<RoadAlert> alerts) => featureCollect
       'properties': {
         'alertId': a.id,
         'type': a.type.code,
-        'label': a.type.label,
+        'label': a.headline,
         'color': hexColor(alertColors[a.type]!),
       },
       'geometry': {'type': 'Point', 'coordinates': _coords(a.position)},
     },
+]);
+
+/// Jammed stretches, from the traffic robot ([RoadAlert.shape]), in their
+/// level's colour: orange when slow, red when jammed, dark red when stopped.
+Map<String, dynamic> jamsGeoJson(Iterable<RoadAlert> alerts) => featureCollection([
+  for (final a in alerts)
+    if (a.shape case final shape? when a.level != null)
+      {
+        'type': 'Feature',
+        'properties': {'color': a.level!.color, 'level': a.level!.code},
+        'geometry': {
+          'type': 'LineString',
+          'coordinates': [for (final p in shape) _coords(p)],
+        },
+      },
 ]);
 
 /// Empty layer of RoadTo's style right under its labels: the route is drawn

@@ -64,6 +64,49 @@ enum AlertType {
   }
 }
 
+/// How bad a jam is, when the report says (tag `level`): the speed it is
+/// crawled at counts in the time to arrival.
+enum JamLevel {
+  slow('slow', 'Ralenti', 25, '#FF9F1C'),
+  jam('jam', 'Bouchon', 10, '#E53935'),
+  stopped('stopped', 'À l’arrêt', 5, '#8E1B1B');
+
+  final String code;
+  final String label;
+  final double kph;
+
+  /// Colour of the jammed stretch on the map: orange, red, dark red.
+  final String color;
+
+  const JamLevel(this.code, this.label, this.kph, this.color);
+
+  static JamLevel? fromCode(String? code) {
+    for (final l in values) {
+      if (l.code == code) return l;
+    }
+    return null;
+  }
+}
+
+/// Traffic information published from open data by RoadTo's own robot
+/// (relay/traffic_bot): its alerts carry their source (tag `src`, "source/site"),
+/// shown with them, and each site's newest alert replaces the previous one.
+/// Only the keys below are believed: anyone else's `src` tag is ignored.
+abstract final class TrafficSources {
+  /// Public keys of the robot (relay/traffic_bot, ROADTO_TRAFFIC_KEY).
+  static const keys = {'72207f9f4206976cdbbfe80fddb9fae6cd852459c1f8f1154a4e05d5ff6c235e'};
+
+  static const labels = {'bison-fute': 'Bison Futé', 'grandlyon': 'Métropole de Lyon'};
+
+  /// Longest jam a report may describe, in metres.
+  static const maxLengthM = 20000;
+
+  /// The jammed stretch's geometry (tag `shape`, polyline precision 6), at
+  /// most this long and this many points; believed from the robot only.
+  static const maxShapeChars = 4000;
+  static const maxShapePoints = 400;
+}
+
 /// Alerte routière décodée d'un événement Nostr.
 class RoadAlert {
   final String id;
@@ -76,6 +119,18 @@ class RoadAlert {
   /// Cap du signaleur au moment du signalement, arrondi à 10°.
   final int? bearing;
 
+  /// For a jam: how bad, and how long (metres), when the report says.
+  final JamLevel? level;
+  final int? lengthM;
+
+  /// "bison-fute/MQA01.E1": open data published by RoadTo's robot
+  /// ([TrafficSources]); null for drivers' reports.
+  final String? source;
+
+  /// The jammed stretch along the road, in the direction of traffic, from
+  /// the robot ([TrafficSources]); drawn in the [level]'s colour.
+  final List<LatLon>? shape;
+
   RoadAlert({
     required this.id,
     required this.author,
@@ -84,20 +139,35 @@ class RoadAlert {
     required this.createdAt,
     required this.expiresAt,
     this.bearing,
+    this.level,
+    this.lengthM,
+    this.source,
+    this.shape,
   });
+
+  /// "Bouchon", "À l’arrêt": the level when the report gives it.
+  String get headline => level?.label ?? type.label;
+
+  /// "Bison Futé", for alerts from open data.
+  String? get sourceLabel {
+    final s = source;
+    if (s == null) return null;
+    return TrafficSources.labels[s.split('/').first] ?? s.split('/').first;
+  }
 
   /// Centre de la maille 7 : la position exacte n'est jamais publiée.
   LatLon get position => geohashDecode(geohash).center;
 
   bool isExpired(DateTime now) => !now.isBefore(expiresAt);
 
-  static RoadAlert? fromEvent(NostrEvent e) {
+  static RoadAlert? fromEvent(NostrEvent e, {Set<String> trustedSources = TrafficSources.keys}) {
     if (e.kind != RoadToKinds.alert) return null;
     final type = AlertType.fromCode(e.tag('t'));
     final exp = e.expiration;
     final hashes = e.tagValues('g');
     if (type == null || exp == null || hashes.isEmpty) return null;
     final finest = hashes.reduce((a, b) => a.length >= b.length ? a : b);
+    final length = int.tryParse(e.tag('length') ?? '');
     return RoadAlert(
       id: e.id,
       author: e.pubkey,
@@ -106,7 +176,23 @@ class RoadAlert {
       createdAt: DateTime.fromMillisecondsSinceEpoch(e.createdAt * 1000, isUtc: true),
       expiresAt: DateTime.fromMillisecondsSinceEpoch(exp * 1000, isUtc: true),
       bearing: int.tryParse(e.tag('bearing') ?? ''),
+      level: type == AlertType.traffic ? JamLevel.fromCode(e.tag('level')) : null,
+      lengthM: type == AlertType.traffic && length != null && length > 0 && length <= TrafficSources.maxLengthM
+          ? length
+          : null,
+      source: trustedSources.contains(e.pubkey) ? e.tag('src') : null,
+      shape: type == AlertType.traffic && trustedSources.contains(e.pubkey) ? _shape(e.tag('shape')) : null,
     );
+  }
+
+  static List<LatLon>? _shape(String? encoded) {
+    if (encoded == null || encoded.isEmpty || encoded.length > TrafficSources.maxShapeChars) return null;
+    try {
+      final points = decodePolyline(encoded);
+      return points.length >= 2 && points.length <= TrafficSources.maxShapePoints ? points : null;
+    } catch (_) {
+      return null;
+    }
   }
 }
 
@@ -119,10 +205,16 @@ NostrEvent buildAlertEvent({
   required LatLon position,
   double? bearing,
   DateTime? now,
+  JamLevel? level,
+  int? lengthM,
+  String? source,
+  List<LatLon>? shape,
+  Duration? lasting,
 }) {
   if (type == AlertType.police && !FeatureFlags.policeAlerts) {
     throw StateError('Les alertes police sont désactivées');
   }
+  final ttl = lasting == null || lasting > type.ttl ? type.ttl : lasting;
   final t = now ?? DateTime.now();
   final hash = geohashEncode(position, precision: alertGeohashPrecisions.last);
   return NostrEvent.create(
@@ -133,8 +225,12 @@ NostrEvent buildAlertEvent({
     tags: [
       ['t', type.code],
       for (final p in alertGeohashPrecisions) ['g', hash.substring(0, p)],
-      ['expiration', '${_unix(t.add(type.ttl))}'],
+      ['expiration', '${_unix(t.add(ttl))}'],
       if (bearing != null) ['bearing', '${((bearing / 10).round() * 10) % 360}'],
+      if (level != null) ['level', level.code],
+      if (lengthM != null) ['length', '$lengthM'],
+      if (source != null) ['src', source],
+      if (shape != null && shape.length >= 2) ['shape', encodePolyline(shape)],
     ],
   );
 }
@@ -186,7 +282,13 @@ class AlertStore {
   /// Seuil de score sous lequel une alerte n'est plus affichée.
   final double visibilityThreshold;
 
-  AlertStore({this.visibilityThreshold = 0.35});
+  /// Keys whose `src` tag is believed ([TrafficSources]).
+  final Set<String> trustedSources;
+
+  /// source ("bison-fute/MQA01.E1") -> its newest alert.
+  final _bySource = <String, String>{};
+
+  AlertStore({this.visibilityThreshold = 0.35, this.trustedSources = TrafficSources.keys});
 
   /// Intègre un événement reçu. Renvoie true s'il a changé l'état.
   bool ingest(NostrEvent e, {DateTime? now}) {
@@ -194,9 +296,19 @@ class AlertStore {
     if (e.isExpired(t) || e.powBits < PowPolicy.forKind(e.kind)) return false;
     switch (e.kind) {
       case RoadToKinds.alert:
-        final alert = RoadAlert.fromEvent(e);
+        final alert = RoadAlert.fromEvent(e, trustedSources: trustedSources);
         if (alert == null || _alerts.containsKey(alert.id)) return false;
         if (alert.type == AlertType.police && !FeatureFlags.policeAlerts) return false;
+        // A site's newest alert replaces the previous one; an older one is late.
+        if (alert.source case final source?) {
+          final previous = _alerts[_bySource[source]];
+          if (previous != null) {
+            if (!previous.createdAt.isBefore(alert.createdAt)) return false;
+            _alerts.remove(previous.id);
+            _confirmations.remove(previous.id);
+          }
+          _bySource[source] = alert.id;
+        }
         _alerts[alert.id] = alert;
         return true;
       case RoadToKinds.confirmation:
@@ -277,5 +389,6 @@ class AlertStore {
       _alerts.remove(id);
       _confirmations.remove(id);
     }
+    _bySource.removeWhere((_, id) => !_alerts.containsKey(id));
   }
 }

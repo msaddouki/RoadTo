@@ -36,6 +36,7 @@ class CarLink {
   Timer? _pending;
   DateTime _lastSent = DateTime.fromMillisecondsSinceEpoch(0);
   Object? _lastRouteId;
+  Object? _lastJamsId;
 
   CarLink({
     required this.changes,
@@ -122,6 +123,9 @@ class CarLink {
     // The shape goes once per route; the car keeps it while the id stays.
     if (state['routeId'] == _lastRouteId) state.remove('route');
     _lastRouteId = state['routeId'];
+    // Jammed stretches too: sent when the jams change.
+    if (state['jamsId'] == _lastJamsId) state.remove('jams');
+    _lastJamsId = state['jamsId'];
     unawaited(_channel.invokeMethod<void>('update', state).catchError((Object _) {}));
   }
 }
@@ -141,6 +145,7 @@ Map<String, Object?> carStateOf(AppController app) => carState(
   pending: app.pendingConfirmation,
   places: app.favorites.all,
   routing: app.routing,
+  jams: carJams(app.visibleAlerts, app.position),
   locationDenied:
       !app.settings.simulate &&
       (app.locationStatus == LocationAvailability.denied || app.locationStatus == LocationAvailability.deniedForever),
@@ -181,6 +186,7 @@ Map<String, Object?> carState({
   List<Place> places = const [],
   bool routing = false,
   bool locationDenied = false,
+  List<RoadAlert> jams = const [],
   required DateTime now,
 }) {
   final g = guidance, next = guidance?.nextManeuver;
@@ -206,7 +212,12 @@ Map<String, Object?> carState({
     'speedLimitKph': speedLimitKph,
     'mapStyle': mapStyle,
     if (ahead != null)
-      'alert': {'label': ahead.alert.type.label, 'distanceM': ahead.distanceM, 'confirmations': confirmations},
+      'alert': {
+        'label': ahead.alert.headline,
+        'distanceM': ahead.distanceM,
+        'confirmations': confirmations,
+        if (ahead.alert.sourceLabel != null) 'source': ahead.alert.sourceLabel,
+      },
     if (pending != null) 'confirmation': {'id': pending.id, 'label': pending.type.label},
     'places': [for (final p in places.take(CarLink.maxPlaces)) placeToMap(p)],
     'routing': routing,
@@ -217,5 +228,25 @@ Map<String, Object?> carState({
         for (final p in route.shape) [p.lon, p.lat],
       ],
     },
+    'jamsId': [for (final a in jams) a.id].join(','),
+    'jams': [
+      for (final a in jams)
+        {
+          'color': a.level!.color,
+          'points': [
+            for (final p in a.shape!) [p.lon, p.lat],
+          ],
+        },
+    ],
   };
+}
+
+/// Jammed stretches for the car's map: those with a road and a level, the
+/// nearest [max] within [radiusM].
+List<RoadAlert> carJams(Iterable<RoadAlert> alerts, LatLon position, {double radiusM = 30000, int max = 40}) {
+  final near = [
+    for (final a in alerts)
+      if (a.shape != null && a.level != null && distanceM(a.position, position) <= radiusM) a,
+  ]..sort((x, y) => distanceM(x.position, position).compareTo(distanceM(y.position, position)));
+  return near.take(max).toList();
 }

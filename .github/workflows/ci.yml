@@ -35,6 +35,7 @@ jobs:
           (cd packages/roadto_core && dart pub get)
           (cd relay/dev_relay && dart pub get)
           (cd relay/strfry_policy && dart pub get)
+          (cd relay/traffic_bot && dart pub get)
           (cd app && flutter pub get)
       # The app and the relays use roadto_core by path: a change to its
       # pubspec (by hand or by Dependabot) must come with their lockfiles.
@@ -55,6 +56,11 @@ jobs:
           dart test
       - name: Dev relay (end to end)
         working-directory: relay/dev_relay
+        run: |
+          dart analyze --fatal-infos
+          dart test
+      - name: Traffic robot
+        working-directory: relay/traffic_bot
         run: |
           dart analyze --fatal-infos
           dart test

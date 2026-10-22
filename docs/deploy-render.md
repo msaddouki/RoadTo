@@ -30,6 +30,11 @@ within 12 hours anyway.
    - in the app, Réglages > Relais: `wss://roadto-relay.onrender.com`.
 4. Check the relay from the repository:
    `cd relay/strfry_policy && dart run tool/smoke.dart wss://roadto-relay.onrender.com wss://roadto-relay.onrender.com`
+5. Traffic from Bison Futé (docs/traffic-feed.md): on `roadto-relay`,
+   Environment, set **ROADTO_TRAFFIC_KEY** to the robot's private key and
+   save (the relay restarts). Its log then shows `traffic: referential: …
+   stations` and, when there are jams, `… jam(s) published`. On the free
+   plan the robot sleeps with the relay; Starter keeps it running.
 
 Every push to master redeploys what changed (`buildFilter`).
 

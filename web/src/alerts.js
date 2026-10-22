@@ -1,6 +1,7 @@
 // RoadTo alerts, as in packages/roadto_core/lib/src/alerts.dart: the event
 // format (ADR 0005), the store and its reliability score, read only.
 import { decode } from './geohash.js';
+import { decodePolyline } from './routing.js';
 
 export const KIND_ALERT = 4550;
 export const KIND_CONFIRMATION = 4551;
@@ -15,6 +16,35 @@ export const TYPES = {
   // Police stays off until the L130-11 channel exists (plan, J6).
 };
 const MAX_TTL = Math.max(...Object.values(TYPES).map((t) => t.ttl));
+
+/** How bad a jam is, when the report says (tag `level`), as JamLevel in the core. */
+export const JAM_LEVELS = {
+  slow: { label: 'Ralenti', kph: 25, color: '#FF9F1C' },
+  jam: { label: 'Bouchon', kph: 10, color: '#E53935' },
+  stopped: { label: 'À l’arrêt', kph: 5, color: '#8E1B1B' },
+};
+
+/**
+ * RoadTo's traffic robot (relay/traffic_bot), publishing jams from open
+ * data: only its `src` tag is believed (TrafficSources in the core).
+ */
+export const TRAFFIC_SOURCE_KEYS = ['72207f9f4206976cdbbfe80fddb9fae6cd852459c1f8f1154a4e05d5ff6c235e'];
+export const SOURCE_LABELS = { 'bison-fute': 'Bison Futé', grandlyon: 'Métropole de Lyon' };
+const MAX_LENGTH_M = 20000;
+const MAX_SHAPE_CHARS = 4000;
+const MAX_SHAPE_POINTS = 400;
+
+/** The jammed stretch (tag `shape`, polyline 6), or null. */
+function shapeOf(encoded) {
+  if (!encoded || encoded.length > MAX_SHAPE_CHARS) return null;
+  try {
+    const points = decodePolyline(encoded);
+    const sane = points.every((p) => Number.isFinite(p.lat) && Number.isFinite(p.lon) && Math.abs(p.lat) <= 90 && Math.abs(p.lon) <= 180);
+    return sane && points.length >= 2 && points.length <= MAX_SHAPE_POINTS ? points : null;
+  } catch {
+    return null;
+  }
+}
 
 /** Minimum proof of work (NIP-13), in leading zero bits of the id. */
 export const POW = { [KIND_ALERT]: 12, [KIND_CONFIRMATION]: 8 };
@@ -41,7 +71,7 @@ export function alertFilter(cells, now = Date.now() / 1000) {
 }
 
 /** A decoded alert, or null when the event is not a valid RoadTo alert. */
-export function alertOf(e) {
+export function alertOf(e, trustedSources = TRAFFIC_SOURCE_KEYS) {
   if (e.kind !== KIND_ALERT) return null;
   const code = tag(e, 't');
   const type = TYPES[code];
@@ -52,10 +82,19 @@ export function alertOf(e) {
   let center;
   try { center = decode(finest); } catch { return null; }
   const bearing = Number.parseInt(tag(e, 'bearing') ?? '', 10);
+  const traffic = code === 'traffic';
+  const level = traffic && JAM_LEVELS[tag(e, 'level')] ? tag(e, 'level') : null;
+  const length = Number.parseInt(tag(e, 'length') ?? '', 10);
+  const trusted = trustedSources.includes(e.pubkey);
+  const source = trusted ? (tag(e, 'src') ?? null) : null;
+  const prefix = source?.split('/')[0];
   return {
-    id: e.id, author: e.pubkey, type: code, label: type.label, color: type.color,
+    id: e.id, author: e.pubkey, type: code, label: level ? JAM_LEVELS[level].label : type.label, color: type.color,
     geohash: finest, lat: center.lat, lon: center.lon,
     createdAt: e.created_at, expiresAt, bearing: Number.isFinite(bearing) ? bearing : null,
+    level, lengthM: traffic && length > 0 && length <= MAX_LENGTH_M ? length : null,
+    source, sourceLabel: source ? (SOURCE_LABELS[prefix] ?? prefix) : null,
+    shape: traffic && trusted ? shapeOf(tag(e, 'shape')) : null,
   };
 }
 
@@ -64,7 +103,13 @@ export class AlertStore {
   /** alert id -> author -> {stillThere, at} */
   #answers = new Map();
 
-  constructor({ threshold = VISIBILITY } = {}) { this.threshold = threshold; }
+  /** source ("bison-fute/MQA01.E1") -> its newest alert id. */
+  #bySource = new Map();
+
+  constructor({ threshold = VISIBILITY, trustedSources = TRAFFIC_SOURCE_KEYS } = {}) {
+    this.threshold = threshold;
+    this.trustedSources = trustedSources;
+  }
 
   /** Adds an event; true when it changed what the store knows. */
   ingest(e, now = Date.now() / 1000) {
@@ -72,8 +117,18 @@ export class AlertStore {
     if (Number.isFinite(exp) && exp <= now) return false;
     if (leadingZeroBits(e.id ?? '') < (POW[e.kind] ?? Infinity)) return false;
     if (e.kind === KIND_ALERT) {
-      const a = alertOf(e);
+      const a = alertOf(e, this.trustedSources);
       if (!a || this.#alerts.has(a.id)) return false;
+      // A sensor's newest alert replaces the previous one; an older one is late.
+      if (a.source) {
+        const previous = this.#alerts.get(this.#bySource.get(a.source));
+        if (previous) {
+          if (previous.createdAt >= a.createdAt) return false;
+          this.#alerts.delete(previous.id);
+          this.#answers.delete(previous.id);
+        }
+        this.#bySource.set(a.source, a.id);
+      }
       this.#alerts.set(a.id, a);
       return true;
     }
@@ -129,6 +184,7 @@ export class AlertStore {
     for (const [id, a] of this.#alerts) {
       if (now >= a.expiresAt) { this.#alerts.delete(id); this.#answers.delete(id); }
     }
+    for (const [source, id] of this.#bySource) if (!this.#alerts.has(id)) this.#bySource.delete(source);
   }
 }
 

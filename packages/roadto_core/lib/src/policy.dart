@@ -45,6 +45,27 @@ String? checkWritePolicy(
     if (type == AlertType.police && !policeAllowed) return 'blocked: alertes police désactivées';
     if (e.content.isNotEmpty) return 'invalid: texte libre interdit';
     if (exp > e.createdAt + type.ttl.inSeconds + 60) return 'invalid: expiration trop lointaine';
+    final level = e.tag('level'), length = e.tag('length');
+    if (level != null && (type != AlertType.traffic || JamLevel.fromCode(level) == null)) {
+      return 'invalid: niveau de bouchon';
+    }
+    if (length != null) {
+      final m = int.tryParse(length);
+      if (type != AlertType.traffic || m == null || m <= 0 || m > TrafficSources.maxLengthM) {
+        return 'invalid: longueur de bouchon';
+      }
+    }
+    final shape = e.tag('shape');
+    if (shape != null &&
+        (type != AlertType.traffic ||
+            shape.length > TrafficSources.maxShapeChars ||
+            !RegExp(r'^[\x3f-\x7e]+$').hasMatch(shape))) {
+      return 'invalid: tracé';
+    }
+    final src = e.tag('src');
+    if (src != null && (src.length > 80 || !RegExp(r'^[a-z0-9-]+/[A-Za-z0-9._-]+$').hasMatch(src))) {
+      return 'invalid: source';
+    }
   } else {
     if (e.tag('e') == null) return 'invalid: alerte visée manquante';
     final still = e.tag('still');

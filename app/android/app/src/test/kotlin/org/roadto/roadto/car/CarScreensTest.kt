@@ -249,6 +249,31 @@ class CarStateTest {
     }
 
     @Test
+    fun state_carriesJammedStretches_sentWhenTheyChange() {
+        val first = CarState.fromMap(
+            mapOf(
+                "jamsId" to "a,b",
+                "jams" to listOf(
+                    mapOf("color" to "#E53935", "points" to listOf(listOf(4.85, 45.76), listOf(4.86, 45.77))),
+                    mapOf("color" to "#FF9F1C", "points" to listOf(listOf(4.80, 45.70))),
+                ),
+            ),
+            CarState(),
+        )
+        assertEquals(2, first.jams.size)
+        assertEquals("#E53935", first.jams[0].color)
+        assertEquals(CarState.fromMap(mapOf("jamsId" to "a,b"), first).jams, first.jams)
+        assertTrue(CarState.fromMap(mapOf("jamsId" to "c"), first).jams.isEmpty())
+
+        // One line per stretch of two points or more, in its colour; nothing else.
+        val json = CarMapRenderer.jamsGeoJson(first.jams + CarJam("red;", listOf(doubleArrayOf(0.0, 0.0), doubleArrayOf(1.0, 1.0))))
+        assertEquals(
+            """{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"color":"#E53935"},"geometry":{"type":"LineString","coordinates":[[4.85,45.76],[4.86,45.77]]}}]}""",
+            json,
+        )
+    }
+
+    @Test
     fun maneuvers_mapValhallaTypes() {
         assertEquals(Maneuver.TYPE_ROUNDABOUT_ENTER_CCW, CarManeuvers.type(26))
         assertEquals(Maneuver.TYPE_TURN_NORMAL_LEFT, CarManeuvers.type(15))

@@ -18,6 +18,9 @@ data class CarManeuver(
 /** An alert ahead on the route. */
 data class CarAlert(val label: String, val distanceM: Double, val confirmations: Int)
 
+/** A jammed stretch drawn on the car's map: its colour and [lon, lat] points. */
+data class CarJam(val color: String, val points: List<DoubleArray>)
+
 /** A place to drive to: a saved one (Maison, Travail…) or a search result. */
 data class CarPlace(val name: String, val detail: String?, val lat: Double, val lon: Double) {
     fun toMap(): Map<String, Any?> = mapOf("name" to name, "detail" to detail, "lat" to lat, "lon" to lon)
@@ -59,6 +62,10 @@ data class CarState(
     val routeId: String? = null,
     /** The route's shape, [lon, lat] pairs. */
     val route: List<DoubleArray> = emptyList(),
+    /** Changes whenever [jams] do. */
+    val jamsId: String? = null,
+    /** Jammed stretches near the car, in their level's colour. */
+    val jams: List<CarJam> = emptyList(),
     /** Saved places, offered as destinations from the car. */
     val places: List<CarPlace> = emptyList(),
     /** A route is being computed. */
@@ -93,6 +100,18 @@ data class CarState(
             val route = (m["route"] as? List<*>)?.mapNotNull { p ->
                 (p as? List<*>)?.let { doubleArrayOf((it[0] as Number).toDouble(), (it[1] as Number).toDouble()) }
             } ?: if (routeId == previous.routeId) previous.route else emptyList()
+            val jamsId = m["jamsId"] as? String
+            // The stretches too are only sent when they change.
+            val jams = (m["jams"] as? List<*>)?.mapNotNull { j ->
+                (j as? Map<String, Any?>)?.let {
+                    CarJam(
+                        color = it["color"] as? String ?: "#E53935",
+                        points = (it["points"] as? List<*>)?.mapNotNull { p ->
+                            (p as? List<*>)?.let { xy -> doubleArrayOf((xy[0] as Number).toDouble(), (xy[1] as Number).toDouble()) }
+                        } ?: emptyList(),
+                    )
+                }
+            } ?: if (jamsId == previous.jamsId) previous.jams else emptyList()
             return CarState(
                 navigating = m["navigating"] as? Boolean ?: false,
                 maneuver = maneuver,
@@ -109,6 +128,8 @@ data class CarState(
                 confirmation = confirmation,
                 routeId = routeId,
                 route = route,
+                jamsId = jamsId,
+                jams = jams,
                 places = CarPlace.listFrom(m["places"]),
                 routing = m["routing"] as? Boolean ?: false,
                 locationDenied = m["locationDenied"] as? Boolean ?: false,

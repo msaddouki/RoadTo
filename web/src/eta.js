@@ -3,6 +3,7 @@
 // stretch, corrected by the driver's own pace (learned from their trips,
 // and of the last minutes) and by the jams reported on the way. The tests
 // compare it with the Dart one.
+import { JAM_LEVELS } from './alerts.js';
 import { bearingAt, maneuverStartM, projectOnRoute, shapeLengthM } from './routing.js';
 
 export const BANDS = ['town', 'road', 'fast'];
@@ -77,9 +78,10 @@ function plannedKphAt(route, alongM) {
 }
 
 /**
- * Jams reported on the route ({alert, alongM, delayS}): about [jamM] crawled
- * at [jamKph] instead of the planned speed; reports heading the other way
- * are for the other side of the road.
+ * Jams reported on the route ({alert, alongM, delayS}): as long and as slow
+ * as the report says (lengthM, level), else about [jamM] crawled at
+ * [jamKph], instead of the planned speed; reports heading the other way are
+ * for the other side of the road.
  */
 export function trafficDelays(route, alerts, { maxOffsetM = 120, jamM = 500, jamKph = 10 } = {}) {
   const out = [];
@@ -92,7 +94,10 @@ export function trafficDelays(route, alerts, { maxOffsetM = 120, jamM = 500, jam
       if (diff > 60) continue;
     }
     const planned = plannedKphAt(route, p.alongM);
-    const extra = jamM / (jamKph / 3.6) - jamM / (Math.max(planned, jamKph) / 3.6);
+    // As long and as slow as the report says, else the usual guess.
+    const length = a.lengthM ?? jamM;
+    const crawl = (a.level && JAM_LEVELS[a.level]?.kph) ?? jamKph;
+    const extra = Math.max(0, length / (crawl / 3.6) - length / (Math.max(planned, crawl) / 3.6));
     out.push({ alert: a, alongM: p.alongM, delayS: Math.round(extra) });
   }
   return out.sort((x, y) => x.alongM - y.alongM);

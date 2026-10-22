@@ -3,8 +3,10 @@
 import * as maplibregl from 'maplibre-gl';
 
 import { AlertStore, ago, alertFilter } from '../alerts.js';
+import { distanceText } from '../routing.js';
 import { cellsCovering } from '../geohash.js';
 import { ICONS } from '../icons.js';
+import { addJamLayer, drawJams } from '../jams.js';
 import { RelayPool } from '../relays.js';
 import { config, mapStyle, watchColorScheme } from '../site.js';
 import { verifyEvent } from '../verify.js';
@@ -23,7 +25,14 @@ const map = new maplibregl.Map({
   hash: false,
 });
 map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
-watchColorScheme((style) => map.setStyle(style));
+watchColorScheme((style) => {
+  map.setStyle(style);
+  map.once('styledata', () => {
+    addJamLayer(map);
+    draw();
+  });
+});
+map.on('load', () => addJamLayer(map));
 
 const store = new AlertStore();
 const markers = new Map();
@@ -70,6 +79,7 @@ function draw() {
   const now = Date.now() / 1000;
   store.purge(now);
   const visible = store.visible(now);
+  drawJams(map, visible);
   const ids = new Set(visible.map((a) => a.id));
   for (const [id, m] of markers) {
     if (!ids.has(id)) {
@@ -100,9 +110,12 @@ function details(a) {
   const title = document.createElement('strong');
   title.textContent = a.label;
   const when = document.createElement('span');
-  when.textContent =
-    c.count === 0
-      ? `Signalé ${ago(now - a.createdAt)}`
+  const length = a.lengthM ? `sur ${distanceText(a.lengthM)}` : null;
+  // Open data (Bison Futé): its source and how fresh; drivers' reports: who confirmed.
+  when.textContent = a.sourceLabel
+    ? [a.sourceLabel, length, ago(now - a.createdAt)].filter(Boolean).join(' · ')
+    : c.count === 0
+      ? [length, `Signalé ${ago(now - a.createdAt)}`].filter(Boolean).join(' · ')
       : `Confirmé par ${c.count === 1 ? '1 conducteur' : `${c.count} conducteurs`} · ${ago(now - c.latest)}`;
   const score = document.createElement('meter');
   score.min = 0;
