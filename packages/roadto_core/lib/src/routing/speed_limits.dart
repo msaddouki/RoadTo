@@ -1,5 +1,4 @@
 import '../geo.dart';
-import 'route.dart';
 
 /// Posted speed limit over a stretch of the route, in metres from its start.
 class SpeedLimitSpan {
@@ -16,7 +15,7 @@ class SpeedLimitSpan {
 }
 
 /// Posted speed limits along a route, from OSM `maxspeed` through Valhalla
-/// (`trace_attributes` on the route's own shape).
+/// (`trace_attributes` on the route's own shape, [roadAttributesRequest]).
 class SpeedLimits {
   /// Ordered, non-overlapping.
   final List<SpeedLimitSpan> spans;
@@ -52,20 +51,6 @@ class SpeedLimits {
     return (known / routeLengthM).clamp(0, 1);
   }
 }
-
-/// Valhalla `trace_attributes` request for the speed limits along [route].
-/// `edge_walk` follows the shape edge by edge, which is exact and fast for a
-/// shape that Valhalla produced itself.
-Map<String, dynamic> speedLimitsRequest(TripRoute route) => {
-  'encoded_polyline': encodePolyline(route.shape),
-  'costing': 'auto',
-  'shape_match': 'edge_walk',
-  'units': 'kilometers',
-  'filters': {
-    'attributes': ['edge.speed_limit', 'edge.begin_shape_index', 'edge.end_shape_index', 'shape'],
-    'action': 'include',
-  },
-};
 
 /// Reads a `trace_attributes` answer. Edge indexes point into the answer's
 /// own shape, which follows the route, so distances along it are distances

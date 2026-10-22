@@ -81,7 +81,7 @@ s'adresse à des services publics fondés sur OpenStreetMap :
 Sur le site, la page **Itinéraire** utilise les mêmes services, depuis
 votre navigateur : Photon reçoit le texte tapé dans les champs de départ et
 d'arrivée, Valhalla le départ et l'arrivée choisis, puis le tracé de
-l'itinéraire (pour les limitations de vitesse). « Ma position » n'est
+l'itinéraire (pour les limitations de vitesse, les feux et les voies). « Ma position » n'est
 demandée qu'à l'appui sur le bouton, ne sert qu'au calcul et ne figure pas
 dans le lien à copier. Pendant le **guidage** dans le navigateur, votre
 position reste dans la page ; seul un recalcul (sortie de l'itinéraire,

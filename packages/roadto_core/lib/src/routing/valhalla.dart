@@ -4,8 +4,8 @@ import 'dart:math' as math;
 import 'package:http/http.dart' as http;
 
 import '../geo.dart';
+import 'road_details.dart';
 import 'route.dart';
-import 'speed_limits.dart';
 
 /// Route computation. Implemented online ([ValhallaRouter]), on the device
 /// ([NativeValhallaRouter]), or both with a fallback ([FallbackRouter]).
@@ -25,9 +25,20 @@ abstract interface class AlternativeRoutes {
   });
 }
 
-/// Speed limits along a route computed by the same engine.
-abstract interface class SpeedLimitSource {
-  Future<SpeedLimits> speedLimits(TripRoute route);
+/// Speed limits, traffic lights, side streets and lanes along a route
+/// computed by the same engine.
+abstract interface class RoadDetailsSource {
+  Future<RoadDetails> roadDetails(TripRoute route);
+}
+
+/// The lanes of [answer], or none: they are a plus, the rest of the
+/// details stands without them.
+Future<List<LaneGuide>> _lanesOr(TripRoute route, Future<Map<String, dynamic>> Function() answer) async {
+  try {
+    return parseLanes(await answer(), route);
+  } on Object catch (_) {
+    return const [];
+  }
 }
 
 class RoutingException implements Exception {
@@ -80,8 +91,9 @@ List<List<double>> _square(LatLon c, double halfM) {
   ];
 }
 
-/// Client of a Valhalla server's /route and /trace_attributes APIs.
-class ValhallaRouter implements RouteEngine, AlternativeRoutes, SpeedLimitSource {
+/// Client of a Valhalla server's /route, /trace_attributes and /trace_route
+/// APIs.
+class ValhallaRouter implements RouteEngine, AlternativeRoutes, RoadDetailsSource {
   final Uri baseUrl;
   final http.Client _client;
   final String language;
@@ -113,8 +125,11 @@ class ValhallaRouter implements RouteEngine, AlternativeRoutes, SpeedLimitSource
   );
 
   @override
-  Future<SpeedLimits> speedLimits(TripRoute route) async =>
-      parseSpeedLimits(await _post('trace_attributes', speedLimitsRequest(route)));
+  Future<RoadDetails> roadDetails(TripRoute route) async {
+    final lanes = _lanesOr(route, () => _post('trace_route', lanesRequest(route, language: language)));
+    final details = parseRoadAttributes(await _post('trace_attributes', roadAttributesRequest(route)));
+    return details.withLanes(await lanes);
+  }
 
   Future<Map<String, dynamic>> _post(String action, Map<String, dynamic> request) async {
     final http.Response res;
@@ -140,15 +155,23 @@ class ValhallaRouter implements RouteEngine, AlternativeRoutes, SpeedLimitSource
 
 /// Valhalla running on the device (valhalla-mobile), on the graph of an
 /// installed region. [call] sends a /route request JSON to the platform and
-/// returns the response JSON, [traceAttributes] the same for
-/// /trace_attributes; the app provides them over a MethodChannel.
-class NativeValhallaRouter implements RouteEngine, AlternativeRoutes, SpeedLimitSource {
+/// returns the response JSON, [traceAttributes] and [traceRoute] the same
+/// for /trace_attributes and /trace_route; the app provides them over a
+/// MethodChannel.
+class NativeValhallaRouter implements RouteEngine, AlternativeRoutes, RoadDetailsSource {
   final String configPath;
   final Future<String> Function(String configPath, String requestJson) call;
   final Future<String> Function(String configPath, String requestJson)? traceAttributes;
+  final Future<String> Function(String configPath, String requestJson)? traceRoute;
   final String language;
 
-  NativeValhallaRouter({required this.configPath, required this.call, this.traceAttributes, this.language = 'fr-FR'});
+  NativeValhallaRouter({
+    required this.configPath,
+    required this.call,
+    this.traceAttributes,
+    this.traceRoute,
+    this.language = 'fr-FR',
+  });
 
   @override
   Future<TripRoute> route(LatLon from, LatLon to, {double? headingDeg, List<LatLon> avoid = const []}) async {
@@ -173,10 +196,15 @@ class NativeValhallaRouter implements RouteEngine, AlternativeRoutes, SpeedLimit
   }
 
   @override
-  Future<SpeedLimits> speedLimits(TripRoute route) async {
+  Future<RoadDetails> roadDetails(TripRoute route) async {
     final trace = traceAttributes;
-    if (trace == null) throw RoutingException('Limitations de vitesse indisponibles hors ligne');
-    return parseSpeedLimits(await _run(trace, jsonEncode(speedLimitsRequest(route))));
+    if (trace == null) throw RoutingException('Détails de la route indisponibles hors ligne');
+    final traceRoute = this.traceRoute;
+    final lanes = traceRoute == null
+        ? Future.value(const <LaneGuide>[])
+        : _lanesOr(route, () => _run(traceRoute, jsonEncode(lanesRequest(route, language: language))));
+    final details = parseRoadAttributes(await _run(trace, jsonEncode(roadAttributesRequest(route))));
+    return details.withLanes(await lanes);
   }
 
   Future<Map<String, dynamic>> _run(
@@ -199,7 +227,7 @@ class NativeValhallaRouter implements RouteEngine, AlternativeRoutes, SpeedLimit
 
 /// Tries [primary] (on the device) and falls back to [fallback] (online) when
 /// it fails, e.g. for a destination outside the installed region.
-class FallbackRouter implements RouteEngine, AlternativeRoutes, SpeedLimitSource {
+class FallbackRouter implements RouteEngine, AlternativeRoutes, RoadDetailsSource {
   final RouteEngine primary;
   final RouteEngine fallback;
 
@@ -245,16 +273,16 @@ class FallbackRouter implements RouteEngine, AlternativeRoutes, SpeedLimitSource
 
   /// From the primary when it can, else from the fallback.
   @override
-  Future<SpeedLimits> speedLimits(TripRoute route) async {
-    if (primary case final SpeedLimitSource first) {
+  Future<RoadDetails> roadDetails(TripRoute route) async {
+    if (primary case final RoadDetailsSource first) {
       try {
-        return await first.speedLimits(route);
+        return await first.roadDetails(route);
       } on RoutingException catch (e) {
         onFallback?.call(e);
       }
     }
-    if (fallback case final SpeedLimitSource second) return second.speedLimits(route);
-    throw RoutingException('Limitations de vitesse indisponibles');
+    if (fallback case final RoadDetailsSource second) return second.roadDetails(route);
+    throw RoutingException('Détails de la route indisponibles');
   }
 }
 

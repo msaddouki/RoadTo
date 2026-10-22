@@ -227,7 +227,8 @@ export async function fetchRoutes(baseUrl, from, to, { avoid = [], headingDeg = 
   return parseRoutes(await post(baseUrl, 'route', routeRequest(from, to, { avoid, headingDeg, alternates }), { signal, fetchImpl }));
 }
 
-async function post(baseUrl, action, body, { signal, fetchImpl }) {
+/** A request to the Valhalla server; its JSON answer. */
+export async function post(baseUrl, action, body, { signal, fetchImpl = globalThis.fetch } = {}) {
   let res;
   try {
     res = await fetchImpl(new URL(action, baseUrl), {
@@ -269,20 +270,10 @@ export function encodePolyline(points, precision = 6) {
 }
 
 /**
- * Posted speed limits along the route (speed_limits.dart in the core): a
- * trace_attributes request on the route's own shape, edge by edge.
+ * Posted speed limits along the route (speed_limits.dart in the core), from
+ * a trace_attributes answer on the route's own shape (road.js):
+ * [{startM, endM, kph, unlimited}], ordered; consecutive equal limits merged.
  */
-export function speedLimitsRequest(route) {
-  return {
-    encoded_polyline: encodePolyline(route.shape),
-    costing: 'auto',
-    shape_match: 'edge_walk',
-    units: 'kilometers',
-    filters: { attributes: ['edge.speed_limit', 'edge.begin_shape_index', 'edge.end_shape_index', 'shape'], action: 'include' },
-  };
-}
-
-/** [{startM, endM, kph, unlimited}], ordered; consecutive equal limits merged. */
 export function parseSpeedLimits(json) {
   if (typeof json.shape !== 'string' || !Array.isArray(json.edges)) return [];
   const shape = decodePolyline(json.shape);
@@ -319,6 +310,3 @@ export function limitAt(spans, alongM) {
 /** Over the limit with the usual margin: 5 km/h up to 100, 5 % above. */
 export const isOverLimit = (kph, limit) => kph > (limit <= 100 ? limit + 5 : limit * 1.05);
 
-export async function fetchSpeedLimits(baseUrl, route, { signal, fetchImpl = globalThis.fetch } = {}) {
-  return parseSpeedLimits(await post(baseUrl, 'trace_attributes', speedLimitsRequest(route), { signal, fetchImpl }));
-}

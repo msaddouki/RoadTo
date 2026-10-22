@@ -19,6 +19,9 @@ abstract final class NavColors {
   static const muted = Color(0xFFA9B3BD);
   static const figures = Color(0xFFD5DCE2);
   static const limitRed = Color(0xFFD93A3A);
+
+  /// "Au feu", "2e à gauche": amber, read at a glance on the blue banner.
+  static const cue = Color(0xFFFFD166);
 }
 
 /// Figures (distances, speeds, times) with digits of equal width, so they do
@@ -66,11 +69,58 @@ IconData maneuverIcon(Maneuver? m) => switch (m?.type) {
   _ => Icons.straight,
 };
 
+/// The arrow of a lane, from its OSRM indication ([Lane.arrow]).
+IconData laneIcon(String arrow) => switch (arrow) {
+  'left' => Icons.turn_left,
+  'slight left' => Icons.turn_slight_left,
+  'sharp left' => Icons.turn_sharp_left,
+  'right' => Icons.turn_right,
+  'slight right' => Icons.turn_slight_right,
+  'sharp right' => Icons.turn_sharp_right,
+  'uturn' => Icons.u_turn_left,
+  _ => Icons.straight,
+};
+
+/// The lanes before the next turn, left to right as painted on the road:
+/// those to take in white, the others dimmed.
+class LaneStrip extends StatelessWidget {
+  final LaneGuide guide;
+
+  const LaneStrip({super.key, required this.guide});
+
+  @override
+  Widget build(BuildContext context) {
+    final lanes = guide.lanes;
+    return Semantics(
+      label: guide.hint == null ? 'Voies' : 'Voies : ${guide.hint}',
+      container: true,
+      excludeSemantics: true,
+      child: Container(
+        color: NavColors.bannerThen,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            for (var i = 0; i < lanes.length; i++) ...[
+              if (i > 0) Container(width: 2, height: 26, color: Colors.white24),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 7),
+                child: Icon(laneIcon(lanes[i].arrow), size: 30, color: lanes[i].valid ? Colors.white : Colors.white30),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 String _maneuverLabel(Maneuver m) =>
     m.isArrival ? 'Arrivée' : (m.streetNames.isNotEmpty ? m.streetNames.first : m.instruction);
 
 /// Next maneuver, as Waze shows it: the arrow with its distance under it,
-/// the street in big letters, and the turn after it in the same card when
+/// the street in big letters with the landmark above it ("Au feu", "2e à
+/// gauche"), the lanes to take, and the turn after it in the same card when
 /// it comes soon after ("Puis ↰ Rue Pasteur").
 class ManeuverBanner extends StatelessWidget {
   final GuidanceState state;
@@ -90,6 +140,8 @@ class ManeuverBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final m = state.nextManeuver;
     final then = this.then;
+    final cue = state.offRoute ? null : state.cue;
+    final lanes = state.offRoute ? null : state.lanes;
     return Material(
       color: NavColors.banner,
       borderRadius: BorderRadius.circular(24),
@@ -120,21 +172,45 @@ class ManeuverBanner extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
-                    state.offRoute ? 'Hors itinéraire' : (m == null ? 'Continuez' : _maneuverLabel(m)),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 25,
-                      height: 1.15,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (cue != null)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 2),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (cue.atLight) ...[
+                                const Icon(Icons.traffic, size: 20, color: NavColors.cue),
+                                const SizedBox(width: 4),
+                              ],
+                              Text(
+                                cue.label,
+                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: NavColors.cue),
+                              ),
+                            ],
+                          ),
+                        ),
+                      Text(
+                        state.offRoute ? 'Hors itinéraire' : (m == null ? 'Continuez' : _maneuverLabel(m)),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 25,
+                          height: 1.15,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
+          if (lanes != null) LaneStrip(guide: lanes),
           if (then != null && !state.offRoute)
             Container(
               color: NavColors.bannerThen,

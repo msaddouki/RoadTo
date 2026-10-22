@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import '../alerts.dart';
 import '../geo.dart';
+import 'road_details.dart';
 import 'route.dart';
 
 /// État du guidage après une nouvelle position.
@@ -20,6 +21,13 @@ class GuidanceState {
   /// Phrase à prononcer maintenant, s'il y en a une.
   final String? announcement;
 
+  /// The next turn told with the road's landmarks ("Au feu", "2e à gauche").
+  final TurnCue? cue;
+
+  /// The lanes to take for the next maneuver, when it is near and only some
+  /// of them lead there.
+  final LaneGuide? lanes;
+
   const GuidanceState({
     required this.projection,
     required this.nextManeuver,
@@ -30,6 +38,8 @@ class GuidanceState {
     required this.offRoute,
     required this.arrived,
     this.announcement,
+    this.cue,
+    this.lanes,
   });
 
   DateTime eta(DateTime now) => now.add(remaining);
@@ -49,6 +59,10 @@ class GuidanceEngine {
   /// Positions hors route consécutives avant de déclarer la sortie de route.
   final int offRouteConfirmations;
   final double arrivalThresholdM;
+
+  /// Lights, side streets and lanes of [route], once the routing engine has
+  /// sent them (a moment after the route).
+  RoadDetails details = RoadDetails.none;
 
   int _segmentHint = 0;
   double? _lastAlongM;
@@ -106,6 +120,8 @@ class GuidanceEngine {
     }
     final next = nextIdx == null ? null : route.maneuvers[nextIdx];
     final distanceToNext = nextIdx == null ? remainingM : route.maneuverStartM(nextIdx) - along;
+    final cue = nextIdx == null || off ? null : turnCue(route, details, nextIdx, along);
+    final lanes = nextIdx == null || off || distanceToNext > lanesWithinM ? null : lanesFor(route, details, nextIdx);
 
     // Temps restant : au prorata de la distance, avec la vitesse prévue par
     // le moteur de routage.
@@ -130,13 +146,20 @@ class GuidanceEngine {
       if (distanceToNext <= nearM) {
         // The arrival is said once, when the car is there (above), not also
         // as the close announcement of the arrival maneuver.
-        if (!next.isArrival && _announced.add('$nextIdx:pre')) say = next.verbalPre ?? next.instruction;
+        if (!next.isArrival && _announced.add('$nextIdx:pre')) {
+          final text = next.verbalPre ?? next.instruction;
+          say = _withLanes(cue?.spoken(text) ?? text, nextIdx, lanes);
+        }
       } else if (distanceToNext <= 600 && distanceToNext > nearM + 150) {
         if (_announced.add('$nextIdx:alert')) {
           // Valhalla often has no alert text for the arrival, and its
           // instruction ("Vous êtes arrivé") would read wrong after "Dans 500 m".
           final text = next.verbalAlert ?? (next.isArrival ? 'vous arrivez à destination' : next.instruction);
-          say = 'Dans ${_roundDistance(distanceToNext)}, ${_lowerFirst(text)}';
+          say = _withLanes(
+            'Dans ${_roundDistance(distanceToNext)}, ${_lowerFirst(cue?.spoken(text) ?? text)}',
+            nextIdx,
+            lanes,
+          );
         }
       }
     }
@@ -151,7 +174,21 @@ class GuidanceEngine {
       offRoute: _offRouteCount >= offRouteConfirmations,
       arrived: arrived,
       announcement: say,
+      cue: cue,
+      lanes: lanes,
     );
+  }
+
+  /// Lanes are shown from this far before the turn.
+  static const lanesWithinM = 1500.0;
+
+  /// [text] and, the first time this maneuver is announced with them known,
+  /// the lanes to take.
+  String _withLanes(String text, int index, LaneGuide? lanes) {
+    final hint = lanes?.hint;
+    if (hint == null || !_announced.add('$index:lanes')) return text;
+    final t = text.trimRight();
+    return '${t.endsWith('.') ? t : '$t.'} Utilisez $hint.';
   }
 
   /// Indice du segment de l'itinéraire où se trouve [alongM].
@@ -165,6 +202,16 @@ class GuidanceEngine {
     }
     return lo;
   }
+}
+
+/// The trip camera's zoom: close in town, further out the faster the car,
+/// closer again just before a turn, as Waze does. To a tenth, so that it
+/// does not pump with each fix.
+double navigationZoom(double speedMps, {double? distanceToTurnM}) {
+  final kph = speedMps * 3.6;
+  var zoom = 18 - (kph - 30).clamp(0, 80) / 80 * 1.8;
+  if (distanceToTurnM != null && distanceToTurnM < 200 && kph < 60) zoom = math.max(zoom, 18.3);
+  return (zoom * 10).round() / 10;
 }
 
 String _lowerFirst(String s) => s.isEmpty ? s : s[0].toLowerCase() + s.substring(1);

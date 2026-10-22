@@ -41,6 +41,21 @@
   public, so no model mapping is needed. A route without limits (old
   graph, server error) simply shows no sign.
 
+- **Traffic lights, side streets and lanes** (`RoadDetails`) come with the
+  limits. The same `trace_attributes` call also asks for
+  `edge.traffic_signal` (a light at the edge's end) and each node's
+  intersecting edges (heading, driveability, use): the lights of one
+  junction count as one, and the streets a car could take off the route
+  are counted on the side of a turn. Guidance then says "Au 2e feu,
+  tournez à gauche" or "Prenez la deuxième à droite", up to the third.
+  Lanes are not in Valhalla's own answers, only in its OSRM form: a
+  `trace_route` on the same shape with `format: osrm` gives each
+  junction's lanes and which lead the route's way, shown before a turn
+  and said once ("Utilisez les deux voies de gauche"). On Android both go
+  through valhalla-mobile's raw calls (`traceAttributesRaw`,
+  `traceRouteRaw`). The lanes are a plus: if that call fails, the rest
+  stands.
+
 - **Alternatives and time to arrival**: when jams are reported on a
   route, the engine's alternatives (`alternates`) are weighed with them,
   and the time shown is corrected by the driver's pace and the jams

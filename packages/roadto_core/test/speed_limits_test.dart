@@ -59,22 +59,25 @@ void main() {
   });
 
   test('the request walks the route shape edge by edge', () {
-    final req = speedLimitsRequest(_route);
+    final req = roadAttributesRequest(_route);
     expect(req['shape_match'], 'edge_walk');
     expect(decodePolyline(req['encoded_polyline'] as String).length, _shape.length);
-    expect((req['filters'] as Map)['attributes'], contains('edge.speed_limit'));
+    expect((req['filters'] as Map)['attributes'], containsAll(['edge.speed_limit', 'edge.traffic_signal']));
   });
 
-  test('online: POST /trace_attributes', () async {
-    late http.Request sent;
+  test('online: POST /trace_attributes, and /trace_route for the lanes', () async {
+    final paths = <String>[];
     final client = MockClient((req) async {
-      sent = req;
+      paths.add(req.url.path);
+      // The lanes are a plus: without them, the limits still come.
+      if (req.url.path == '/trace_route') return http.Response('{"error":"no"}', 400);
       return http.Response(jsonEncode(_answer()), 200);
     });
     final router = ValhallaRouter(baseUrl: 'https://valhalla.example/', client: client);
-    final limits = await router.speedLimits(_route);
-    expect(sent.url.path, '/trace_attributes');
-    expect(limits.at(0)!.kph, 50);
+    final details = await router.roadDetails(_route);
+    expect(paths, unorderedEquals(['/trace_attributes', '/trace_route']));
+    expect(details.speedLimits.at(0)!.kph, 50);
+    expect(details.lanes, isEmpty);
   });
 
   test('on the device, with the server as fallback', () async {
@@ -87,7 +90,7 @@ void main() {
         return jsonEncode(_answer());
       },
     );
-    expect((await native.speedLimits(_route)).at(300)!.kph, 30);
+    expect((await native.roadDetails(_route)).speedLimits.at(300)!.kph, 30);
 
     final failing = NativeValhallaRouter(
       configPath: '/x',
@@ -100,12 +103,12 @@ void main() {
     );
     final errors = <RoutingException>[];
     final both = FallbackRouter(failing, online, onFallback: errors.add);
-    expect((await both.speedLimits(_route)).at(0)!.kph, 50);
+    expect((await both.roadDetails(_route)).speedLimits.at(0)!.kph, 50);
     expect(errors, hasLength(1));
   });
 
   test('without a trace callback the device has no limits', () {
     final native = NativeValhallaRouter(configPath: '/x', call: (_, _) async => '{}');
-    expect(native.speedLimits(_route), throwsA(isA<RoutingException>()));
+    expect(native.roadDetails(_route), throwsA(isA<RoutingException>()));
   });
 }

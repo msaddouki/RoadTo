@@ -193,6 +193,31 @@ void main() {
     ],
   };
   final limits = parseSpeedLimits(trace);
+
+  // Lights, side streets and lanes on a real route (Part-Dieu to
+  // Bellecour), and a drive along it at 30 km/h with them: the words, the
+  // banner's cue and lanes, the camera's zoom.
+  Map<String, dynamic> webFixture(String name) =>
+      jsonDecode(File('../../web/test/fixtures/$name').readAsStringSync()) as Map<String, dynamic>;
+  final partDieu = parseValhallaRoute(webFixture('valhalla-partdieu.json'));
+  final details = parseRoadAttributes(
+    webFixture('valhalla-partdieu-attributes.json'),
+  ).withLanes(parseLanes(webFixture('valhalla-partdieu-lanes.json'), partDieu));
+  final roadEngine = GuidanceEngine(partDieu)..details = details;
+  final roadDrive = <Map<String, Object?>>[];
+  for (var d = 0.0; d < partDieu.shapeLengthM + 30; d += 12) {
+    final p = partDieu.pointAt(d);
+    final g = roadEngine.update(p, speedMps: 30 / 3.6);
+    roadDrive.add({
+      'lat': p.lat,
+      'lon': p.lon,
+      'say': g.announcement,
+      'cue': g.cue?.label,
+      'lanesM': g.lanes?.alongM,
+      'zoom': navigationZoom(30 / 3.6, distanceToTurnM: g.distanceToNextM),
+    });
+    if (g.arrived) break;
+  }
   // On the route, beside it, and far from it.
   final probes = [
     route.pointAt(1000),
@@ -267,6 +292,42 @@ void main() {
         ],
         'formatDistance': {
           for (final m in [42.4, 856.0, 4231.0, 37400.0]) '$m': formatDistance(m),
+        },
+      },
+      'road': {
+        'limits': [
+          for (final s in details.speedLimits.spans) {'startM': s.startM, 'endM': s.endM, 'kph': s.kph},
+        ],
+        'signalsM': details.signalsM,
+        'sideRoads': [
+          for (final j in details.sideRoads) {'alongM': j.alongM, 'left': j.left, 'right': j.right},
+        ],
+        'lanes': [
+          for (final l in details.lanes)
+            {
+              'alongM': l.alongM,
+              'arrows': [for (final x in l.lanes) x.arrow],
+              'valid': [for (final x in l.lanes) x.valid],
+              'preferred': [for (final x in l.lanes) x.preferred],
+              'hint': l.hint,
+            },
+        ],
+        // Each turn seen from just after the one before.
+        'cues': [
+          for (var i = 1; i < partDieu.maneuvers.length; i++)
+            if (turnCue(partDieu, details, i, partDieu.maneuverStartM(i - 1) + 10) case final c)
+              {
+                'from': partDieu.maneuverStartM(i - 1) + 10,
+                'label': c?.label,
+                'atLight': c?.atLight,
+                'spoken': c?.spoken(partDieu.maneuvers[i].verbalPre ?? partDieu.maneuvers[i].instruction),
+                'lanes': lanesFor(partDieu, details, i)?.hint,
+              },
+        ],
+        'drive': roadDrive,
+        'zoom': {
+          for (final kph in [0, 30, 50, 90, 130, 200]) '$kph': navigationZoom(kph / 3.6),
+          'turn': navigationZoom(40 / 3.6, distanceToTurnM: 150),
         },
       },
     }),

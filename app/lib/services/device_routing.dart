@@ -17,9 +17,14 @@ abstract final class DeviceRouting {
   /// returns Valhalla's JSON answer.
   static Future<String> route(String configPath, String requestJson) => _run('route', configPath, requestJson);
 
-  /// Same for /trace_attributes (speed limits along a route).
+  /// Same for /trace_attributes (speed limits and traffic lights along a
+  /// route).
   static Future<String> traceAttributes(String configPath, String requestJson) =>
       _run('traceAttributes', configPath, requestJson);
+
+  /// Same for /trace_route (the lanes, in OSRM form).
+  static Future<String> traceRoute(String configPath, String requestJson) =>
+      _run('traceRoute', configPath, requestJson);
 
   static Future<String> _run(String method, String configPath, String requestJson) async {
     final response = await _channel.invokeMethod<String>(method, {'config': configPath, 'request': requestJson});

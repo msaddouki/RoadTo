@@ -28,6 +28,12 @@ the browser's location (`watchPosition`) with:
   names in bubbles as in the app;
 - the voice (the browser's French speech), switchable, remembered;
 - speed and the posted limit (Valhalla `trace_attributes`), red when over;
+- the traffic lights on the map and in the words ("Au 2e feu, tournez à
+  gauche"), the streets counted ("Prenez la deuxième à droite") and the
+  lanes to take before a turn, as in the app (`src/road.js`: Valhalla
+  `trace_attributes`, and `trace_route` in OSRM form for the lanes);
+- a camera close in town and before a turn, further out when fast, with
+  the car low on the screen;
 - the next alert ahead from the relays; a road reported closed or an
   accident ahead reroutes, as does leaving the route (3 fixes off, at most
   every 15 s);

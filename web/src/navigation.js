@@ -6,10 +6,11 @@
 import * as maplibregl from 'maplibre-gl';
 
 import { EtaEstimator, LearnedPace, fastestWithJams, trafficDelays } from './eta.js';
-import { GuidanceEngine, MANEUVER_ICONS, maneuverKind, maneuverLabel, thenOf } from './guidance.js';
+import { GuidanceEngine, MANEUVER_ICONS, maneuverKind, maneuverLabel, navigationZoom, thenOf } from './guidance.js';
 import { ICONS } from './icons.js';
+import { NO_DETAILS, fetchRoadDetails, laneHint } from './road.js';
 import {
-  BLOCKING, alertsOnRoute, bearingAt, bearingDeg, distanceM, distanceText, durationText, fetchRoute, fetchRoutes, fetchSpeedLimits,
+  BLOCKING, alertsOnRoute, bearingAt, bearingDeg, distanceM, distanceText, durationText, fetchRoute, fetchRoutes,
   isOverLimit, limitAt, pointAt, projectOnRoute, shapeLengthM,
 } from './routing.js';
 
@@ -46,7 +47,8 @@ export class Navigation {
   #watch = null;
   #sim = null;
   #wakeLock = null;
-  #limits = [];
+  #details = NO_DETAILS;
+  #signalsKey = null;
   #lastReroute = 0;
   #rerouting = false;
   #avoid = [];
@@ -86,7 +88,8 @@ export class Navigation {
     this.map.on('dragstart', this.#onDrag);
     document.addEventListener('visibilitychange', this.#onVisibility);
     await this.#keepAwake();
-    this.#loadLimits(this.route);
+    this.#addSignalLayer();
+    this.#loadDetails(this.route);
     if (this.simulateKmh) this.#simulate();
     else this.#locate();
   }
@@ -102,6 +105,7 @@ export class Navigation {
     this.#wakeLock = null;
     this.#puck?.remove();
     for (const m of this.#pins.splice(0)) m.remove();
+    this.map.getSource(SIGNALS)?.setData(EMPTY);
     this.map.off('dragstart', this.#onDrag);
     document.removeEventListener('visibilitychange', this.#onVisibility);
     this.#navLabels(false);
@@ -182,6 +186,7 @@ export class Navigation {
     this.#eta.observe(Date.now(), g);
     if (g.announcement) this.voice.say(g.announcement);
     this.#drawRouteProgress(g);
+    this.#drawSignals(g);
     this.#puck.setLngLat([fix.lon, fix.lat]).setRotation(fix.headingDeg ?? 0).addTo(this.map);
     this.#camera(false);
     this.ui.update(g, fix, this.#limitHere(g), this.#ahead(g), this.#remainingS(g));
@@ -232,24 +237,74 @@ export class Navigation {
     this.#jams = trafficDelays(route, this.store.visible());
     this.#engine = new GuidanceEngine(route);
     this.#state = null;
-    this.#limits = [];
-    this.#loadLimits(route);
+    this.#details = NO_DETAILS;
+    this.#loadDetails(route);
     this.onRoute?.(route);
     if (this.#fix) this.#onFix(this.#fix);
   }
 
-  async #loadLimits(route) {
+  /** Limits, lights, side streets and lanes: a moment after the route. */
+  async #loadDetails(route) {
     try {
-      const limits = await fetchSpeedLimits(this.settings.routingUrl, route);
-      if (this.route === route) this.#limits = limits;
+      const details = await fetchRoadDetails(this.settings.routingUrl, route);
+      if (this.route !== route || this.#ended) return;
+      this.#details = details;
+      this.#engine.details = details;
     } catch {
-      // No limits for this route: no sign.
+      // Nothing more for this route: no sign, no lights.
     }
   }
 
   #limitHere(g) {
     if (g.offRoute) return null;
-    return limitAt(this.#limits, g.projection.alongM);
+    return limitAt(this.#details.limits, g.projection.alongM);
+  }
+
+  /** The traffic lights of the route still ahead, standing on it. */
+  #drawSignals(g) {
+    const along = g.offRoute ? 0 : g.projection.alongM;
+    const { signalsM } = this.#details;
+    const key = `${signalsM.length}:${signalsM.filter((s) => s < along - 20).length}`;
+    const source = this.map.getSource(SIGNALS);
+    if (!source || (key === this.#signalsKey && this.#signalsRoute === this.route)) return;
+    this.#signalsKey = key;
+    this.#signalsRoute = this.route;
+    source.setData({
+      type: 'FeatureCollection',
+      features: signalsM
+        .filter((s) => s >= along - 20)
+        .map((s) => {
+          const p = pointAt(this.route, s);
+          return { type: 'Feature', properties: {}, geometry: { type: 'Point', coordinates: [p.lon, p.lat] } };
+        }),
+    });
+  }
+
+  #signalsRoute = null;
+
+  /** The layer and its image, once per style (again after a change of style). */
+  #addSignalLayer() {
+    const map = this.map;
+    try {
+      if (!map.hasImage(SIGNAL_IMAGE)) map.addImage(SIGNAL_IMAGE, trafficLightImage(), { pixelRatio: 2 });
+      if (map.getSource(SIGNALS)) return;
+      map.addSource(SIGNALS, { type: 'geojson', data: EMPTY });
+      map.addLayer({
+        id: SIGNALS,
+        type: 'symbol',
+        source: SIGNALS,
+        layout: {
+          'icon-image': SIGNAL_IMAGE,
+          'icon-anchor': 'bottom',
+          'icon-size': ['interpolate', ['linear'], ['zoom'], 14, 0.6, 16, 0.8, 18, 1],
+          'icon-allow-overlap': true,
+          'icon-ignore-placement': true,
+        },
+      });
+    } catch {
+      // A browser without canvas: no lights on the map, the voice still says them.
+    }
+    this.#signalsKey = null;
   }
 
   #drawRouteProgress(g) {
@@ -377,17 +432,17 @@ export class Navigation {
   #camera(now) {
     const fix = this.#fix;
     if (!fix || !this.#follow) return;
-    // Closer in town, further out on fast roads, as in the app.
-    const kph = fix.speedMps * 3.6;
-    const zoom = kph > 90 ? 15.6 : kph > 60 ? 16.3 : 17;
+    // Close in town and before a turn, further out on fast roads, as in the app.
+    const g = this.#state;
+    const zoom = navigationZoom(fix.speedMps, g && !g.offRoute ? g.distanceToNextM : null);
     const narrow = matchMedia('(max-width: 720px)').matches;
     this.map.easeTo({
       center: [fix.lon, fix.lat],
       bearing: fix.headingDeg ?? this.map.getBearing(),
       pitch: 50,
       zoom,
-      // The car low on the screen, the road ahead above it.
-      padding: { top: narrow ? 200 : 240, bottom: narrow ? 140 : 120, left: 0, right: 0 },
+      // The car low on the screen, the road ahead above it, as in Waze.
+      padding: { top: Math.max(narrow ? 200 : 240, Math.round(innerHeight * 0.45)), bottom: narrow ? 140 : 120, left: 0, right: 0 },
       duration: now ? 600 : 950,
       easing: (t) => t,
     });
@@ -409,9 +464,12 @@ export class Navigation {
     }
   }
 
-  /** After a change of style (day or night), the labels again. */
+  /** After a change of style (day or night), the labels and the lights again. */
   restyled() {
     this.#navLabels(!this.#ended);
+    if (this.#ended) return;
+    this.#addSignalLayer();
+    if (this.#state) this.#drawSignals(this.#state);
   }
 
   // ---- Screen.
@@ -430,6 +488,42 @@ export class Navigation {
     if (document.visibilityState === 'visible' && !this.#ended) this.#keepAwake();
   };
 }
+
+const SIGNALS = 'signals';
+const SIGNAL_IMAGE = 'roadto-signal';
+const EMPTY = { type: 'FeatureCollection', features: [] };
+
+/** A traffic light, 12 × 26 drawn at twice the size: dark body, white edge, red, amber and green. */
+function trafficLightImage() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 24;
+  canvas.height = 52;
+  const c = canvas.getContext('2d');
+  c.scale(2, 2);
+  c.beginPath();
+  c.roundRect(1, 1, 10, 24, 3.5);
+  c.fillStyle = '#1B1F24';
+  c.fill();
+  c.lineWidth = 1.4;
+  c.strokeStyle = '#fff';
+  c.stroke();
+  ['#FF4D4D', '#FFB300', '#3DDC84'].forEach((color, i) => {
+    c.beginPath();
+    c.arc(6, 6.5 + i * 6.5, 2.4, 0, 2 * Math.PI);
+    c.fillStyle = color;
+    c.fill();
+  });
+  return c.getImageData(0, 0, 24, 52);
+}
+
+/** The same, small, beside "Au feu" in the banner. */
+const TRAFFIC_LIGHT = '<svg viewBox="0 0 12 26" aria-hidden="true"><rect x="1" y="1" width="10" height="24" rx="3.5" fill="#1B1F24" stroke="#fff" stroke-width="1.4"/><circle cx="6" cy="6.5" r="2.4" fill="#FF4D4D"/><circle cx="6" cy="13" r="2.4" fill="#FFB300"/><circle cx="6" cy="19.5" r="2.4" fill="#3DDC84"/></svg>';
+
+/** The banner's arrow for a lane's (OSRM) indication. */
+const LANE_KINDS = {
+  left: 'left', 'slight left': 'slight-left', 'sharp left': 'sharp-left',
+  right: 'right', 'slight right': 'slight-right', 'sharp right': 'sharp-right', uturn: 'uturn-left',
+};
 
 /** Where an alert meets the route: the place to go around. */
 const projectPoint = (route, p) => projectOnRoute(route, p).point;
@@ -485,7 +579,7 @@ class NavigationUi {
     this.nav = nav;
     const $ = (id) => document.getElementById(id);
     this.el = {
-      root: $('nav'), arrow: $('nav-arrow'), dist: $('nav-dist'), street: $('nav-street'),
+      root: $('nav'), arrow: $('nav-arrow'), dist: $('nav-dist'), street: $('nav-street'), cue: $('nav-cue'), lanes: $('nav-lanes'),
       then: $('nav-then'), thenArrow: $('nav-then-arrow'), thenStreet: $('nav-then-street'),
       alert: $('nav-alert'), limit: $('nav-limit'), speed: $('nav-speed'), now: $('nav-now'),
       eta: $('nav-eta'), left: $('nav-left'), message: $('nav-message'),
@@ -541,6 +635,10 @@ class NavigationUi {
     this.el.street.textContent = g.offRoute
       ? 'Hors itinéraire'
       : g.arrived ? (this.nav.destination.name ?? 'Arrivée') : m ? maneuverLabel(m) : 'Continuez';
+    const cue = g.offRoute || g.arrived ? null : g.cue;
+    this.el.cue.hidden = !cue;
+    if (cue) this.el.cue.innerHTML = `${cue.atLight ? TRAFFIC_LIGHT : ''}<span>${cue.label}</span>`;
+    this.#lanes(g.offRoute || g.arrived ? null : g.lanes);
     const then = g.offRoute ? null : thenOf(route, g);
     this.el.then.hidden = !then;
     if (then) {
@@ -581,6 +679,19 @@ class NavigationUi {
     const arrival = new Date(Date.now() + remainingS * 1000).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
     this.el.eta.textContent = arrival;
     this.el.left.textContent = g.arrived ? 'Arrivé' : `${durationText(remainingS)} · ${distanceText(g.remainingM)}`;
+  }
+
+  /** The lanes before the turn, left to right: those to take in white. */
+  #lanes(guide) {
+    const el = this.el.lanes;
+    el.hidden = !guide;
+    if (!guide || el._guide === guide) return;
+    el._guide = guide;
+    el.innerHTML = guide.lanes
+      .map((l, i) => `${i ? '<i></i>' : ''}<span class="${l.valid ? 'valid' : ''}">${MANEUVER_ICONS[LANE_KINDS[l.arrow] ?? 'straight']}</span>`)
+      .join('');
+    const hint = laneHint(guide);
+    el.setAttribute('aria-label', hint ? `Voies : ${hint}` : 'Voies');
   }
 
   arrived(destination) {

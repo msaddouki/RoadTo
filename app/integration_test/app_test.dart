@@ -7,6 +7,8 @@
 // server needed: the embedded region installs, search and routing run on
 // the device, and a simulated trip follows the route.
 
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -104,6 +106,22 @@ void main() {
     expect(several.first.lengthM, closeTo(city.lengthM, city.lengthM * 0.05));
     debugPrint('On-device alternatives: ${several.length} routes');
     step('route_device_alternatives');
+
+    // Lights, side streets and lanes on the device: trace_attributes, and
+    // trace_route in OSRM form (the lanes), on the region's graph.
+    final osrm = jsonDecode(await DeviceRouting.traceRoute(region.routingConfigPath, jsonEncode(lanesRequest(city))));
+    expect((osrm as Map)['matchings'], isNotEmpty);
+    final details = await NativeValhallaRouter(
+      configPath: region.routingConfigPath,
+      call: DeviceRouting.route,
+      traceAttributes: DeviceRouting.traceAttributes,
+      traceRoute: DeviceRouting.traceRoute,
+    ).roadDetails(city);
+    debugPrint(
+      'On-device details: ${details.signalsM.length} lights, ${details.sideRoads.length} junctions, '
+      '${details.lanes.length} lane groups',
+    );
+    step('route_device_details');
 
     // A trip in the app: the controller routes on the device too, then the
     // simulator drives along the route.

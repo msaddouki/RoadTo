@@ -38,6 +38,7 @@ class _MapScreenState extends State<MapScreen> {
   Timer? _confirmTimeout;
   String? _lastRouteKey;
   String? _lastJamsKey;
+  String? _lastSignalsKey;
 
   /// The route preview the camera last framed.
   TripPreview? _framedPreview;
@@ -45,6 +46,11 @@ class _MapScreenState extends State<MapScreen> {
   /// Label layers of the current style, and whether they are set for a trip.
   List<String> _layerIds = const [];
   bool? _navLabels;
+
+  /// Whether the map's viewport is set for a trip (the car low on screen),
+  /// and the screen's height it is set from.
+  bool? _navInsets;
+  double _screenHeight = 0;
 
   AppController get app => widget.app;
 
@@ -99,17 +105,21 @@ class _MapScreenState extends State<MapScreen> {
     _styleReady = true;
     _lastRouteKey = null;
     _lastJamsKey = null;
+    _lastSignalsKey = null;
     _navLabels = null;
+    _navInsets = null;
     await _syncMap();
   }
 
   Future<void> _addLayers(MapLibreMapController map) async {
+    final pixelRatio = MediaQuery.devicePixelRatioOf(context);
     _layerIds = [for (final id in await map.getLayerIds()) '$id'];
     // Under the labels of RoadTo's style; on top of the others.
     final belowLabels = _layerIds.contains(labelsMarkerLayer) ? labelsMarkerLayer : null;
     await map.addGeoJsonSource('route', routeGeoJson(null));
     await map.addGeoJsonSource('alerts', alertsGeoJson(const []));
     await map.addGeoJsonSource('jams', jamsGeoJson(const []));
+    await map.addGeoJsonSource('signals', signalsGeoJson(null, RoadDetails.none));
     await map.addGeoJsonSource('destination', pointGeoJson(null));
     await map.addGeoJsonSource('position', pointGeoJson(null));
     await map.addLineLayer(
@@ -180,6 +190,29 @@ class _MapScreenState extends State<MapScreen> {
       ),
       belowLayerId: belowLabels,
     );
+    // Traffic lights ahead on the route, standing on it.
+    await map.addImage(signalImage, await trafficLightPng(pixelRatio));
+    await map.addSymbolLayer(
+      'signals',
+      'signals',
+      const SymbolLayerProperties(
+        iconImage: signalImage,
+        iconAnchor: 'bottom',
+        iconSize: [
+          'interpolate',
+          ['linear'],
+          ['zoom'],
+          14,
+          0.6,
+          16,
+          0.8,
+          18,
+          1.0,
+        ],
+        iconAllowOverlap: true,
+        iconIgnorePlacement: true,
+      ),
+    );
     await map.addCircleLayer(
       'destination',
       'destination',
@@ -238,6 +271,12 @@ class _MapScreenState extends State<MapScreen> {
         await map.setLayerVisibility(e.key, e.value);
       }
     }
+    if (app.navigating != _navInsets) {
+      _navInsets = app.navigating;
+      // During a trip the car sits low on the screen with the road ahead
+      // above it, under the banner, as in Waze.
+      await map.updateContentInsets(EdgeInsets.only(top: app.navigating ? _screenHeight * 0.4 : 0), true);
+    }
     final g = app.guidance;
     final preview = app.navigating ? null : app.preview;
     final shown = app.route ?? preview?.route;
@@ -255,6 +294,15 @@ class _MapScreenState extends State<MapScreen> {
     if (jamsKey != _lastJamsKey) {
       _lastJamsKey = jamsKey;
       await map.setGeoJsonSource('jams', jamsGeoJson(alerts));
+    }
+    final along = g?.projection.alongM ?? 0;
+    final details = app.roadDetails;
+    final signalsKey =
+        '${identityHashCode(app.route)}:${identityHashCode(details)}:'
+        '${details.signalsM.where((s) => s < along - 20).length}';
+    if (signalsKey != _lastSignalsKey) {
+      _lastSignalsKey = signalsKey;
+      await map.setGeoJsonSource('signals', signalsGeoJson(app.route, details, alongM: along));
     }
     await map.setGeoJsonSource('destination', pointGeoJson((app.destination ?? preview?.place)?.position));
     final pos = g?.offRoute ?? true ? app.position : g!.projection.point;
@@ -274,9 +322,10 @@ class _MapScreenState extends State<MapScreen> {
         CameraUpdate.newCameraPosition(
           CameraPosition(
             target: LatLng(pos.lat, pos.lon),
-            zoom: nav ? 16.5 : 14,
+            // Close in town and before a turn, further out when fast.
+            zoom: nav ? navigationZoom(app.fix?.speedMps ?? 0, distanceToTurnM: g?.distanceToNextM) : 14,
             bearing: nav ? (app.fix?.bearingDeg ?? (g == null ? 0 : app.route!.bearingAt(g.projection.alongM))) : 0,
-            tilt: nav ? 45 : 0,
+            tilt: nav ? 50 : 0,
           ),
         ),
         duration: const Duration(milliseconds: 900),
@@ -442,6 +491,7 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _screenHeight = MediaQuery.sizeOf(context).height;
     final g = app.guidance;
     final mapKey = _currentMapKey;
     final navigating = app.navigating && g != null;

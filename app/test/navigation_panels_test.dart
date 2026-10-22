@@ -37,6 +37,29 @@ void main() {
       expect(find.text(formatDistance(g.distanceToNextM)), findsOneWidget);
     });
 
+    testWidgets('the light at the turn and the lanes to take', (tester) async {
+      final turnM = route.maneuverStartM(1);
+      final engine = GuidanceEngine(route)
+        ..details = RoadDetails(
+          signalsM: [turnM - 10],
+          lanes: [
+            LaneGuide(turnM, const [
+              Lane(['left'], valid: false, arrow: 'left'),
+              Lane(['straight'], valid: false, arrow: 'straight'),
+              Lane(['right'], valid: true, preferred: true, arrow: 'right'),
+            ]),
+          ],
+        );
+      final g = engine.update(route.pointAt(30), speedMps: 13);
+      await _pump(tester, ManeuverBanner(state: g));
+      expect(find.text('Au feu'), findsOneWidget);
+      expect(find.byIcon(Icons.traffic), findsOneWidget);
+      expect(find.bySemanticsLabel('Voies : la voie de droite'), findsOneWidget);
+      // The banner's arrow and the lane's.
+      expect(find.byIcon(Icons.turn_right), findsNWidgets(2));
+      expect(find.byIcon(Icons.turn_left), findsOneWidget);
+    });
+
     test('no "then" when the next turn is far after this one', () {
       expect(ManeuverBanner.thenOf(route, at(30), withinM: 100), isNull);
     });

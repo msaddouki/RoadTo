@@ -41,7 +41,7 @@
     ]
    ],
    "content": "",
-   "sig": "0c0b997b17b507f58c703829e027f70e806f704d92dfdb23fae772acbbbb8206bf8dc80aa3a465b8dd46f9ccad1fbb78c42a5724e5c17d85a9e7ac9cbfcc288f"
+   "sig": "bed6310c8872ab9ec16e3609d10291921064ddf120aba1e008f8a47fc8e1ce59dec1e916706264778a1e1d2223774a7e468bc62c342cb54cc8050ac47db53891"
   },
   {
    "id": "00003ef1ef0fca7ce78a39b9fdcbc0dbeb940f0baa78650b34ce609caee57a44",
@@ -68,7 +68,7 @@
     ]
    ],
    "content": "",
-   "sig": "95099ddf6749a202a3cb855f5023101a1597f4fc40786c3e83334ba0dac33d1cb1ade0bd3f32a6a8d876eb9099c957845e6be5020f8087f0f7d1ca24e2de8e10"
+   "sig": "45a56bdb2615a030f0897a82b5d91da0985932c2abeaa24500eca1aca2144907d3b5aca06dc33732090a6d1b7c7beb70e733b4f1ed698993393889c6bde7a96c"
   },
   {
    "id": "00d17916cabae4605fefa19defc03e5251e5b6167771a102290aed21909b1caf",
@@ -91,7 +91,7 @@
     ]
    ],
    "content": "",
-   "sig": "cfdaf570b357b986cfa4e678cb30e0ca41bb43a8a6fae1c7bfb8dbb5fb4f0cb7bd3b7f6cf46d7f3ffe62ddc017a94c7015c1d4c205cfced45bdc7b5b06662ed4"
+   "sig": "7ca8b1e658cfa645b57bb55cb560ef74996daf8d1c30d387e983ade7f90bbf6087aaf695cd5b4dac11b7ac15d9c29bca99373c875866e9dfca550485a1f74483"
   },
   {
    "id": "00cce0a181d3a262820997e976747e53678d0b5c51c66cd078ca2bc8a74dbf5e",
@@ -114,7 +114,7 @@
     ]
    ],
    "content": "",
-   "sig": "42b6ab80c86e934ed1161b0edb165be1aef4da5ee3c8773bfaa960971cd27ede960903c102b5cd5b7b1784a5e23f58de40633cc5633034ace98707da79cc7613"
+   "sig": "593bd3629c009561d4f06079631916be3ee5c195cf096efd76febed62750e5d3be60fb17098bb6b84b02cd3506b93fd4518a9309ae2d089fb41f97b1492f62b9"
   },
   {
    "id": "0071d2ed8da4f9df803e6880b3068593ac18c8515cc9a1971a5a7ebee691db6c",
@@ -137,7 +137,7 @@
     ]
    ],
    "content": "",
-   "sig": "5131333bf71e0f6a432b29fc9b8c7aad1063a00c652b04f0f2a227ed9bd35b7430f1dd468d4ca7d484efd23d12b38686f6adfda7fdb4b26099f42f00352f4a93"
+   "sig": "bb1151caa237677d243be4517ef33b777e97055ea2b4920eff0cc1a0ef5e68f7bede888fad80be21b61062d4a5ca56141404f3d7402a4c06e365e85899d6b1a9"
   },
   {
    "id": "00d063b4f3a31d8260a13ac753662df450426473605afcdc75bb36b41ca0e7dd",
@@ -160,7 +160,7 @@
     ]
    ],
    "content": "",
-   "sig": "3f2c6f6c4f17cedc13d168ad27e8f869e7dcdc82994ddf00e61f2634b76e9e7ce57839c06dc704c18d86746dc2943de1bb474cc2da936df42f073c981e3880a1"
+   "sig": "3080347152d52b2b97004455b5f1e0c68509424443207466a238f58f16193a6dadc794af88d3f73eebd9d41035defb6bda52df0d547ab3b1d69e90271d41f333"
   },
   {
    "id": "00ae1c4e9365a235f8c883c32ecf88f16cb3cab928cd7f02d421a47d85afcb08",
@@ -183,7 +183,7 @@
     ]
    ],
    "content": "",
-   "sig": "2dfdfa80cede6b37330efe31f703e9037cf9fe0db7dee4ecc0f8d1ce2ad03b0789ddfd0065f1ba2be9845918f11013a47e56dedcbe06854252d0a6a077e2e2c4"
+   "sig": "691a1b0e53f459a71c9bc485849c0769499217be368fcf82f971684cce007385a101a169b128dae4ea368944a80e05b2e410c6f292c452df9bde677b272704f5"
   }
  ],
  "reliability": {
@@ -3993,7 +3993,7 @@
       ]
      ],
      "content": "",
-     "sig": "e9e2a38c007580136553ef0d3ac8045a16dbf6834a2513aaf090c2beb5869cc0be554562fd9c5ba46ed73b083ec339fb3a8910fc7a350b7b4ccab3bcd3a0a043"
+     "sig": "27c7d843d7ff50d753867cb3ae7e9549778c22a58be3ac9d2f765c92a3213346d797412ae03489f2eb8beb072d553dd2ea88b3ccabdbb53ab01b334c6a6a754b"
     },
     {
      "id": "00069a61202d20cf640c8153cfb757d7d40e4c869308dee2a99a11c055a99299",
@@ -4052,7 +4052,7 @@
       ]
      ],
      "content": "",
-     "sig": "6ac07555718792fcd63d694a723b054cde348a94e780ba81423d8f8ac04626f08ddd84a685ef60d453ae21725f9407516c270f6e0f08c4cb3b850d2948e30c2d"
+     "sig": "1974bc013df3878f512e77baddb490fde799b84180e8e774b1fb054ee2eb1fd61827a888c345e0111e5080ac9dfdb1ca14ce35605e7c106d1c76ee815199d445"
     }
    ],
    "delayS": 772,
@@ -7298,6 +7298,3215 @@
    "856.0": "860 m",
    "4231.0": "4,2 km",
    "37400.0": "37 km"
+  }
+ },
+ "road": {
+  "limits": [
+   {
+    "startM": 0.0,
+    "endM": 651.5754495909077,
+    "kph": 50
+   },
+   {
+    "startM": 651.5754495909077,
+    "endM": 2952.746862308538,
+    "kph": 30
+   },
+   {
+    "startM": 2952.746862308538,
+    "endM": 3022.211022109706,
+    "kph": 50
+   },
+   {
+    "startM": 3022.211022109706,
+    "endM": 4428.461197287256,
+    "kph": 30
+   }
+  ],
+  "signalsM": [
+   330.8291229759957,
+   533.6981993210169,
+   643.3431556778395,
+   815.9277084273948,
+   925.4018184266498,
+   1803.8290923518823,
+   1932.922983417691,
+   2064.2030987622506,
+   2163.896975459797,
+   2244.049450478123,
+   2316.736107691714,
+   2408.7533586334393,
+   2475.9738266689174,
+   2534.579847533686,
+   2578.8692778994196,
+   2676.612595261946,
+   2921.080689166949,
+   3249.1563676514456,
+   3357.983780467681,
+   3447.2625649312326,
+   3541.3257890870777,
+   3595.1139983848147,
+   3724.8484099750426,
+   3838.91981792634,
+   4036.72875376726,
+   4115.9405982685375
+  ],
+  "sideRoads": [
+   {
+    "alongM": 348.3868410646451,
+    "left": false,
+    "right": true
+   },
+   {
+    "alongM": 461.1772148326225,
+    "left": true,
+    "right": false
+   },
+   {
+    "alongM": 541.8899020351569,
+    "left": false,
+    "right": true
+   },
+   {
+    "alongM": 603.1370948442509,
+    "left": false,
+    "right": true
+   },
+   {
+    "alongM": 734.7545815732303,
+    "left": true,
+    "right": false
+   },
+   {
+    "alongM": 932.9229021434257,
+    "left": true,
+    "right": true
+   },
+   {
+    "alongM": 1828.8090784121096,
+    "left": true,
+    "right": false
+   },
+   {
+    "alongM": 1941.250404923868,
+    "left": false,
+    "right": true
+   },
+   {
+    "alongM": 2075.789452057426,
+    "left": true,
+    "right": false
+   },
+   {
+    "alongM": 2171.7054576620003,
+    "left": false,
+    "right": true
+   },
+   {
+    "alongM": 2253.1693959778063,
+    "left": true,
+    "right": false
+   },
+   {
+    "alongM": 2327.927049652946,
+    "left": false,
+    "right": true
+   },
+   {
+    "alongM": 2416.7931282557847,
+    "left": true,
+    "right": false
+   },
+   {
+    "alongM": 2588.5559215564704,
+    "left": false,
+    "right": true
+   },
+   {
+    "alongM": 2687.3667283684017,
+    "left": true,
+    "right": false
+   },
+   {
+    "alongM": 2933.4161531257414,
+    "left": false,
+    "right": true
+   },
+   {
+    "alongM": 3266.162047957268,
+    "left": true,
+    "right": false
+   },
+   {
+    "alongM": 3494.1211829298913,
+    "left": false,
+    "right": true
+   },
+   {
+    "alongM": 3810.907017847298,
+    "left": false,
+    "right": true
+   },
+   {
+    "alongM": 4122.554205800652,
+    "left": true,
+    "right": false
+   }
+  ],
+  "lanes": [
+   {
+    "alongM": 2879.328907827465,
+    "arrows": [
+     "left",
+     "left",
+     "straight"
+    ],
+    "valid": [
+     true,
+     true,
+     false
+    ],
+    "preferred": [
+     true,
+     false,
+     false
+    ],
+    "hint": "les deux voies de gauche"
+   }
+  ],
+  "cues": [
+   {
+    "from": 10.0,
+    "label": "Au 3e feu",
+    "atLight": true,
+    "spoken": "Au troisième feu, tournez à gauche dans Rue Vauban.",
+    "lanes": null
+   },
+   {
+    "from": 661.5754495909077,
+    "label": "Au feu",
+    "atLight": true,
+    "spoken": "Au feu, tournez à gauche dans Boulevard des Brotteaux.",
+    "lanes": null
+   },
+   {
+    "from": 837.6524243312829,
+    "label": null,
+    "atLight": null,
+    "spoken": null,
+    "lanes": "les deux voies de gauche"
+   },
+   {
+    "from": 2889.328907827465,
+    "label": "Au feu",
+    "atLight": true,
+    "spoken": "Au feu, tournez à gauche dans Quai Jules Courmont. Ensuite, dans 70 mètres, Gardez la droite pour rester sur Quai Jules Courmont.",
+    "lanes": null
+   },
+   {
+    "from": 2962.746862308538,
+    "label": null,
+    "atLight": null,
+    "spoken": null,
+    "lanes": null
+   },
+   {
+    "from": 3032.211022109706,
+    "label": "Au feu",
+    "atLight": true,
+    "spoken": "Au feu, tournez à droite dans Rue de la Barre.",
+    "lanes": null
+   },
+   {
+    "from": 3276.162047957268,
+    "label": null,
+    "atLight": null,
+    "spoken": null,
+    "lanes": null
+   },
+   {
+    "from": 3856.1733826512987,
+    "label": "Au feu",
+    "atLight": true,
+    "spoken": "Au feu, tournez à gauche dans Rue Antoine de Saint-Exupéry.",
+    "lanes": null
+   },
+   {
+    "from": 4056.8999595287446,
+    "label": "2e à gauche",
+    "atLight": false,
+    "spoken": "Prenez la deuxième à gauche dans Place Bellecour. Ensuite, Gardez la droite pour prendre Accès Parking Bellecour.",
+    "lanes": null
+   },
+   {
+    "from": 4189.53129223585,
+    "label": null,
+    "atLight": null,
+    "spoken": null,
+    "lanes": null
+   },
+   {
+    "from": 4200.395471588965,
+    "label": null,
+    "atLight": null,
+    "spoken": null,
+    "lanes": null
+   }
+  ],
+  "drive": [
+   {
+    "lat": 45.760562,
+    "lon": 4.858193,
+    "say": "Conduisez vers le nord sur Tunnel de Vivier-Merle.",
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.760669667848305,
+    "lon": 4.858182464482624,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.760777335696616,
+    "lon": 4.858171928965247,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76088500354492,
+    "lon": 4.858161393447872,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76099262415108,
+    "lon": 4.858150111745044,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76109985619361,
+    "lon": 4.858132692715093,
+    "say": "Dans 600 mètres, au troisième feu, tournez à gauche dans Rue Vauban.",
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76120708823614,
+    "lon": 4.858115273685143,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76131432027867,
+    "lon": 4.858097854655193,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.7614215523212,
+    "lon": 4.858080435625242,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76152878436374,
+    "lon": 4.858063016595292,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76163601640627,
+    "lon": 4.858045597565341,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.7617432484488,
+    "lon": 4.858028178535391,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76185047886105,
+    "lon": 4.858010739707192,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76195759282234,
+    "lon": 4.857991886689342,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.762064706783626,
+    "lon": 4.857973033671492,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76217182074491,
+    "lon": 4.857954180653642,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.7622789347062,
+    "lon": 4.857935327635792,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76238604866749,
+    "lon": 4.857916474617942,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76249316262878,
+    "lon": 4.857897621600092,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.762600276590064,
+    "lon": 4.857878768582242,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76270739055135,
+    "lon": 4.857859915564392,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76281485417244,
+    "lon": 4.857846157079033,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.762922477673136,
+    "lon": 4.857834728034711,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76303008861503,
+    "lon": 4.857836939747653,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.763137303352764,
+    "lon": 4.8578541408136005,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76324275182121,
+    "lon": 4.857885892900782,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.763345679881816,
+    "lon": 4.857931767938939,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76344723377424,
+    "lon": 4.8579841068052,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76354829183827,
+    "lon": 4.858038245560427,
+    "say": null,
+    "cue": "Au 2e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.763652636273946,
+    "lon": 4.8580777272387925,
+    "say": null,
+    "cue": "Au 2e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76375384036911,
+    "lon": 4.858130299569181,
+    "say": null,
+    "cue": "Au 2e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.763856796417514,
+    "lon": 4.858176630304291,
+    "say": null,
+    "cue": "Au 2e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.763959272603714,
+    "lon": 4.858225135699091,
+    "say": null,
+    "cue": "Au 2e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.764061905129736,
+    "lon": 4.8582729559530895,
+    "say": null,
+    "cue": "Au 2e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.764163896623124,
+    "lon": 4.858323413097403,
+    "say": null,
+    "cue": "Au 2e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76426507985011,
+    "lon": 4.858377207773676,
+    "say": null,
+    "cue": "Au 2e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76436635607848,
+    "lon": 4.858430641857359,
+    "say": null,
+    "cue": "Au 2e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76446768770485,
+    "lon": 4.858483859134755,
+    "say": null,
+    "cue": "Au 2e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76456918086704,
+    "lon": 4.858536439654318,
+    "say": null,
+    "cue": "Au 2e feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76467046827934,
+    "lon": 4.858589820976631,
+    "say": null,
+    "cue": "Au 2e feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76477154420878,
+    "lon": 4.858644029296328,
+    "say": null,
+    "cue": "Au 2e feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76487262013821,
+    "lon": 4.858698237616025,
+    "say": null,
+    "cue": "Au 2e feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76497369606765,
+    "lon": 4.858752445935722,
+    "say": null,
+    "cue": "Au 2e feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.765074771997085,
+    "lon": 4.85880665425542,
+    "say": null,
+    "cue": "Au 2e feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76517590259293,
+    "lon": 4.858860651366544,
+    "say": null,
+    "cue": "Au 2e feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.765277081057995,
+    "lon": 4.858914463755736,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76537839551389,
+    "lon": 4.858967747663485,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.765479314059405,
+    "lon": 4.859022544973789,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76558009392829,
+    "lon": 4.859077875097887,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76568087379719,
+    "lon": 4.859133205221983,
+    "say": "Au feu, tournez à gauche dans Rue Vauban.",
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.765781653666075,
+    "lon": 4.85918853534608,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.7658867116019,
+    "lon": 4.8592209912232915,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76599419940007,
+    "lon": 4.859221263085865,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76610199030852,
+    "lon": 4.859213762366261,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76620987229124,
+    "lon": 4.8592098898652205,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76624373159856,
+    "lon": 4.859099424531626,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.766243,
+    "lon": 4.858944746119015,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76624045242816,
+    "lon": 4.8587900983158345,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76623808026541,
+    "lon": 4.858635433304643,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76623570810266,
+    "lon": 4.858480768293452,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.766233335939916,
+    "lon": 4.858326103282261,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76623003342073,
+    "lon": 4.858171480778518,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76621988327131,
+    "lon": 4.8580175342743805,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76620675899497,
+    "lon": 4.857863980241138,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76619363471862,
+    "lon": 4.8577104262078965,
+    "say": "Au feu, tournez à gauche dans Boulevard des Brotteaux.",
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.766180571796035,
+    "lon": 4.8575568615524505,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76616777096015,
+    "lon": 4.857403251521816,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76615497012427,
+    "lon": 4.857249641491183,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76614191984536,
+    "lon": 4.857096075138709,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76612590969456,
+    "lon": 4.856947673528109,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76601927798,
+    "lon": 4.856971471486965,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76591259623956,
+    "lon": 4.8569948247037775,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76580580294748,
+    "lon": 4.857016946082317,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.7656984976697,
+    "lon": 4.857033413723956,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76559123513844,
+    "lon": 4.8570504232690475,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76548395346347,
+    "lon": 4.857067128761443,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76537761755284,
+    "lon": 4.857093397968558,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.765271376610414,
+    "lon": 4.857120562052662,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76516473851197,
+    "lon": 4.857143815372006,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76505809528667,
+    "lon": 4.857167457659084,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76495133000932,
+    "lon": 4.8571900122191565,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.764844564731966,
+    "lon": 4.8572125667792285,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76473779945462,
+    "lon": 4.857235121339301,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76463103417727,
+    "lon": 4.857257675899372,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76452426889992,
+    "lon": 4.857280230459444,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76441750362257,
+    "lon": 4.857302785019516,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.764310738345216,
+    "lon": 4.857325339579588,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76420397306787,
+    "lon": 4.85734789413966,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76409710640455,
+    "lon": 4.85736934971465,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76398992144615,
+    "lon": 4.857387355093038,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76388273648775,
+    "lon": 4.857405360471425,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.763775551529356,
+    "lon": 4.857423365849812,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76366836657096,
+    "lon": 4.857441371228199,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76356087569993,
+    "lon": 4.857454177863509,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76345312615605,
+    "lon": 4.857462829286741,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76334527300006,
+    "lon": 4.857457810944788,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.763237783277624,
+    "lon": 4.857464048058087,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76313070742339,
+    "lon": 4.857483341004794,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76302363156916,
+    "lon": 4.857502633951502,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.762916541805424,
+    "lon": 4.85752176632897,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76280942721013,
+    "lon": 4.85754061205476,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76270231261483,
+    "lon": 4.857559457780549,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76259519801953,
+    "lon": 4.857578303506338,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76248808342423,
+    "lon": 4.857597149232127,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.762380968828936,
+    "lon": 4.857615994957916,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.762273933520866,
+    "lon": 4.8576356492208514,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76216734493462,
+    "lon": 4.857659858961408,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76206075634836,
+    "lon": 4.857684068701964,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76195416776211,
+    "lon": 4.85770827844252,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.761847579175864,
+    "lon": 4.857732488183077,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.761740990589615,
+    "lon": 4.857756697923633,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76163440200337,
+    "lon": 4.857780907664189,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76152781341712,
+    "lon": 4.857805117404745,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76142122483086,
+    "lon": 4.857829327145302,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76131462696952,
+    "lon": 4.857852555056786,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76122372535222,
+    "lon": 4.857785974745205,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.761192439309504,
+    "lon": 4.857640672481226,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76117835474256,
+    "lon": 4.857487307196734,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76116427017562,
+    "lon": 4.85733394191224,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76115003452139,
+    "lon": 4.857180605639536,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.761135507946584,
+    "lon": 4.857027325229424,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76112098137177,
+    "lon": 4.856874044819311,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76110645479695,
+    "lon": 4.856720764409198,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.761091846764316,
+    "lon": 4.856567500044094,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.7610770868782,
+    "lon": 4.8564142655900575,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76106232699209,
+    "lon": 4.856261031136022,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.761047567105976,
+    "lon": 4.856107796681985,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76102128837528,
+    "lon": 4.855958345109005,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76098803388455,
+    "lon": 4.855811184431637,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.7609548878951,
+    "lon": 4.85566398648021,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76093798904251,
+    "lon": 4.855511207057814,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.760921090189925,
+    "lon": 4.8553584276354185,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76090433111882,
+    "lon": 4.855205617717414,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76088873828467,
+    "lon": 4.855052553365816,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76087314545051,
+    "lon": 4.854899489014219,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76085755261636,
+    "lon": 4.854746424662622,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76084108372921,
+    "lon": 4.85459354926497,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.760824582653626,
+    "lon": 4.854440680809973,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.760808081578034,
+    "lon": 4.8542878123549755,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76079492969111,
+    "lon": 4.854134303171014,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76078287849081,
+    "lon": 4.853980583416112,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.760770827290514,
+    "lon": 4.85382686366121,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76075877081746,
+    "lon": 4.853673144767494,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.760746435828466,
+    "lon": 4.8535194713630165,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.760734601684234,
+    "lon": 4.853365738527107,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76072913745352,
+    "lon": 4.8532112498220785,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.760723486833015,
+    "lon": 4.853056778544762,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.760714905871055,
+    "lon": 4.852902581258568,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76070632490909,
+    "lon": 4.852748383972374,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76069774394713,
+    "lon": 4.85259418668618,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76068808001076,
+    "lon": 4.85244015012105,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76067642555488,
+    "lon": 4.852286391769476,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76066450038436,
+    "lon": 4.852132655265694,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.760652266393464,
+    "lon": 4.8519789700822,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76064045949296,
+    "lon": 4.851825213633842,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.760627773452484,
+    "lon": 4.851671602288542,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.760614091036274,
+    "lon": 4.8515181637639255,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76060120176431,
+    "lon": 4.851364596206603,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76059054106394,
+    "lon": 4.851210666094016,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76057988036358,
+    "lon": 4.851056735981429,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76056921966321,
+    "lon": 4.850902805868842,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.7605587792906,
+    "lon": 4.850748845217055,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76054921955119,
+    "lon": 4.850594780981759,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76053841011534,
+    "lon": 4.850440884772139,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76052899410641,
+    "lon": 4.850286788164458,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76051957809748,
+    "lon": 4.850132691556776,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76051016208854,
+    "lon": 4.849978594949094,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.760500746079614,
+    "lon": 4.849824498341412,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.760491330070685,
+    "lon": 4.84967040173373,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76049175005113,
+    "lon": 4.849515739824389,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76048493389692,
+    "lon": 4.849361544563135,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76047451866149,
+    "lon": 4.849207580213349,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76046417374529,
+    "lon": 4.84905360617937,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.760449821843906,
+    "lon": 4.84890029796588,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76043895404725,
+    "lon": 4.84874640261426,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76042784669021,
+    "lon": 4.848592540342391,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76041682045858,
+    "lon": 4.848438665961526,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76040499319348,
+    "lon": 4.848284911515262,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.760393165928384,
+    "lon": 4.848131157068997,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76038112351742,
+    "lon": 4.847977437219275,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76036858701415,
+    "lon": 4.847823801867916,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.760355730210335,
+    "lon": 4.847670222944647,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76034479475578,
+    "lon": 4.8475163331386675,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76033394789209,
+    "lon": 4.8473624304689515,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.7603231010284,
+    "lon": 4.8472085277992365,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76031225416471,
+    "lon": 4.847054625129521,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76030140730102,
+    "lon": 4.846900722459805,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76029203260133,
+    "lon": 4.8467466357258955,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76028155154819,
+    "lon": 4.84659268129817,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76027164751863,
+    "lon": 4.846438649047173,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76026199100379,
+    "lon": 4.846284583742307,
+    "say": "Dans 600 mètres, gardez la gauche pour prendre Pont Wilson. Utilisez les deux voies de gauche.",
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76025233448895,
+    "lon": 4.846130518437441,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76024267797412,
+    "lon": 4.845976453132574,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.760232754160434,
+    "lon": 4.8458224270053885,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76022601372495,
+    "lon": 4.845668059841029,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.760226762326965,
+    "lon": 4.845513488716387,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.7602164671386,
+    "lon": 4.8453595085077135,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76020617195022,
+    "lon": 4.84520552829904,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76019493640486,
+    "lon": 4.845051684029482,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76018131873805,
+    "lon": 4.84489823799235,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.760167497853494,
+    "lon": 4.844744826173745,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76015376941851,
+    "lon": 4.844591406263305,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76014178727901,
+    "lon": 4.844437677171294,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76012955075417,
+    "lon": 4.844283989418754,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76011724568861,
+    "lon": 4.844130312822161,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.760104940623044,
+    "lon": 4.843976636225568,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.760092745753646,
+    "lon": 4.843822942249515,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.760080740779465,
+    "lon": 4.8436692185888495,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.760069706182655,
+    "lon": 4.843515344777338,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76005917005539,
+    "lon": 4.843361402956408,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76005024215931,
+    "lon": 4.843207247950742,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76004103413224,
+    "lon": 4.843053127296482,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76003606866845,
+    "lon": 4.842898642873629,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76003233454856,
+    "lon": 4.842744050310328,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76002786400837,
+    "lon": 4.842589528121341,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.76001724904971,
+    "lon": 4.842435642207632,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.7599984767293,
+    "lon": 4.84228331594991,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.75998236579282,
+    "lon": 4.842130759796301,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.7599849092484,
+    "lon": 4.84197611769721,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.75998745270398,
+    "lon": 4.8418214755981195,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.759989996159554,
+    "lon": 4.84166683349903,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.75999253961513,
+    "lon": 4.841512191399939,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.759995083070706,
+    "lon": 4.841357549300849,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.759997,
+    "lon": 4.841202896612613,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.75998291482797,
+    "lon": 4.841049986421911,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75997349837938,
+    "lon": 4.840897042136085,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75998041459665,
+    "lon": 4.84074267987827,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.7599886320939,
+    "lon": 4.8405884437760065,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75999684959115,
+    "lon": 4.840434207673744,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.7600050670884,
+    "lon": 4.840279971571481,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76001328458565,
+    "lon": 4.8401257354692175,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76002150208291,
+    "lon": 4.839971499366955,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76002971958016,
+    "lon": 4.839817263264692,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.760037937077406,
+    "lon": 4.839663027162429,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76004615457466,
+    "lon": 4.839508791060166,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76005437207191,
+    "lon": 4.839354554957903,
+    "say": "Gardez la gauche pour prendre Pont Wilson.",
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.760062589569166,
+    "lon": 4.83920031885564,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76007080706642,
+    "lon": 4.839046082753376,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76007902456367,
+    "lon": 4.838891846651114,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76008724206092,
+    "lon": 4.838737610548851,
+    "say": null,
+    "cue": null,
+    "lanesM": 2879.328907827465,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.760095119791885,
+    "lon": 4.838583351026046,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.760097261826395,
+    "lon": 4.8384286961340655,
+    "say": "Au feu, tournez à gauche dans Quai Jules Courmont. Ensuite, dans 70 mètres, Gardez la droite pour rester sur Quai Jules Courmont.",
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76009940386091,
+    "lon": 4.8382740412420855,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76009475329204,
+    "lon": 4.838119647405318,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.76007037941965,
+    "lon": 4.837969524107179,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.7600401083658,
+    "lon": 4.83782109869753,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75998791262942,
+    "lon": 4.837686825258827,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.759884517767155,
+    "lon": 4.837652540994924,
+    "say": "Gardez la droite pour rester sur Quai Jules Courmont.",
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75977783824835,
+    "lon": 4.8376291695102385,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75967115872954,
+    "lon": 4.837605798025552,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75956506121093,
+    "lon": 4.837577755833683,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.759459134769564,
+    "lon": 4.837548172773482,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75935763562507,
+    "lon": 4.837506676625106,
+    "say": "Dans 200 mètres, au feu, tournez à droite dans Rue de la Barre.",
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.75926951795575,
+    "lon": 4.837426414075529,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.75916548439072,
+    "lon": 4.837385284526562,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.75906145082568,
+    "lon": 4.837344154977594,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.75895747393118,
+    "lon": 4.837302732363877,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.758853500170105,
+    "lon": 4.837261293546056,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75874952640903,
+    "lon": 4.837219854728235,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.758645552647955,
+    "lon": 4.837178415910414,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75854171632117,
+    "lon": 4.837136275663417,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75843788485646,
+    "lon": 4.837094110601608,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.758334053391756,
+    "lon": 4.837051945539799,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75823022192706,
+    "lon": 4.837009780477991,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75812639046235,
+    "lon": 4.8369676154161825,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75802247097262,
+    "lon": 4.83692590537824,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75791851992927,
+    "lon": 4.836884372224979,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75781592630144,
+    "lon": 4.836836384882932,
+    "say": "Au feu, tournez à droite dans Rue de la Barre.",
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75771344692856,
+    "lon": 4.836787908325522,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.757611370425224,
+    "lon": 4.836737706766503,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.757509293921885,
+    "lon": 4.836687505207485,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75740942575656,
+    "lon": 4.83662977668834,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75731416346944,
+    "lon": 4.836557095091498,
+    "say": "Dans 600 mètres, tournez à gauche dans Quai Tilsitt.",
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.757320842109166,
+    "lon": 4.836421881879858,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.75735552674476,
+    "lon": 4.836275798369902,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.757395733931915,
+    "lon": 4.836132270666741,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.75743674582436,
+    "lon": 4.835989197215483,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.7574777577168,
+    "lon": 4.835846123764225,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.75751876960924,
+    "lon": 4.835703050312966,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.75755978150168,
+    "lon": 4.835559976861708,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.75760082239229,
+    "lon": 4.83541692096838,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.75764039286343,
+    "lon": 4.835273025110168,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.757681105818094,
+    "lon": 4.835129775825232,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.75772181877276,
+    "lon": 4.8349865265402965,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.75776215773589,
+    "lon": 4.8348430611776685,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.75780209112303,
+    "lon": 4.834699361489085,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.757842024510175,
+    "lon": 4.834555661800502,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.75788206821554,
+    "lon": 4.834412025638445,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.7579194919804,
+    "lon": 4.8342670195179736,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.757956917709784,
+    "lon": 4.834121939844288,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.75799508548669,
+    "lon": 4.833977257341141,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.7580332532636,
+    "lon": 4.833832574837994,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.758072248105734,
+    "lon": 4.833688347969546,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.75811098237632,
+    "lon": 4.833543974779173,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.758149716646905,
+    "lon": 4.833399601588798,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.758189481510854,
+    "lon": 4.833255814712025,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.758227239651085,
+    "lon": 4.833110928786616,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.7582660200934,
+    "lon": 4.832966580799208,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.758304734244085,
+    "lon": 4.832822196056901,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.75834344839477,
+    "lon": 4.832677811314594,
+    "say": null,
+    "cue": "Au 3e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.75838154049418,
+    "lon": 4.8325330902539125,
+    "say": null,
+    "cue": "Au 2e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.758420563388434,
+    "lon": 4.832388887293355,
+    "say": null,
+    "cue": "Au 2e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.75845935589848,
+    "lon": 4.8322445451744445,
+    "say": null,
+    "cue": "Au 2e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.75849817414484,
+    "lon": 4.8321002171832905,
+    "say": null,
+    "cue": "Au 2e feu",
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.75853699239119,
+    "lon": 4.831955889192136,
+    "say": null,
+    "cue": "Au 2e feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75857581063755,
+    "lon": 4.831811561200981,
+    "say": null,
+    "cue": "Au 2e feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75861462888391,
+    "lon": 4.831667233209826,
+    "say": null,
+    "cue": "Au 2e feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.758653447130264,
+    "lon": 4.831522905218671,
+    "say": null,
+    "cue": "Au 2e feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.758691806936184,
+    "lon": 4.8313783525196845,
+    "say": null,
+    "cue": "Au 2e feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75872276959964,
+    "lon": 4.831230174058856,
+    "say": null,
+    "cue": "Au 2e feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.7587537322631,
+    "lon": 4.831081995598026,
+    "say": null,
+    "cue": "Au 2e feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.758793630103064,
+    "lon": 4.830938462083287,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75883711553711,
+    "lon": 4.830796894605822,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75887747804708,
+    "lon": 4.8306534725404875,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.758917793579904,
+    "lon": 4.8305099893087755,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.758958109112726,
+    "lon": 4.830366506077063,
+    "say": "Au feu, tournez à gauche dans Quai Tilsitt.",
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75899842464555,
+    "lon": 4.830223022845351,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75903918518224,
+    "lon": 4.830079800936047,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.7590826420851,
+    "lon": 4.8299383954595605,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.759131278623315,
+    "lon": 4.8298003124142665,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75918059916113,
+    "lon": 4.829662735570329,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75916773449191,
+    "lon": 4.8295406894323305,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75908763014133,
+    "lon": 4.829437038892038,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.759005380054994,
+    "lon": 4.829337067875965,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.758919812141926,
+    "lon": 4.829242811528648,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75883424422886,
+    "lon": 4.829148555181331,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75874867631579,
+    "lon": 4.829054298834014,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75866310840272,
+    "lon": 4.828960042486696,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75857754048966,
+    "lon": 4.828865786139379,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75849197257659,
+    "lon": 4.8287715297920615,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.758406404663525,
+    "lon": 4.828677273444745,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75832083675046,
+    "lon": 4.8285830170974275,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75823526883739,
+    "lon": 4.82848876075011,
+    "say": "Au feu, tournez à gauche dans Rue Antoine de Saint-Exupéry.",
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75814970092432,
+    "lon": 4.828394504402793,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75806413301125,
+    "lon": 4.828300248055476,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.757977973001864,
+    "lon": 4.828207107467856,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75789185457722,
+    "lon": 4.828113888346476,
+    "say": null,
+    "cue": "Au feu",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75780585030748,
+    "lon": 4.828020454177281,
+    "say": null,
+    "cue": "2e à gauche",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75773428250067,
+    "lon": 4.82809005333213,
+    "say": null,
+    "cue": "2e à gauche",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75768077976288,
+    "lon": 4.828223683880434,
+    "say": null,
+    "cue": "2e à gauche",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.757634495821144,
+    "lon": 4.828363414514647,
+    "say": null,
+    "cue": "2e à gauche",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.757588211879415,
+    "lon": 4.82850314514886,
+    "say": null,
+    "cue": "2e à gauche",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75754192793768,
+    "lon": 4.828642875783072,
+    "say": null,
+    "cue": "2e à gauche",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75749578443814,
+    "lon": 4.828782700576053,
+    "say": "Prenez la deuxième à gauche dans Place Bellecour. Ensuite, Gardez la droite pour prendre Accès Parking Bellecour.",
+    "cue": "2e à gauche",
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75745011248434,
+    "lon": 4.828922795186852,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.757401882569965,
+    "lon": 4.829061166600577,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.757353652655596,
+    "lon": 4.8291995380143025,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75730542274122,
+    "lon": 4.829337909428029,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75725719282685,
+    "lon": 4.829476280841754,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.757296858570584,
+    "lon": 4.8295940976176475,
+    "say": "Dans 200 mètres, vous arriverez à votre destination.",
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.75735157539519,
+    "lon": 4.829720040394265,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.757448690325774,
+    "lon": 4.829787497471794,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.75754597810266,
+    "lon": 4.82985443732181,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.0
+   },
+   {
+    "lat": 45.75764015793219,
+    "lon": 4.82992808397158,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.757696319713446,
+    "lon": 4.830055961425797,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.757739128285834,
+    "lon": 4.830197950255,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75778193685822,
+    "lon": 4.830339939084203,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.7578187963348,
+    "lon": 4.830485238971376,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75782703933073,
+    "lon": 4.830632790236112,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75779070530518,
+    "lon": 4.830778363108665,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.757751047647886,
+    "lon": 4.8309222193165,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75771138999059,
+    "lon": 4.831066075524336,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75767173233329,
+    "lon": 4.831209931732171,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.757632074675996,
+    "lon": 4.831353787940006,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.7575924495152,
+    "lon": 4.831497662402137,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.7575528942768,
+    "lon": 4.831641576141859,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.7575133390384,
+    "lon": 4.831785489881581,
+    "say": null,
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.3
+   },
+   {
+    "lat": 45.75760605617446,
+    "lon": 4.831845159801537,
+    "say": "Vous êtes arrivé à votre destination.",
+    "cue": null,
+    "lanesM": null,
+    "zoom": 18.3
+   }
+  ],
+  "zoom": {
+   "0": 18.0,
+   "30": 18.0,
+   "50": 17.6,
+   "90": 16.7,
+   "130": 16.2,
+   "200": 16.2,
+   "turn": 18.3
   }
  }
 }
