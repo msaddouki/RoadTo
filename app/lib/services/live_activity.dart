@@ -85,6 +85,7 @@ class LiveActivityLink {
 Map<String, Object?>? liveActivityStateOf(AppController app) => liveActivityState(
   guidance: app.guidance,
   route: app.route,
+  remaining: app.remaining,
   destination: app.destination,
   ahead: app.ahead.firstOrNull,
   now: DateTime.now(),
@@ -96,6 +97,7 @@ Map<String, Object?>? liveActivityStateOf(AppController app) => liveActivityStat
 Map<String, Object?>? liveActivityState({
   required GuidanceState? guidance,
   required TripRoute? route,
+  Duration? remaining,
   required Place? destination,
   AlertAhead? ahead,
   required DateTime now,
@@ -103,7 +105,7 @@ Map<String, Object?>? liveActivityState({
   final g = guidance;
   if (route == null || g == null) return null;
   final next = g.nextManeuver;
-  final arrival = g.eta(now);
+  final arrival = now.add(remaining ?? g.remaining);
   return {
     'destination': destination?.name ?? 'Destination',
     'symbol': maneuverSymbol(next),

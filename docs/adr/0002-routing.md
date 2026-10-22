@@ -41,6 +41,12 @@
   public, so no model mapping is needed. A route without limits (old
   graph, server error) simply shows no sign.
 
+- **Alternatives and time to arrival**: when jams are reported on a
+  route, the engine's alternatives (`alternates`) are weighed with them,
+  and the time shown is corrected by the driver's pace and the jams
+  (docs/eta.md). On Android those requests use valhalla-mobile's raw call
+  (`routeRaw`), since the typed answer drops the alternatives.
+
 ## Consequences
 
 - The Android app grows by the native library and, with the embedded

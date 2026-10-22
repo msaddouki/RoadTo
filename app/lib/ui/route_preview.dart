@@ -121,6 +121,14 @@ class RoutePreviewSheet extends StatelessWidget {
               ),
             ],
           ),
+          if (p.jamDelay >= const Duration(minutes: 1)) ...[
+            const SizedBox(height: 6),
+            Text(
+              'dont ${p.jamDelay.inMinutes} min de bouchons signalés',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 14, color: Color(0xFFFF9F1C), fontWeight: FontWeight.w700),
+            ),
+          ],
           const SizedBox(height: 14),
           if (p.alerts.isEmpty)
             const Row(

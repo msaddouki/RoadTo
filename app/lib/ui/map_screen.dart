@@ -547,6 +547,7 @@ class _MapScreenState extends State<MapScreen> {
                     NavigationSheet(
                       state: g,
                       now: DateTime.now(),
+                      remaining: app.remaining,
                       voiceOn: app.settings.voice,
                       onToggleVoice: () => app.updateSettings(app.settings.copyWith(voice: !app.settings.voice)),
                       onReport: _openReport,
