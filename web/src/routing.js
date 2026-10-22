@@ -14,10 +14,19 @@ export function distanceM(a, b) {
 /** Types of alerts the route must go around, as in the app (blocksRoad). */
 export const BLOCKING = new Set(['accident', 'closure']);
 
+export function bearingDeg(a, b) {
+  const la1 = rad(a.lat), la2 = rad(b.lat), dLon = rad(b.lon - a.lon);
+  const y = Math.sin(dLon) * Math.cos(la2);
+  const x = Math.cos(la1) * Math.sin(la2) - Math.sin(la1) * Math.cos(la2) * Math.cos(dLon);
+  return ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
+}
+
 /** Body of a Valhalla /route request (valhallaRouteRequest in the core). */
-export function routeRequest(from, to, { avoid = [], language = 'fr-FR' } = {}) {
+export function routeRequest(from, to, { avoid = [], headingDeg = null, language = 'fr-FR' } = {}) {
+  const start = { lat: from.lat, lon: from.lon };
+  if (headingDeg !== null && headingDeg !== undefined) Object.assign(start, { heading: Math.round(headingDeg), heading_tolerance: 45 });
   return {
-    locations: [{ lat: from.lat, lon: from.lon }, { lat: to.lat, lon: to.lon }],
+    locations: [start, { lat: to.lat, lon: to.lon }],
     costing: 'auto',
     units: 'kilometers',
     language,
@@ -78,6 +87,10 @@ export function parseRoute(json) {
       maneuvers.push({
         type: m.type,
         instruction: m.instruction ?? '',
+        verbalAlert: m.verbal_transition_alert_instruction ?? null,
+        verbalPre: m.verbal_pre_transition_instruction ?? null,
+        verbalPost: m.verbal_post_transition_instruction ?? null,
+        isArrival: m.type >= 4 && m.type <= 6,
         streetNames: m.street_names ?? [],
         beginShapeIndex: offset + m.begin_shape_index,
         lengthM: (m.length ?? 0) * 1000,
@@ -90,12 +103,16 @@ export function parseRoute(json) {
   return { shape, maneuvers, cumulative, lengthM: trip.summary.length * 1000, timeS: trip.summary.time };
 }
 
-/** [p] projected on the route: {alongM, offsetM, point}, or null for an empty route. */
-export function projectOnRoute(route, p) {
+/**
+ * [p] projected on the route, on segments [from] to [to]:
+ * {segmentIndex, alongM, offsetM, point}, or null for an empty route.
+ */
+export function projectOnRoute(route, p, { from = 0, to = null } = {}) {
   const { shape, cumulative } = route;
   if (shape.length < 2) return null;
+  const end = Math.min(Math.max(to ?? shape.length - 1, 1), shape.length - 1);
   let best = null;
-  for (let i = 0; i < shape.length - 1; i++) {
+  for (let i = Math.min(Math.max(from, 0), shape.length - 2); i < end; i++) {
     const a = shape[i], b = shape[i + 1];
     // Local equirectangular plane, as projectOnSegment in the core.
     const cosLat = Math.cos(rad(a.lat));
@@ -106,7 +123,7 @@ export function projectOnRoute(route, p) {
     const q = { lat: a.lat + (b.lat - a.lat) * t, lon: a.lon + (b.lon - a.lon) * t };
     const d = distanceM(p, q);
     if (best === null || d < best.offsetM) {
-      best = { alongM: cumulative[i] + t * (cumulative[i + 1] - cumulative[i]), offsetM: d, point: q };
+      best = { segmentIndex: i, alongM: cumulative[i] + t * (cumulative[i + 1] - cumulative[i]), offsetM: d, point: q };
     }
   }
   return best;
@@ -153,6 +170,35 @@ export function distanceText(m) {
   return `${Math.round(m)} m`;
 }
 
+/** Distance from the start of the route to the start of maneuver [i]. */
+export function maneuverStartM(route, i) {
+  return route.cumulative[Math.min(Math.max(route.maneuvers[i].beginShapeIndex, 0), route.shape.length - 1)];
+}
+
+/** Length of the shape itself (a few metres off lengthM). */
+export const shapeLengthM = (route) => route.cumulative.at(-1) ?? 0;
+
+/** The point [d] metres from the start, along the route. */
+export function pointAt(route, d) {
+  const { shape, cumulative } = route;
+  if (d <= 0) return shape[0];
+  if (d >= shapeLengthM(route)) return shape.at(-1);
+  let lo = 0, hi = cumulative.length - 1;
+  while (hi - lo > 1) {
+    const mid = (lo + hi) >> 1;
+    if (cumulative[mid] <= d) lo = mid; else hi = mid;
+  }
+  const seg = cumulative[hi] - cumulative[lo];
+  const f = seg === 0 ? 0 : (d - cumulative[lo]) / seg;
+  return { lat: shape[lo].lat + (shape[hi].lat - shape[lo].lat) * f, lon: shape[lo].lon + (shape[hi].lon - shape[lo].lon) * f };
+}
+
+/** Heading of the route [d] metres from the start. */
+export function bearingAt(route, d) {
+  const a = pointAt(route, d), b = pointAt(route, d + 15);
+  return a.lat === b.lat && a.lon === b.lon ? bearingDeg(pointAt(route, d - 15), a) : bearingDeg(a, b);
+}
+
 /** [[w, s], [e, n]] of the route, for fitting the map. */
 export function bounds(shape) {
   let s = 90, w = 180, n = -90, e = -180;
@@ -166,13 +212,17 @@ export function bounds(shape) {
 /**
  * Client of a Valhalla server. [fetchImpl] for tests.
  */
-export async function fetchRoute(baseUrl, from, to, { avoid = [], signal, fetchImpl = globalThis.fetch } = {}) {
+export async function fetchRoute(baseUrl, from, to, { avoid = [], headingDeg = null, signal, fetchImpl = globalThis.fetch } = {}) {
+  return parseRoute(await post(baseUrl, 'route', routeRequest(from, to, { avoid, headingDeg }), { signal, fetchImpl }));
+}
+
+async function post(baseUrl, action, body, { signal, fetchImpl }) {
   let res;
   try {
-    res = await fetchImpl(new URL('route', baseUrl), {
+    res = await fetchImpl(new URL(action, baseUrl), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(routeRequest(from, to, { avoid })),
+      body: JSON.stringify(body),
       signal,
     });
   } catch (e) {
@@ -182,5 +232,82 @@ export async function fetchRoute(baseUrl, from, to, { avoid = [], signal, fetchI
   let json;
   try { json = await res.json(); } catch { throw new RoutingError(`Réponse illisible du serveur d’itinéraire (${res.status})`); }
   if (!res.ok && !json.error) throw new RoutingError(`Erreur du serveur d’itinéraire (${res.status})`);
-  return parseRoute(json);
+  return json;
+}
+
+/** Encoded polyline (precision 6) of [{lat, lon}]. */
+export function encodePolyline(points, precision = 6) {
+  const factor = 10 ** precision;
+  let out = '', lastLat = 0, lastLon = 0;
+  const put = (v) => {
+    let n = v < 0 ? ~(v << 1) : v << 1;
+    while (n >= 0x20) {
+      out += String.fromCharCode((0x20 | (n & 0x1f)) + 63);
+      n >>= 5;
+    }
+    out += String.fromCharCode(n + 63);
+  };
+  for (const p of points) {
+    const lat = Math.round(p.lat * factor), lon = Math.round(p.lon * factor);
+    put(lat - lastLat);
+    put(lon - lastLon);
+    lastLat = lat;
+    lastLon = lon;
+  }
+  return out;
+}
+
+/**
+ * Posted speed limits along the route (speed_limits.dart in the core): a
+ * trace_attributes request on the route's own shape, edge by edge.
+ */
+export function speedLimitsRequest(route) {
+  return {
+    encoded_polyline: encodePolyline(route.shape),
+    costing: 'auto',
+    shape_match: 'edge_walk',
+    units: 'kilometers',
+    filters: { attributes: ['edge.speed_limit', 'edge.begin_shape_index', 'edge.end_shape_index', 'shape'], action: 'include' },
+  };
+}
+
+/** [{startM, endM, kph, unlimited}], ordered; consecutive equal limits merged. */
+export function parseSpeedLimits(json) {
+  if (typeof json.shape !== 'string' || !Array.isArray(json.edges)) return [];
+  const shape = decodePolyline(json.shape);
+  if (shape.length < 2) return [];
+  const cumulative = [0];
+  for (let i = 1; i < shape.length; i++) cumulative.push(cumulative[i - 1] + distanceM(shape[i - 1], shape[i]));
+  const at = (index) => cumulative[Math.min(Math.max(Math.trunc(index ?? 0), 0), shape.length - 1)];
+  const spans = [];
+  for (const e of json.edges) {
+    const start = at(e.begin_shape_index), end = at(e.end_shape_index);
+    if (end <= start) continue;
+    const raw = e.speed_limit;
+    const unlimited = raw === 'unlimited';
+    const kph = typeof raw === 'number' && raw > 0 && raw < 250 ? Math.round(raw) : null;
+    const last = spans.at(-1);
+    if (last && last.kph === kph && last.unlimited === unlimited && Math.abs(start - last.endM) < 1) last.endM = end;
+    else spans.push({ startM: start, endM: end, kph, unlimited });
+  }
+  return spans;
+}
+
+/** The limit span at [alongM], or null. */
+export function limitAt(spans, alongM) {
+  let lo = 0, hi = spans.length - 1;
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1, s = spans[mid];
+    if (alongM < s.startM) hi = mid - 1;
+    else if (alongM >= s.endM) lo = mid + 1;
+    else return s;
+  }
+  return null;
+}
+
+/** Over the limit with the usual margin: 5 km/h up to 100, 5 % above. */
+export const isOverLimit = (kph, limit) => kph > (limit <= 100 ? limit + 5 : limit * 1.05);
+
+export async function fetchSpeedLimits(baseUrl, route, { signal, fetchImpl = globalThis.fetch } = {}) {
+  return parseSpeedLimits(await post(baseUrl, 'trace_attributes', speedLimitsRequest(route), { signal, fetchImpl }));
 }

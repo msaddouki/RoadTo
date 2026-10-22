@@ -6,7 +6,7 @@ A static companion site for the apps, with nothing to run on a server:
 | --- | --- |
 | `index.html` | What RoadTo is, the privacy promises, the closed beta |
 | `carte.html` | **Live alerts**, read only: the relays' alerts for the area on screen, verified (id, Schnorr signature, proof of work), not expired and trusted enough, as the app shows them |
-| `itineraire.html#de=…&vers=…` | **Route preview**, like the app's before "Partir": search (Photon), route (Valhalla), time, length, arrival, and the alerts on the way from the relays; roads reported closed or blocked are avoided. Guidance stays in the app ("Ouvrir dans RoadTo"). Both ends are in the fragment; "Ma position" is never put in the link |
+| `itineraire.html#de=…&vers=…` | **Route preview and guidance**. The preview, like the app's before "Partir": search (Photon), route (Valhalla), time, length, arrival, and the alerts on the way from the relays; roads reported closed or blocked are avoided. "Démarrer" guides like the app's trip screen (below); "Ouvrir dans RoadTo" hands the destination to the app. Both ends are in the fragment; "Ma position" is never put in the link |
 | `lieu.html#lat,lon,name` | A **shared place**, with "Ouvrir dans RoadTo" (`roadto://place?…`) and "Itinéraire". The place is in the fragment, which browsers never send to the server |
 | `confidentialite.html`, `cgu.html` | The privacy policy and terms, built from `docs/beta/` |
 
@@ -16,6 +16,27 @@ Valhalla (FOSSGIS) ones the app falls back to, or your own
 (`ROADTO_GEOCODER_URL`, `ROADTO_ROUTING_URL`, also to allow in the Content
 Security Policy). The map library, the signature check and the app's font
 are bundled at build time: no CDN, no Google Fonts, no analytics.
+
+## Guidance in the browser
+
+`src/guidance.js` is the core's `GuidanceEngine` (same projection, off-route
+rule, arrival and announcements), checked against the Dart engine on a
+replayed drive (`test/guidance.test.js`). `src/navigation.js` runs it on
+the browser's location (`watchPosition`) with:
+
+- the next maneuver, its distance and the turn after it ("Puis"), street
+  names in bubbles as in the app;
+- the voice (the browser's French speech), switchable, remembered;
+- speed and the posted limit (Valhalla `trace_attributes`), red when over;
+- the next alert ahead from the relays; a road reported closed or an
+  accident ahead reroutes, as does leaving the route (3 fixes off, at most
+  every 15 s);
+- the screen kept on (Screen Wake Lock), the arrival screen.
+
+Browsers stop the location when the page is hidden or the screen locks,
+and there is no car screen: the page says to keep it open; the apps are
+for real use. To try it at a desk, `itineraire.html?simulation` drives
+along the route at 50 km/h (`?simulation=90` for 90).
 
 ## Build and try
 
@@ -52,6 +73,8 @@ works too: build with `ROADTO_RELAYS` and `ROADTO_CONTACT` set, or edit
 
 ## Not done yet
 
+- Reporting and confirming alerts from the site (a key and proof of work
+  in the browser).
 - The public Valhalla and Photon servers are for testing (fair use, no
   guarantee). For the beta, host Valhalla with the regions' graphs
   (`routing.tar` of the region packages) and point `ROADTO_ROUTING_URL` at
