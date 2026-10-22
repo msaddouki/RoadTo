@@ -96,11 +96,11 @@ dependencies {
     // with the same MapLibre build as maplibre_gl (OpenGL variant).
     implementation("androidx.car.app:app:1.7.0")
     implementation("androidx.car.app:app-projected:1.7.0")
-    implementation("org.maplibre.gl:android-sdk-opengl:13.5.0")
+    implementation("org.maplibre.gl:android-sdk-opengl:13.7.1")
 
     // Car screens tested on the JVM (Robolectric), without a head unit.
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.robolectric:robolectric:4.16")
+    testImplementation("org.robolectric:robolectric:4.17")
     testImplementation("androidx.car.app:app-testing:1.7.0")
     testImplementation("androidx.test:core:1.7.0")
 }
