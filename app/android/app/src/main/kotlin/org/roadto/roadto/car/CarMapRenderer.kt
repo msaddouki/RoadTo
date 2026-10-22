@@ -15,6 +15,7 @@ import org.maplibre.android.geometry.LatLng
 import org.maplibre.android.maps.MapLibreMap
 import org.maplibre.android.maps.MapView
 import org.maplibre.android.maps.Style
+import org.maplibre.android.style.expressions.Expression
 import org.maplibre.android.style.layers.CircleLayer
 import org.maplibre.android.style.layers.LineLayer
 import org.maplibre.android.style.layers.Property
@@ -37,6 +38,7 @@ class CarMapRenderer(private val carContext: CarContext, private val bridge: Car
     private var navLabels: Boolean? = null
     private var styleUri: String? = null
     private var routeId: String? = null
+    private var jamsId: String? = null
     private var width = 0
     private var height = 0
     private var visible = Rect()
@@ -100,6 +102,7 @@ class CarMapRenderer(private val carContext: CarContext, private val bridge: Car
         style = null
         styleUri = null
         routeId = null
+        jamsId = null
         presentation = null
         display = null
     }
@@ -112,6 +115,7 @@ class CarMapRenderer(private val carContext: CarContext, private val bridge: Car
             styleUri = uri
             style = null
             routeId = null
+        jamsId = null
             navLabels = null
             m.setStyle(Style.Builder().fromUri(uri)) { loaded ->
                 if (styleUri != uri) return@setStyle
@@ -129,6 +133,10 @@ class CarMapRenderer(private val carContext: CarContext, private val bridge: Car
         if (s.routeId != routeId) {
             routeId = s.routeId
             (st.getSource(ROUTE) as? GeoJsonSource)?.setGeoJson(lineGeoJson(s.route))
+        }
+        if (s.jamsId != jamsId) {
+            jamsId = s.jamsId
+            (st.getSource(JAMS) as? GeoJsonSource)?.setGeoJson(jamsGeoJson(s.jams))
         }
         if (s.lat != 0.0 || s.lon != 0.0) {
             (st.getSource(POSITION) as? GeoJsonSource)?.setGeoJson(pointGeoJson(s.lat, s.lon))
@@ -153,6 +161,7 @@ class CarMapRenderer(private val carContext: CarContext, private val bridge: Car
     private fun addLayers(style: Style) {
         try {
             style.addSource(GeoJsonSource(ROUTE, lineGeoJson(emptyList())))
+            style.addSource(GeoJsonSource(JAMS, jamsGeoJson(emptyList())))
             style.addSource(GeoJsonSource(POSITION, pointGeoJson(null, null)))
             // Under the street names of RoadTo's style (its "roadto-labels"
             // marker): the route never covers a name.
@@ -170,6 +179,24 @@ class CarMapRenderer(private val carContext: CarContext, private val bridge: Car
                 LineLayer(ROUTE, ROUTE).withProperties(
                     PropertyFactory.lineColor("#3D8BFF"),
                     PropertyFactory.lineWidth(8f),
+                    PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
+                    PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
+                ),
+            )
+            // Jams over the route, orange to dark red, with a dark edge, as on the phone.
+            addRouteLayer(
+                LineLayer("$JAMS-casing", JAMS).withProperties(
+                    PropertyFactory.lineColor("#2A0E05"),
+                    PropertyFactory.lineWidth(11f),
+                    PropertyFactory.lineOpacity(0.85f),
+                    PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
+                    PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
+                ),
+            )
+            addRouteLayer(
+                LineLayer(JAMS, JAMS).withProperties(
+                    PropertyFactory.lineColor(Expression.get("color")),
+                    PropertyFactory.lineWidth(7f),
                     PropertyFactory.lineCap(Property.LINE_CAP_ROUND),
                     PropertyFactory.lineJoin(Property.LINE_JOIN_ROUND),
                 ),
@@ -209,6 +236,7 @@ class CarMapRenderer(private val carContext: CarContext, private val bridge: Car
         private const val LABELS_MARKER = "roadto-labels"
         private const val NAV_SUFFIX = "-nav"
         private const val ROUTE = "roadto-route"
+        private const val JAMS = "roadto-jams"
         private const val POSITION = "roadto-position"
 
         /** The phone gives a URL, or a local file path for the offline style. */
@@ -226,6 +254,21 @@ class CarMapRenderer(private val carContext: CarContext, private val bridge: Car
                     "[${it[0]},${it[1]}]"
                 }
             }
+
+        fun jamsGeoJson(jams: List<CarJam>): String =
+            jams.filter { it.points.size >= 2 && COLOR.matches(it.color) }.joinToString(
+                ",",
+                """{"type":"FeatureCollection","features":[""",
+                "]}",
+            ) { jam ->
+                jam.points.joinToString(
+                    ",",
+                    """{"type":"Feature","properties":{"color":"${jam.color}"},"geometry":{"type":"LineString","coordinates":[""",
+                    "]}}",
+                ) { "[${it[0]},${it[1]}]" }
+            }
+
+        private val COLOR = Regex("^#[0-9A-Fa-f]{6}$")
 
         fun pointGeoJson(lat: Double?, lon: Double?): String =
             if (lat == null || lon == null) {

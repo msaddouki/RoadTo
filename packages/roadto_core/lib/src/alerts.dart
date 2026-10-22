@@ -67,15 +67,18 @@ enum AlertType {
 /// How bad a jam is, when the report says (tag `level`): the speed it is
 /// crawled at counts in the time to arrival.
 enum JamLevel {
-  slow('slow', 'Ralenti', 25),
-  jam('jam', 'Bouchon', 10),
-  stopped('stopped', 'À l’arrêt', 5);
+  slow('slow', 'Ralenti', 25, '#FF9F1C'),
+  jam('jam', 'Bouchon', 10, '#E53935'),
+  stopped('stopped', 'À l’arrêt', 5, '#8E1B1B');
 
   final String code;
   final String label;
   final double kph;
 
-  const JamLevel(this.code, this.label, this.kph);
+  /// Colour of the jammed stretch on the map: orange, red, dark red.
+  final String color;
+
+  const JamLevel(this.code, this.label, this.kph, this.color);
 
   static JamLevel? fromCode(String? code) {
     for (final l in values) {
@@ -97,6 +100,11 @@ abstract final class TrafficSources {
 
   /// Longest jam a report may describe, in metres.
   static const maxLengthM = 20000;
+
+  /// The jammed stretch's geometry (tag `shape`, polyline precision 6), at
+  /// most this long and this many points; believed from the robot only.
+  static const maxShapeChars = 4000;
+  static const maxShapePoints = 400;
 }
 
 /// Alerte routière décodée d'un événement Nostr.
@@ -119,6 +127,10 @@ class RoadAlert {
   /// ([TrafficSources]); null for drivers' reports.
   final String? source;
 
+  /// The jammed stretch along the road, in the direction of traffic, from
+  /// the robot ([TrafficSources]); drawn in the [level]'s colour.
+  final List<LatLon>? shape;
+
   RoadAlert({
     required this.id,
     required this.author,
@@ -130,6 +142,7 @@ class RoadAlert {
     this.level,
     this.lengthM,
     this.source,
+    this.shape,
   });
 
   /// "Bouchon", "À l’arrêt": the level when the report gives it.
@@ -168,7 +181,18 @@ class RoadAlert {
           ? length
           : null,
       source: trustedSources.contains(e.pubkey) ? e.tag('src') : null,
+      shape: type == AlertType.traffic && trustedSources.contains(e.pubkey) ? _shape(e.tag('shape')) : null,
     );
+  }
+
+  static List<LatLon>? _shape(String? encoded) {
+    if (encoded == null || encoded.isEmpty || encoded.length > TrafficSources.maxShapeChars) return null;
+    try {
+      final points = decodePolyline(encoded);
+      return points.length >= 2 && points.length <= TrafficSources.maxShapePoints ? points : null;
+    } catch (_) {
+      return null;
+    }
   }
 }
 
@@ -184,6 +208,7 @@ NostrEvent buildAlertEvent({
   JamLevel? level,
   int? lengthM,
   String? source,
+  List<LatLon>? shape,
   Duration? lasting,
 }) {
   if (type == AlertType.police && !FeatureFlags.policeAlerts) {
@@ -205,6 +230,7 @@ NostrEvent buildAlertEvent({
       if (level != null) ['level', level.code],
       if (lengthM != null) ['length', '$lengthM'],
       if (source != null) ['src', source],
+      if (shape != null && shape.length >= 2) ['shape', encodePolyline(shape)],
     ],
   );
 }

@@ -12,6 +12,8 @@ import 'package:roadto_traffic_bot/traffic_bot.dart';
 ///                          in TrafficSources.keys (roadto_core)
 ///   ROADTO_TRAFFIC_RELAYS  relays, comma separated (ws://127.0.0.1:7777)
 ///   ROADTO_TRAFFIC_FEEDS   TRAFICOLOR areas, comma separated (TraficLyon)
+///   ROADTO_TRAFFIC_ROUTING_URL  Valhalla server drawing each station's road
+///                          once (https://valhalla1.openstreetmap.de/)
 Future<void> main() async {
   final env = Platform.environment;
   final secret = env['ROADTO_TRAFFIC_KEY']?.trim() ?? '';
@@ -32,7 +34,10 @@ Future<void> main() async {
 
   final client = http.Client();
   final pool = RelayPool(relays);
-  final bot = TrafficBot(keys: keys, sites: await _referential(client));
+  final shapes = StretchShapes(
+    ValhallaRouter(baseUrl: env['ROADTO_TRAFFIC_ROUTING_URL'] ?? 'https://valhalla1.openstreetmap.de/', client: client),
+  );
+  final bot = TrafficBot(keys: keys, sites: await _referential(client), shapeOf: (id) => shapes[id]);
   var referentialAt = DateTime.now();
 
   while (true) {
@@ -50,6 +55,15 @@ Future<void> main() async {
         final file = latestFile(await _get(client, feedIndexUrl(feed)));
         if (file == null) continue;
         final data = parseStates(await _get(client, '${feedIndexUrl(feed)}$file'));
+        // The road of stations newly jammed, a few a minute (fair use of
+        // the routing server): their jams are drawn once it is known.
+        var asked = 0;
+        for (final MapEntry(key: id, value: state) in data.states.entries) {
+          final site = bot.sites[id];
+          if (site == null || levelOf(state) == null || !shapes.wants(site, DateTime.now()) || asked >= 10) continue;
+          asked++;
+          await shapes.fetch(site, DateTime.now());
+        }
         final events = bot.step(feed, file, data, DateTime.now());
         var accepted = 0;
         for (final e in events) {

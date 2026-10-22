@@ -61,6 +61,45 @@ void main() {
     expect(store.all, hasLength(4));
   });
 
+  test('the jammed stretch: from the robot only, checked by the relays', () {
+    const stretch = [LatLon(45.7485, 4.8467), LatLon(45.7510, 4.8480), LatLon(45.7540, 4.8490)];
+    NostrEvent shaped(KeyPair keys) => buildAlertEvent(
+      keys: keys,
+      type: AlertType.traffic,
+      position: here,
+      now: t0,
+      level: JamLevel.stopped,
+      source: 'bison-fute/S1',
+      shape: stretch,
+    );
+    final mine = RoadAlert.fromEvent(shaped(robot), trustedSources: {robot.publicKey})!;
+    expect(mine.shape, hasLength(3));
+    expect(distanceM(mine.shape!.last, stretch.last), lessThan(0.5));
+    expect(mine.level!.color, '#8E1B1B');
+    expect(RoadAlert.fromEvent(shaped(someone), trustedSources: {robot.publicKey})!.shape, isNull);
+    expect(checkWritePolicy(shaped(someone), now: t0), isNull);
+
+    NostrEvent tagged(String type, String shape) => NostrEvent.create(
+      keys: someone,
+      kind: RoadToKinds.alert,
+      createdAt: t0,
+      powDifficulty: PowPolicy.alert,
+      tags: [
+        ['t', type],
+        ['g', 'u05k'],
+        ['g', 'u05kq'],
+        ['expiration', '${t0.millisecondsSinceEpoch ~/ 1000 + 600}'],
+        ['shape', shape],
+      ],
+    );
+    expect(checkWritePolicy(tagged('traffic', 'a' * 5000), now: t0), 'invalid: tracé');
+    expect(checkWritePolicy(tagged('traffic', 'abc def'), now: t0), 'invalid: tracé');
+    expect(checkWritePolicy(tagged('accident', encodePolyline(stretch)), now: t0), 'invalid: tracé');
+    // Garbage that passes the relay is still never drawn.
+    final garbage = RoadAlert.fromEvent(tagged('traffic', '~~~~'), trustedSources: {someone.publicKey})!;
+    expect(garbage.shape, isNull);
+  });
+
   test('sensor alerts are not asked about', () {
     final sensor = RoadAlert.fromEvent(jam(robot, t0), trustedSources: {robot.publicKey})!;
     final driver = RoadAlert.fromEvent(jam(someone, t0, src: null), trustedSources: {robot.publicKey})!;

@@ -41,7 +41,7 @@
     ]
    ],
    "content": "",
-   "sig": "bc5400a6053a5a48fe8eece0a4d69df7f9c946537e7296b9cb8a567cda464264aebc6295ec8393ffaeccb6ac22abf8518adb7436c002607d115e21d75db1b3d6"
+   "sig": "0c0b997b17b507f58c703829e027f70e806f704d92dfdb23fae772acbbbb8206bf8dc80aa3a465b8dd46f9ccad1fbb78c42a5724e5c17d85a9e7ac9cbfcc288f"
   },
   {
    "id": "00003ef1ef0fca7ce78a39b9fdcbc0dbeb940f0baa78650b34ce609caee57a44",
@@ -68,7 +68,7 @@
     ]
    ],
    "content": "",
-   "sig": "658c550e42e30ab07dba22b1af3d22f07e98f03f4347654dcfcbaef07194aad9218af6ce8b53e002f20b0c20015d15a4de0c9d79c1fa617a045b0abe4e9b5f93"
+   "sig": "95099ddf6749a202a3cb855f5023101a1597f4fc40786c3e83334ba0dac33d1cb1ade0bd3f32a6a8d876eb9099c957845e6be5020f8087f0f7d1ca24e2de8e10"
   },
   {
    "id": "00d17916cabae4605fefa19defc03e5251e5b6167771a102290aed21909b1caf",
@@ -91,7 +91,7 @@
     ]
    ],
    "content": "",
-   "sig": "23c230466eece7f70619f1ddb467aaf57566d4f59adc4d7c390d054b5049ceceeeb1da98d29359db7d9ed33f3be5815297ab63869547942ffb34c3b849a9be3c"
+   "sig": "cfdaf570b357b986cfa4e678cb30e0ca41bb43a8a6fae1c7bfb8dbb5fb4f0cb7bd3b7f6cf46d7f3ffe62ddc017a94c7015c1d4c205cfced45bdc7b5b06662ed4"
   },
   {
    "id": "00cce0a181d3a262820997e976747e53678d0b5c51c66cd078ca2bc8a74dbf5e",
@@ -114,7 +114,7 @@
     ]
    ],
    "content": "",
-   "sig": "9cf960551e25784593659835439fb90dc796c4aec6a07349d501360e327a81ee13d597c3226b04dec0ae7d41e39a0283aed7eeb949ae8b771dd4de2bbb49039d"
+   "sig": "42b6ab80c86e934ed1161b0edb165be1aef4da5ee3c8773bfaa960971cd27ede960903c102b5cd5b7b1784a5e23f58de40633cc5633034ace98707da79cc7613"
   },
   {
    "id": "0071d2ed8da4f9df803e6880b3068593ac18c8515cc9a1971a5a7ebee691db6c",
@@ -137,7 +137,7 @@
     ]
    ],
    "content": "",
-   "sig": "f60625609b0993cdccf7f911f9dc39e393cd1d901f5a58e8cd89172581d1dbee7870e94872e422f62be6338d8f6f4bd5ef9e54cfbd193f05d1438b0c7d0155d3"
+   "sig": "5131333bf71e0f6a432b29fc9b8c7aad1063a00c652b04f0f2a227ed9bd35b7430f1dd468d4ca7d484efd23d12b38686f6adfda7fdb4b26099f42f00352f4a93"
   },
   {
    "id": "00d063b4f3a31d8260a13ac753662df450426473605afcdc75bb36b41ca0e7dd",
@@ -160,7 +160,7 @@
     ]
    ],
    "content": "",
-   "sig": "3bb86bfed8525ca3ada29831980efe027b3df802ba79e332e5445538ec185105b1d8c5dc05806f45e911bc5807a561adc9252f01431a5b652c3bbb7204be0624"
+   "sig": "3f2c6f6c4f17cedc13d168ad27e8f869e7dcdc82994ddf00e61f2634b76e9e7ce57839c06dc704c18d86746dc2943de1bb474cc2da936df42f073c981e3880a1"
   },
   {
    "id": "00ae1c4e9365a235f8c883c32ecf88f16cb3cab928cd7f02d421a47d85afcb08",
@@ -183,7 +183,7 @@
     ]
    ],
    "content": "",
-   "sig": "bf3b612ac46bc1fe80fdd589703ed26b780c0c12344d8135225d87856b59d5eca084343e4307fc0ccaa9efd1d3ee97b0c952c2235c5b2fed497488ffde9588a5"
+   "sig": "2dfdfa80cede6b37330efe31f703e9037cf9fe0db7dee4ecc0f8d1ce2ad03b0789ddfd0065f1ba2be9845918f11013a47e56dedcbe06854252d0a6a077e2e2c4"
   }
  ],
  "reliability": {
@@ -3937,7 +3937,7 @@
    "key": "9ac20335eb38768d2052be1dbbc3c8f6178407458e51e6b4ad22f1d91758895b",
    "events": [
     {
-     "id": "000c298de5255010e2a2926e55abac404b766fdbe5021a346e06c8f0fba97034",
+     "id": "000251134f0eee0582b7670c4858ca3046185123c5d8f90ab706f11bfeed29f7",
      "pubkey": "9ac20335eb38768d2052be1dbbc3c8f6178407458e51e6b4ad22f1d91758895b",
      "created_at": 1792656000,
      "kind": 4550,
@@ -3983,16 +3983,20 @@
        "bison-fute/MY269.D1"
       ],
       [
+       "shape",
+       "euvgvAsedfHir@{_@jBmz@vTgiAvUshApVchAjX{fA"
+      ],
+      [
        "nonce",
-       "1714",
+       "6850",
        "12"
       ]
      ],
      "content": "",
-     "sig": "bf8a73287160eee819b5b620f15463297c034af38e9195016c268e86c08f769a26d468ef7f95a3f22f084f7f98262eb16c5ca8e366f1df983a747a740f6fd4e5"
+     "sig": "e9e2a38c007580136553ef0d3ac8045a16dbf6834a2513aaf090c2beb5869cc0be554562fd9c5ba46ed73b083ec339fb3a8910fc7a350b7b4ccab3bcd3a0a043"
     },
     {
-     "id": "0007dd42de751ac55113df1f2e2c7cffa8acdb57ad2c5ac88de257984e5264a5",
+     "id": "00069a61202d20cf640c8153cfb757d7d40e4c869308dee2a99a11c055a99299",
      "pubkey": "9ac20335eb38768d2052be1dbbc3c8f6178407458e51e6b4ad22f1d91758895b",
      "created_at": 1792656300,
      "kind": 4550,
@@ -4038,16 +4042,50 @@
        "bison-fute/MY269.D1"
       ],
       [
+       "shape",
+       "euvgvAsedfHir@{_@jBmz@vTgiAvUshApVchAjX{fA"
+      ],
+      [
        "nonce",
-       "2667",
+       "613",
        "12"
       ]
      ],
      "content": "",
-     "sig": "4bb3e2643f7ad4fa8502e891aeabe89a243bb8fe33720a22805bef46629b8c98e78fcd7528889f96f3f6918063b021c948f6b9dc8c9ab45c10722fa5d02c3872"
+     "sig": "6ac07555718792fcd63d694a723b054cde348a94e780ba81423d8f8ac04626f08ddd84a685ef60d453ae21725f9407516c270f6e0f08c4cb3b850d2948e30c2d"
     }
    ],
-   "delayS": 772
+   "delayS": 772,
+   "shape": [
+    [
+     4.835946,
+     45.756259
+    ],
+    [
+     4.836472,
+     45.75708
+    ],
+    [
+     4.837423,
+     45.757026
+    ],
+    [
+     4.838611,
+     45.756678
+    ],
+    [
+     4.839789,
+     45.756314
+    ],
+    [
+     4.840959,
+     45.755937
+    ],
+    [
+     4.842109,
+     45.755531
+    ]
+   ]
   },
   "eta": {
    "learned": {

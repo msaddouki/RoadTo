@@ -9,6 +9,38 @@ String _fixture(String name) => File('test/fixtures/$name').readAsStringSync();
 /// A TRAFICOLOR file with these states, published at [at].
 ({DateTime? at, Map<String, String> states}) _file(DateTime at, Map<String, String> states) => (at: at, states: states);
 
+/// A route along [points], timed at 50 km/h.
+TripRoute _routeThrough(List<LatLon> points) {
+  var length = 0.0;
+  for (var i = 1; i < points.length; i++) {
+    length += distanceM(points[i - 1], points[i]);
+  }
+  return TripRoute(
+    shape: points,
+    maneuvers: [
+      Maneuver(type: 1, instruction: 'Partez.', beginShapeIndex: 0, lengthM: length, timeS: length / 13.9),
+      Maneuver(type: 4, instruction: 'Arrivée.', beginShapeIndex: points.length - 1, lengthM: 0, timeS: 0),
+    ],
+    lengthM: length,
+    timeS: length / 13.9,
+  );
+}
+
+class _FakeRouter implements RouteEngine {
+  TripRoute? Function(LatLon from, LatLon to, double? heading) answer;
+  int calls = 0;
+
+  _FakeRouter(this.answer);
+
+  @override
+  Future<TripRoute> route(LatLon from, LatLon to, {double? headingDeg, List<LatLon> avoid = const []}) async {
+    calls++;
+    final r = answer(from, to, headingDeg);
+    if (r == null) throw RoutingException('no route');
+    return r;
+  }
+}
+
 void main() {
   final sites = parseReferential(_fixture('refDir.csv'));
   final robot = KeyPair.fromPrivateKey('3' * 64);
@@ -128,6 +160,68 @@ void main() {
       final data = _file(now, {'MY269.D1': 'congested'});
       expect(bot.step('TraficLyon', 'same.xml', data, now), hasLength(1));
       expect(bot.step('TraficLyon', 'same.xml', data, now.add(const Duration(minutes: 6))), isEmpty);
+    });
+  });
+
+  group('the road of a station', () {
+    final a42 = sites['MY269.D1']!;
+
+    test('the route along the stretch, unless it strays; cut and thinned', () {
+      final along = _routeThrough([a42.start, a42.middle, a42.end]);
+      expect(stretchShape(a42, along), hasLength(3));
+      final detour = _routeThrough([a42.start, const LatLon(45.83, 4.95), a42.end]);
+      expect(stretchShape(a42, detour), isNull, reason: 'far longer than the stretch');
+      expect(stretchShape(sites['MY269.F3']!, along), isNull, reason: 'a point station');
+      // A long, finely drawn stretch: cut to 3 km, at most 200 points.
+      final long = Site('L', 'A7', const LatLon(45.70, 4.80), const LatLon(45.70 + 4000 / 111320, 4.80), 0);
+      final fine = _routeThrough([for (var i = 0; i <= 400; i++) LatLon(45.70 + i * 10 / 111320, 4.80)]);
+      final cut = stretchShape(long, fine)!;
+      expect(cut.length, lessThanOrEqualTo(200));
+      expect(distanceM(cut.first, long.start), lessThan(1));
+      expect(distanceM(cut.first, cut.last), closeTo(maxStretchM, 15));
+    });
+
+    test('asked once per station, heading with traffic; tried again an hour after a failure', () async {
+      double? heading;
+      final router = _FakeRouter((from, to, h) {
+        heading = h;
+        return _routeThrough([from, to]);
+      });
+      final shapes = StretchShapes(router);
+      expect(shapes.wants(a42, t0), isTrue);
+      await shapes.fetch(a42, t0);
+      expect(heading, a42.bearing);
+      expect(shapes[a42.id], hasLength(2));
+      expect(shapes.wants(a42, t0), isFalse);
+
+      final failing = StretchShapes(_FakeRouter((_, _, _) => null));
+      await failing.fetch(a42, t0);
+      expect(failing[a42.id], isNull);
+      expect(failing.wants(a42, t0.add(const Duration(minutes: 30))), isFalse);
+      expect(failing.wants(a42, t0.add(const Duration(hours: 1))), isTrue);
+    });
+
+    test('a jam carries its road once known', () async {
+      final shapes = StretchShapes(_FakeRouter((from, to, _) => _routeThrough([from, to])));
+      await shapes.fetch(a42, t0);
+      final bot = TrafficBot(keys: robot, sites: sites, shapeOf: (id) => shapes[id]);
+      bot.step('TraficLyon', 'a', _file(t0, {'MY269.D1': 'congested'}), t0);
+      final e = bot.step('TraficLyon', 'b', _file(t0, {'MY269.D1': 'congested'}), t0).single;
+      expect(checkWritePolicy(e, now: t0), isNull);
+      final alert = RoadAlert.fromEvent(e, trustedSources: {robot.publicKey})!;
+      final shape = alert.shape!;
+      expect(distanceM(shape.first, a42.start), lessThan(1));
+      expect(distanceM(shape.last, a42.end), lessThan(1));
+      // Its pin on the road: the middle of the road, within its cell.
+      expect(distanceM(alert.position, middleOf(shape)), lessThan(120));
+    });
+
+    test('the middle of a bent road is on it, not on the straight line', () {
+      const bend = [LatLon(45.70, 4.80), LatLon(45.71, 4.80), LatLon(45.71, 4.81427)];
+      final m = middleOf(bend);
+      // 1112 m north then 1112 m east: halfway is the corner.
+      expect(distanceM(m, bend[1]), lessThan(5));
+      expect(middleOf(const [LatLon(45.7, 4.8), LatLon(45.7, 4.8)]), const LatLon(45.7, 4.8));
     });
   });
 }

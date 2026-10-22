@@ -16,6 +16,7 @@ import {
 import { config, mapStyle, watchColorScheme } from '../site.js';
 import { verifyEvent } from '../verify.js';
 import { Navigation, loadPace, savePace } from '../navigation.js';
+import { addJamLayer, drawJams } from '../jams.js';
 import { BAND_LABELS, BANDS, EtaEstimator, LearnedPace, fastestWithJams, trafficDelays } from '../eta.js';
 
 const settings = config();
@@ -53,6 +54,9 @@ function addLayers() {
   // During a trip, the part already driven greys out.
   const color = ['match', ['get', 'part'], 'done', '#7A8699', '#3D8BFF'];
   map.addLayer({ id: 'route-line', type: 'line', source: 'route', layout, paint: { 'line-color': color, 'line-width': 8 } }, below);
+  // Jammed stretches over the route, as in the app.
+  addJamLayer(map);
+  drawJams(map, store.visible());
 }
 map.on('load', addLayers);
 watchColorScheme((style) => {
@@ -360,6 +364,7 @@ setInterval(onAlerts, 30_000);
 
 function onAlerts() {
   store.purge();
+  drawJams(map, store.visible());
   if (nav) {
     nav.onAlerts();
     return;

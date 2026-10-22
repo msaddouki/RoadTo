@@ -5,9 +5,11 @@ library;
 import 'package:roadto_core/roadto_core.dart';
 
 import 'bison_fute.dart';
+import 'shapes.dart';
 
 export 'bison_fute.dart';
 export 'lambert93.dart';
+export 'shapes.dart';
 
 class _SiteState {
   final JamLevel level;
@@ -37,10 +39,15 @@ class TrafficBot {
   /// A file older than this is a stuck feed: nothing is published from it.
   static const staleAfter = Duration(minutes: 10);
 
+  /// The road each station measures, when known ([StretchShapes]).
+  final List<LatLon>? Function(String id) shapeOf;
+
   final _states = <String, _SiteState>{};
   final _lastFile = <String, String>{};
 
-  TrafficBot({required this.keys, required this.sites, this.source = 'bison-fute'});
+  TrafficBot({required this.keys, required this.sites, this.source = 'bison-fute', this.shapeOf = _noShape});
+
+  static List<LatLon>? _noShape(String id) => null;
 
   /// Stations currently seen jammed (confirmed or not).
   int get jammed => _states.length;
@@ -76,16 +83,20 @@ class TrafficBot {
       if (s.readings < confirmations) continue;
       final last = s.publishedAt;
       if (last != null && s.publishedLevel == level && now.difference(last) < refreshEvery) continue;
+      final shape = shapeOf(id);
       out.add(
         buildAlertEvent(
           keys: keys,
           type: AlertType.traffic,
-          position: site.middle,
+          // On the road itself when its shape is known: a bend takes the
+          // straight line's middle off the road.
+          position: shape == null ? site.middle : middleOf(shape),
           bearing: site.bearing,
           now: now,
           level: level,
           lengthM: jamLengthOf(site),
           source: '$source/$id',
+          shape: shape,
           lasting: lasting,
         ),
       );

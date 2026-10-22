@@ -174,6 +174,7 @@ void main() {
     level: level,
     lengthM: length,
     source: 'bison-fute/MY269.D1',
+    shape: [for (var d = 1200.0; d <= 1800; d += 100) route.pointAt(d)],
     lasting: const Duration(minutes: 10),
   );
   final sensorOld = sensorJam(DateTime.utc(2026, 10, 22, 8), JamLevel.slow, 600);
@@ -234,6 +235,9 @@ void main() {
           'key': sensor.publicKey,
           'events': [sensorOld.toJson(), sensorNew.toJson()],
           'delayS': trafficDelays(route, [sensorAlert]).single.delay.inSeconds,
+          'shape': [
+            for (final p in sensorAlert.shape!) [p.lon, p.lat],
+          ],
         },
         'eta': {
           'learned': learned.toJson(),

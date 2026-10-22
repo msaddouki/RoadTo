@@ -55,6 +55,13 @@ String? checkWritePolicy(
         return 'invalid: longueur de bouchon';
       }
     }
+    final shape = e.tag('shape');
+    if (shape != null &&
+        (type != AlertType.traffic ||
+            shape.length > TrafficSources.maxShapeChars ||
+            !RegExp(r'^[\x3f-\x7e]+$').hasMatch(shape))) {
+      return 'invalid: tracé';
+    }
     final src = e.tag('src');
     if (src != null && (src.length > 80 || !RegExp(r'^[a-z0-9-]+/[A-Za-z0-9._-]+$').hasMatch(src))) {
       return 'invalid: source';

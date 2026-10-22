@@ -35,6 +35,18 @@ station's stretch, heading the way traffic goes, with three more tags:
 | `level` | `jam` | slow, jam or stopped (anyone may set it) |
 | `length` | `999` | metres of road, up to 3 km from a station |
 | `src` | `bison-fute/MY269.D1` | source and station: believed from the robot only |
+| `shape` | `ofqtvAu…` | the stretch along the road (polyline, precision 6): believed from the robot only |
+
+The stretch is drawn on the maps (app, Android Auto, site) in the jam's
+colour, orange when slow, red when jammed, dark red when stopped, with a
+dark edge so it shows even on an orange motorway, over the route and under
+the street names. The robot gets it once per station from Valhalla
+(`ROADTO_TRAFFIC_ROUTING_URL`, the public FOSSGIS server by default; ten
+stations a minute at most): the route from the start of the station's
+stretch to its end, heading with traffic, so it follows the road and the
+right carriageway. A route much longer than the stretch (a detour by an
+interchange) is dropped, and a stretch is cut to 3 km; a point station has
+no stretch to draw. The alert's pin sits at the middle of that road.
 
 It lives 10 minutes and is published again every 5 minutes while the jam
 lasts, at once when it gets worse or better; each station's newest alert

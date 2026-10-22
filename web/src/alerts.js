@@ -1,6 +1,7 @@
 // RoadTo alerts, as in packages/roadto_core/lib/src/alerts.dart: the event
 // format (ADR 0005), the store and its reliability score, read only.
 import { decode } from './geohash.js';
+import { decodePolyline } from './routing.js';
 
 export const KIND_ALERT = 4550;
 export const KIND_CONFIRMATION = 4551;
@@ -18,9 +19,9 @@ const MAX_TTL = Math.max(...Object.values(TYPES).map((t) => t.ttl));
 
 /** How bad a jam is, when the report says (tag `level`), as JamLevel in the core. */
 export const JAM_LEVELS = {
-  slow: { label: 'Ralenti', kph: 25 },
-  jam: { label: 'Bouchon', kph: 10 },
-  stopped: { label: 'À l’arrêt', kph: 5 },
+  slow: { label: 'Ralenti', kph: 25, color: '#FF9F1C' },
+  jam: { label: 'Bouchon', kph: 10, color: '#E53935' },
+  stopped: { label: 'À l’arrêt', kph: 5, color: '#8E1B1B' },
 };
 
 /**
@@ -30,6 +31,20 @@ export const JAM_LEVELS = {
 export const TRAFFIC_SOURCE_KEYS = ['72207f9f4206976cdbbfe80fddb9fae6cd852459c1f8f1154a4e05d5ff6c235e'];
 export const SOURCE_LABELS = { 'bison-fute': 'Bison Futé', grandlyon: 'Métropole de Lyon' };
 const MAX_LENGTH_M = 20000;
+const MAX_SHAPE_CHARS = 4000;
+const MAX_SHAPE_POINTS = 400;
+
+/** The jammed stretch (tag `shape`, polyline 6), or null. */
+function shapeOf(encoded) {
+  if (!encoded || encoded.length > MAX_SHAPE_CHARS) return null;
+  try {
+    const points = decodePolyline(encoded);
+    const sane = points.every((p) => Number.isFinite(p.lat) && Number.isFinite(p.lon) && Math.abs(p.lat) <= 90 && Math.abs(p.lon) <= 180);
+    return sane && points.length >= 2 && points.length <= MAX_SHAPE_POINTS ? points : null;
+  } catch {
+    return null;
+  }
+}
 
 /** Minimum proof of work (NIP-13), in leading zero bits of the id. */
 export const POW = { [KIND_ALERT]: 12, [KIND_CONFIRMATION]: 8 };
@@ -70,7 +85,8 @@ export function alertOf(e, trustedSources = TRAFFIC_SOURCE_KEYS) {
   const traffic = code === 'traffic';
   const level = traffic && JAM_LEVELS[tag(e, 'level')] ? tag(e, 'level') : null;
   const length = Number.parseInt(tag(e, 'length') ?? '', 10);
-  const source = trustedSources.includes(e.pubkey) ? (tag(e, 'src') ?? null) : null;
+  const trusted = trustedSources.includes(e.pubkey);
+  const source = trusted ? (tag(e, 'src') ?? null) : null;
   const prefix = source?.split('/')[0];
   return {
     id: e.id, author: e.pubkey, type: code, label: level ? JAM_LEVELS[level].label : type.label, color: type.color,
@@ -78,6 +94,7 @@ export function alertOf(e, trustedSources = TRAFFIC_SOURCE_KEYS) {
     createdAt: e.created_at, expiresAt, bearing: Number.isFinite(bearing) ? bearing : null,
     level, lengthM: traffic && length > 0 && length <= MAX_LENGTH_M ? length : null,
     source, sourceLabel: source ? (SOURCE_LABELS[prefix] ?? prefix) : null,
+    shape: traffic && trusted ? shapeOf(tag(e, 'shape')) : null,
   };
 }
 

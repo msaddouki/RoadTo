@@ -4,6 +4,7 @@ import { test } from 'node:test';
 
 import { AlertStore, alertOf } from '../src/alerts.js';
 import { trafficDelays } from '../src/eta.js';
+import { jamFeatures } from '../src/jams.js';
 import { parseRoute } from '../src/routing.js';
 import { verifyEvent } from '../src/verify.js';
 
@@ -46,4 +47,14 @@ test('the newest alert of a sensor replaces the previous one', () => {
 test('its delay, from its level and length, as the app computes it', () => {
   const a = alertOf(newer, [ref.key]);
   assert.deepEqual(trafficDelays(route, [a]).map((d) => d.delayS), [ref.delayS]);
+});
+
+test('the jammed stretch, from the robot only, drawn in its colour', () => {
+  const a = alertOf(newer, [ref.key]);
+  assert.equal(a.shape.length, ref.shape.length);
+  a.shape.forEach((p, i) => assert.ok(Math.abs(p.lon - ref.shape[i][0]) < 1e-9 && Math.abs(p.lat - ref.shape[i][1]) < 1e-9));
+  assert.equal(alertOf(newer, []).shape, null);
+  const fc = jamFeatures([a, alertOf(older, [ref.key]), { ...a, id: 'x', level: null }]);
+  assert.deepEqual(fc.features.map((f) => f.properties.color), ['#8E1B1B', '#FF9F1C']);
+  assert.deepEqual(fc.features[0].geometry.coordinates, ref.shape);
 });
