@@ -3,9 +3,9 @@ import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 
 import { GuidanceEngine, MANEUVER_ICONS, maneuverKind, maneuverLabel, thenOf } from '../src/guidance.js';
+import { roadAttributesRequest } from '../src/road.js';
 import {
   bearingAt, decodePolyline, encodePolyline, isOverLimit, limitAt, parseRoute, parseSpeedLimits, pointAt, routeRequest,
-  speedLimitsRequest,
 } from '../src/routing.js';
 
 const fixture = (name) => JSON.parse(readFileSync(new URL(`./fixtures/${name}`, import.meta.url)));
@@ -68,7 +68,7 @@ test('speed limits: parsed as the app does, merged, looked up', () => {
 test('polyline: encoding round trip, request on the route shape', () => {
   assert.equal(encodePolyline(route.shape), ref.trace.shape);
   assert.deepEqual(decodePolyline(encodePolyline(route.shape)), route.shape);
-  const r = speedLimitsRequest(route);
+  const r = roadAttributesRequest(route);
   assert.equal(r.shape_match, 'edge_walk');
   assert.ok(r.filters.attributes.includes('edge.speed_limit'));
   const withHeading = routeRequest({ lat: 1, lon: 2 }, { lat: 3, lon: 4 }, { headingDeg: 87.6 });

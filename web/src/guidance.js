@@ -2,7 +2,11 @@
 // (packages/roadto_core/lib/src/routing/guidance.dart): next maneuver,
 // distances, time left, off route, arrival and what to say when. The tests
 // replay a drive against the Dart engine's own answers.
+import { NO_DETAILS, laneHint, lanesFor, turnCue } from './road.js';
 import { maneuverStartM, projectOnRoute, shapeLengthM } from './routing.js';
+
+/** Lanes are shown from this far before the turn. */
+export const LANES_WITHIN_M = 1500;
 
 export class GuidanceEngine {
   #segmentHint = 0;
@@ -16,12 +20,14 @@ export class GuidanceEngine {
     this.offRouteThresholdM = offRouteThresholdM;
     this.offRouteConfirmations = offRouteConfirmations;
     this.arrivalThresholdM = arrivalThresholdM;
+    /** Lights, side streets and lanes of the route, once the server sent them (road.js). */
+    this.details = NO_DETAILS;
   }
 
   /**
    * The state after a new position ({lat, lon}):
    * {projection, nextManeuver, nextManeuverIndex, distanceToNextM,
-   *  remainingM, remainingS, offRoute, arrived, announcement}.
+   *  remainingM, remainingS, offRoute, arrived, announcement, cue, lanes}.
    */
   update(position, { speedMps = 0 } = {}) {
     const route = this.route;
@@ -64,6 +70,8 @@ export class GuidanceEngine {
     }
     const next = nextIdx === null ? null : route.maneuvers[nextIdx];
     const distanceToNextM = nextIdx === null ? remainingM : maneuverStartM(route, nextIdx) - along;
+    const cue = nextIdx === null || off ? null : turnCue(route, this.details, nextIdx, along);
+    const lanes = nextIdx === null || off || distanceToNextM > LANES_WITHIN_M ? null : lanesFor(route, this.details, nextIdx);
 
     // Time left: in proportion to the distance, at the routing engine's speeds.
     const ratio = total === 0 ? 0 : remainingM / total;
@@ -84,11 +92,14 @@ export class GuidanceEngine {
       // Close announcement: ~8 s before, at least 60 m, at most 250 m.
       const nearM = Math.min(Math.max(speedMps * 8, 60), 250);
       if (distanceToNextM <= nearM) {
-        if (!next.isArrival && this.#add(`${nextIdx}:pre`)) say = next.verbalPre ?? next.instruction;
+        if (!next.isArrival && this.#add(`${nextIdx}:pre`)) {
+          const text = next.verbalPre ?? next.instruction;
+          say = this.#withLanes(cue ? cue.spoken(text) : text, nextIdx, lanes);
+        }
       } else if (distanceToNextM <= 600 && distanceToNextM > nearM + 150) {
         if (this.#add(`${nextIdx}:alert`)) {
           const text = next.verbalAlert ?? (next.isArrival ? 'vous arrivez à destination' : next.instruction);
-          say = `Dans ${roundDistance(distanceToNextM)}, ${lowerFirst(text)}`;
+          say = this.#withLanes(`Dans ${roundDistance(distanceToNextM)}, ${lowerFirst(cue ? cue.spoken(text) : text)}`, nextIdx, lanes);
         }
       }
     }
@@ -103,7 +114,17 @@ export class GuidanceEngine {
       offRoute: this.#offRouteCount >= this.offRouteConfirmations,
       arrived,
       announcement: say,
+      cue,
+      lanes,
     };
+  }
+
+  /** [text] and, the first time this maneuver is announced with them known, the lanes to take. */
+  #withLanes(text, index, lanes) {
+    const hint = lanes ? laneHint(lanes) : null;
+    if (hint === null || !this.#add(`${index}:lanes`)) return text;
+    const t = text.trimEnd();
+    return `${t.endsWith('.') ? t : `${t}.`} Utilisez ${hint}.`;
   }
 
   #add(key) {
@@ -122,6 +143,17 @@ export class GuidanceEngine {
     }
     return lo;
   }
+}
+
+/**
+ * The trip camera's zoom (navigationZoom in the core): close in town,
+ * further out the faster the car, closer again just before a turn.
+ */
+export function navigationZoom(speedMps, distanceToTurnM = null) {
+  const kph = speedMps * 3.6;
+  let zoom = 18 - (Math.min(Math.max(kph - 30, 0), 80) / 80) * 1.8;
+  if (distanceToTurnM !== null && distanceToTurnM < 200 && kph < 60) zoom = Math.max(zoom, 18.3);
+  return Math.round(zoom * 10) / 10;
 }
 
 const lowerFirst = (s) => (s ? s[0].toLowerCase() + s.slice(1) : s);

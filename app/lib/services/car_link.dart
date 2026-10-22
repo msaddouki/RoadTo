@@ -196,7 +196,8 @@ Map<String, Object?> carState({
     if (navigating && next != null)
       'maneuver': {
         'type': next.type,
-        'instruction': next.instruction,
+        // "Au feu, tournez à gauche…", "Prenez la deuxième à droite…".
+        'instruction': g.cue?.spoken(next.instruction) ?? next.instruction,
         'street': next.streetNames.firstOrNull,
         'distanceM': g.distanceToNextM,
       },

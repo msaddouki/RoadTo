@@ -54,8 +54,9 @@ class AppController extends ChangeNotifier {
   bool routing = false;
   List<AlertAhead> ahead = const [];
 
-  /// Posted speed limits along [route], filled in shortly after it starts.
-  SpeedLimits speedLimits = SpeedLimits.none;
+  /// Speed limits, traffic lights, side streets and lanes along [route],
+  /// filled in shortly after it starts.
+  RoadDetails roadDetails = RoadDetails.none;
 
   /// How the driver's trips compare with the routing engine, learned on the
   /// phone (Réglages > Temps de trajet).
@@ -146,6 +147,7 @@ class AppController extends ChangeNotifier {
         configPath: region.routingConfigPath,
         call: DeviceRouting.route,
         traceAttributes: DeviceRouting.traceAttributes,
+        traceRoute: DeviceRouting.traceRoute,
       ),
       online,
       onFallback: (e) => debugPrint('Offline routing failed, using the server: ${e.message}'),
@@ -422,8 +424,8 @@ class AppController extends ChangeNotifier {
     _bankDriving();
     _eta = EtaEstimator(r, learned: learnedPace, carry: _eta?.live ?? LivePace.none);
     jams = trafficDelays(r, alerts.visible());
-    speedLimits = SpeedLimits.none;
-    unawaited(_loadSpeedLimits(r));
+    roadDetails = RoadDetails.none;
+    unawaited(_loadRoadDetails(r));
     _guidance = GuidanceEngine(r);
     guidance = null;
     _cells = const {};
@@ -456,7 +458,7 @@ class AppController extends ChangeNotifier {
   SpeedLimitSpan? get speedLimit {
     final g = guidance;
     if (route == null || g == null || g.offRoute) return null;
-    return speedLimits.at(g.projection.alongM);
+    return roadDetails.speedLimits.at(g.projection.alongM);
   }
 
   bool get overSpeed {
@@ -464,15 +466,16 @@ class AppController extends ChangeNotifier {
     return limit != null && f != null && isOverLimit(f.speedMps * 3.6, limit);
   }
 
-  Future<void> _loadSpeedLimits(TripRoute r) async {
-    if (_router case final SpeedLimitSource source) {
+  Future<void> _loadRoadDetails(TripRoute r) async {
+    if (_router case final RoadDetailsSource source) {
       try {
-        final limits = await source.speedLimits(r);
+        final details = await source.roadDetails(r);
         if (!identical(route, r)) return; // rerouted or stopped meanwhile
-        speedLimits = limits;
+        roadDetails = details;
+        _guidance?.details = details;
         notifyListeners();
       } on RoutingException catch (e) {
-        debugPrint('No speed limits for this route: ${e.message}');
+        debugPrint('No speed limits or lights for this route: ${e.message}');
       }
     }
   }
@@ -481,7 +484,7 @@ class AppController extends ChangeNotifier {
     _stopSimulator();
     _learnFromTrip();
     route = null;
-    speedLimits = SpeedLimits.none;
+    roadDetails = RoadDetails.none;
     _guidance = null;
     guidance = null;
     destination = null;

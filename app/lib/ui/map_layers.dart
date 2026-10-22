@@ -1,4 +1,6 @@
 import 'dart:math';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:roadto_core/roadto_core.dart';
@@ -101,6 +103,47 @@ Map<String, dynamic> jamsGeoJson(Iterable<RoadAlert> alerts) => featureCollectio
         },
       },
 ]);
+
+/// Traffic lights of [route] still ahead of [alongM]
+/// ([RoadDetails.signalsM]), where the route meets them.
+Map<String, dynamic> signalsGeoJson(TripRoute? route, RoadDetails details, {double alongM = 0}) => featureCollection([
+  if (route != null)
+    for (final s in details.signalsM)
+      if (s >= alongM - 20)
+        {
+          'type': 'Feature',
+          'properties': const <String, Object?>{},
+          'geometry': {'type': 'Point', 'coordinates': _coords(route.pointAt(s))},
+        },
+]);
+
+/// Name of the traffic light image on the map ([trafficLightPng]).
+const signalImage = 'roadto-signal';
+
+/// The map's traffic light, 12 × 26 logical pixels drawn at [pixelRatio]:
+/// a dark body with a white edge and its red, amber and green lights.
+Future<Uint8List> trafficLightPng(double pixelRatio) async {
+  const w = 12.0, h = 26.0;
+  final recorder = ui.PictureRecorder();
+  final canvas = Canvas(recorder)..scale(pixelRatio);
+  final body = RRect.fromRectAndRadius(const Rect.fromLTWH(1, 1, w - 2, h - 2), const Radius.circular(3.5));
+  canvas
+    ..drawRRect(body, Paint()..color = const Color(0xFF1B1F24))
+    ..drawRRect(
+      body,
+      Paint()
+        ..color = Colors.white
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.4,
+    );
+  for (final (i, color) in const [(0, Color(0xFFFF4D4D)), (1, Color(0xFFFFB300)), (2, Color(0xFF3DDC84))]) {
+    canvas.drawCircle(Offset(w / 2, 6.5 + i * 6.5), 2.4, Paint()..color = color);
+  }
+  final image = await recorder.endRecording().toImage((w * pixelRatio).ceil(), (h * pixelRatio).ceil());
+  final png = await image.toByteData(format: ui.ImageByteFormat.png);
+  image.dispose();
+  return png!.buffer.asUint8List();
+}
 
 /// Empty layer of RoadTo's style right under its labels: the route is drawn
 /// under it, so it never covers a name (pipeline/roadto_pipeline/drive_style.py).

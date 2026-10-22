@@ -21,6 +21,7 @@ export 'src/routing/gpx.dart';
 export 'src/routing/eta.dart';
 export 'src/routing/guidance.dart';
 export 'src/routing/replay.dart';
+export 'src/routing/road_details.dart';
 export 'src/routing/route.dart';
 export 'src/routing/simulator.dart';
 export 'src/routing/speed_limits.dart';

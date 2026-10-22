@@ -30,6 +30,10 @@ once a region is downloaded.
 - **Speed limits** from OSM on the navigation screen, red when over the
   limit (5 km/h margin, 5 % above 100 km/h); from the region's graph on
   Android, from the routing server otherwise.
+- **Traffic lights and lanes**: the lights on the map and in the guidance
+  ("Au 2e feu, tournez à gauche"), the streets counted ("Prenez la
+  deuxième à droite"), and the lanes to take before a turn, drawn in the
+  banner and said once; the camera close in town and before a turn.
 - **Navigation screen of the mockup**: next maneuver with the one after it
   when close ("Puis…"), the alert ahead with how many drivers confirmed it,
   speed limit and current speed, arrival time, and three large buttons

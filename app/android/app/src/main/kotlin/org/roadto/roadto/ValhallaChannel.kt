@@ -34,7 +34,7 @@ class ValhallaChannel(private val context: Context, messenger: BinaryMessenger) 
     init {
         channel.setMethodCallHandler { call, result ->
             when (call.method) {
-                "route", "traceAttributes" -> {
+                "route", "traceAttributes", "traceRoute" -> {
                     val config = call.argument<String>("config")
                     val request = call.argument<String>("request")
                     if (config == null || request == null) {
@@ -45,7 +45,9 @@ class ValhallaChannel(private val context: Context, messenger: BinaryMessenger) 
                         try {
                             val response = when (call.method) {
                                 "route" -> route(config, request)
-                                // Raw JSON is public for trace_attributes: no model mapping.
+                                // Raw JSON is public for these: no model mapping. trace_route
+                                // answers in OSRM form, the one with the lanes.
+                                "traceRoute" -> engine(config).traceRouteRaw(request)
                                 else -> engine(config).traceAttributesRaw(request)
                             }
                             main.post { result.success(response) }
