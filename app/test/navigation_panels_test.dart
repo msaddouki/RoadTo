@@ -54,7 +54,7 @@ void main() {
       await _pump(tester, ManeuverBanner(state: g));
       expect(find.text('Au feu'), findsOneWidget);
       expect(find.byIcon(Icons.traffic), findsOneWidget);
-      expect(find.bySemanticsLabel('Voies : la voie de droite'), findsOneWidget);
+      expect(find.bySemanticsLabel('Voies : la première voie à droite'), findsOneWidget);
       // The banner's arrow and the lane's.
       expect(find.byIcon(Icons.turn_right), findsNWidgets(2));
       expect(find.byIcon(Icons.turn_left), findsOneWidget);

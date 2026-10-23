@@ -129,17 +129,35 @@ export function parseLanes(json, route) {
   return out.sort((a, b) => a.alongM - b.alongM);
 }
 
-const NUMBERS = { 2: 'deux', 3: 'trois', 4: 'quatre' };
+const NUMBERS = { 2: 'deux', 3: 'trois', 4: 'quatre', 5: 'cinq' };
+const LANE_ORDINALS = { 1: 'première', 2: 'deuxième', 3: 'troisième', 4: 'quatrième', 5: 'cinquième', 6: 'sixième' };
+const nth = (i) => LANE_ORDINALS[i] ?? `${i}e`;
 
-/** Which lanes to take, in words ("les deux voies de gauche"); null when any will do or they are apart. */
+/**
+ * Which lanes to take, by their place across the road as Waze says it:
+ * "la voie de droite" (of two), "la voie du milieu", "la première voie à
+ * droite", "la deuxième voie à gauche" (from the nearer side), "les deux
+ * voies de gauche"; null when any will do or they are apart.
+ */
 export function laneHint(guide) {
-  const lanes = guide.lanes;
-  const valid = lanes.flatMap((l, i) => (l.valid ? [i] : []));
-  if (lanes.length < 2 || valid.length === 0 || valid.length === lanes.length) return null;
-  if (valid.at(-1) - valid[0] + 1 !== valid.length) return null;
-  const side = valid[0] === 0 ? 'de gauche' : valid.at(-1) === lanes.length - 1 ? 'de droite' : 'du milieu';
-  const n = valid.length;
-  return n === 1 ? `la voie ${side}` : `les ${NUMBERS[n] ?? n} voies ${side}`;
+  const n = guide.lanes.length;
+  const valid = guide.lanes.flatMap((l, i) => (l.valid ? [i] : []));
+  if (n < 2 || valid.length === 0 || valid.length === n) return null;
+  const a = valid[0], b = valid.at(-1), k = valid.length;
+  if (b - a + 1 !== k) return null;
+  const fromLeft = a + 1, fromRight = n - b;
+  if (k === 1) {
+    if (n === 2) return a === 0 ? 'la voie de gauche' : 'la voie de droite';
+    if (fromLeft === fromRight) return 'la voie du milieu';
+    return fromLeft < fromRight ? `la ${nth(fromLeft)} voie à gauche` : `la ${nth(fromRight)} voie à droite`;
+  }
+  const count = NUMBERS[k] ?? k;
+  if (a === 0) return `les ${count} voies de gauche`;
+  if (b === n - 1) return `les ${count} voies de droite`;
+  if (fromLeft === fromRight || k > 2) return `les ${count} voies du milieu`;
+  return fromLeft < fromRight
+    ? `la ${nth(fromLeft)} ou la ${nth(fromLeft + 1)} voie à gauche`
+    : `la ${nth(fromRight)} ou la ${nth(fromRight + 1)} voie à droite`;
 }
 
 const ORDINALS = { 2: ['2e', 'deuxième'], 3: ['3e', 'troisième'] };

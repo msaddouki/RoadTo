@@ -6,7 +6,7 @@
 import * as maplibregl from 'maplibre-gl';
 
 import { EtaEstimator, LearnedPace, fastestWithJams, trafficDelays } from './eta.js';
-import { GuidanceEngine, MANEUVER_ICONS, maneuverKind, maneuverLabel, navigationZoom, thenOf } from './guidance.js';
+import { GuidanceEngine, MANEUVER_ICONS, NAVIGATION_TILT, maneuverKind, maneuverLabel, navigationZoom, thenOf } from './guidance.js';
 import { ICONS } from './icons.js';
 import { NO_DETAILS, fetchRoadDetails, laneHint } from './road.js';
 import {
@@ -439,10 +439,10 @@ export class Navigation {
     this.map.easeTo({
       center: [fix.lon, fix.lat],
       bearing: fix.headingDeg ?? this.map.getBearing(),
-      pitch: 50,
+      pitch: NAVIGATION_TILT,
       zoom,
       // The car low on the screen, the road ahead above it, as in Waze.
-      padding: { top: Math.max(narrow ? 200 : 240, Math.round(innerHeight * 0.45)), bottom: narrow ? 140 : 120, left: 0, right: 0 },
+      padding: { top: Math.max(narrow ? 200 : 240, Math.round(innerHeight * 0.55)), bottom: narrow ? 140 : 120, left: 0, right: 0 },
       duration: now ? 600 : 950,
       easing: (t) => t,
     });

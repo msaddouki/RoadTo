@@ -204,15 +204,21 @@ class GuidanceEngine {
   }
 }
 
-/// The trip camera's zoom: close in town, further out the faster the car,
-/// closer again just before a turn, as Waze does. To a tenth, so that it
-/// does not pump with each fix.
+/// The trip camera's zoom, as Waze frames it: close in town (18.5 up to
+/// 50 km/h, the street and the next block filling the screen), further out
+/// the faster the car (16.6 from 130 km/h), closer again just before a
+/// turn. To a tenth, so that it does not pump with each fix. The camera
+/// leans as far as it goes ([navigationTilt]).
 double navigationZoom(double speedMps, {double? distanceToTurnM}) {
   final kph = speedMps * 3.6;
-  var zoom = 18 - (kph - 30).clamp(0, 80) / 80 * 1.8;
-  if (distanceToTurnM != null && distanceToTurnM < 200 && kph < 60) zoom = math.max(zoom, 18.3);
+  var zoom = 18.5 - (kph - 50).clamp(0, 80) / 80 * 1.9;
+  if (distanceToTurnM != null && distanceToTurnM < 200 && kph < 60) zoom = math.max(zoom, 18.8);
   return (zoom * 10).round() / 10;
 }
+
+/// The trip camera's tilt, degrees: Waze's 3D view, the most MapLibre
+/// allows.
+const navigationTilt = 60.0;
 
 String _lowerFirst(String s) => s.isEmpty ? s : s[0].toLowerCase() + s.substring(1);
 

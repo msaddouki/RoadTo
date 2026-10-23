@@ -67,6 +67,23 @@ test('guidance with the road details: the same words, cues and lanes as the app'
   assert.ok(said.includes('Dans 600 mètres, gardez la gauche pour prendre Pont Wilson. Utilisez les deux voies de gauche.'));
 });
 
+test('lanes named by their place across the road, as the app says them', () => {
+  const guide = (valid) => ({ lanes: valid.map((v) => ({ valid: v })) });
+  const cases = [
+    [[false, true], 'la voie de droite'],
+    [[false, true, false], 'la voie du milieu'],
+    [[false, false, true], 'la première voie à droite'],
+    [[false, true, false, false], 'la deuxième voie à gauche'],
+    [[false, false, true, false], 'la deuxième voie à droite'],
+    [[false, true, true, false], 'les deux voies du milieu'],
+    [[true, true, true, false], 'les trois voies de gauche'],
+    [[false, true, true, false, false], 'la deuxième ou la troisième voie à gauche'],
+    [[true, false, true], null],
+    [[true, true], null],
+  ];
+  for (const [valid, want] of cases) assert.equal(laneHint(guide(valid)), want, JSON.stringify(valid));
+});
+
 test('trip camera: closer in town and before a turn', () => {
   for (const kph of [0, 30, 50, 90, 130, 200]) assert.equal(navigationZoom(kph / 3.6), ref.zoom[kph], `${kph} km/h`);
   assert.equal(navigationZoom(40 / 3.6, 150), ref.zoom.turn);
