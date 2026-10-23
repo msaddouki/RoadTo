@@ -303,14 +303,24 @@ class AppController extends ChangeNotifier {
 
   /// Offline index first when a region is installed, online search otherwise
   /// or when the region has no match.
+  /// Places matching [query], the nearest first: from the region's index
+  /// when it has them near enough, else from the online search too (a
+  /// place outside the region), merged.
   Future<List<Place>> search(String query) async {
-    final offline = _offlineGeocoder;
-    if (offline != null) {
-      final found = offline.searchSync(query, near: position);
-      if (found.isNotEmpty) return found;
+    final found = _offlineGeocoder?.searchSync(query, near: position) ?? const <Place>[];
+    if (found.isNotEmpty && distanceM(position, found.first.position) <= offlineSearchEnoughM) return found;
+    try {
+      final online = await _onlineGeocoder.search(query, near: position);
+      return distinctPlaces([...online, ...found]).take(8).toList();
+    } on Exception {
+      if (found.isNotEmpty) return found; // offline: what the region has
+      rethrow;
     }
-    return _onlineGeocoder.search(query, near: position);
   }
+
+  /// The region's best answer further than this: the online search is asked
+  /// too.
+  static const offlineSearchEnoughM = 50000.0;
 
   /// Places of [category] ahead on the route when navigating, around the
   /// position otherwise. Null when no offline region is installed.

@@ -19,6 +19,17 @@ export function parsePhoton(json) {
   return out;
 }
 
+/** [places] once each by their label, in order: OSM cuts a street into several ways (distinctPlaces in the core). */
+export function distinctPlaces(places) {
+  const seen = new Set();
+  return places.filter((p) => {
+    const label = p.detail ? `${p.name}, ${p.detail}` : p.name;
+    if (seen.has(label)) return false;
+    seen.add(label);
+    return true;
+  });
+}
+
 /** Places matching [query], nearest [near] first; [] under 3 characters. */
 export async function searchPlaces(baseUrl, query, { near, limit = 6, signal, fetchImpl = globalThis.fetch } = {}) {
   const q = query.trim();
@@ -26,11 +37,12 @@ export async function searchPlaces(baseUrl, query, { near, limit = 6, signal, fe
   const url = new URL('api', baseUrl);
   url.search = new URLSearchParams({
     q,
-    limit: String(limit),
+    // A few more: the same street often comes back once per way.
+    limit: String(limit + 4),
     lang: 'fr',
     ...(near ? { lat: near.lat.toFixed(4), lon: near.lon.toFixed(4) } : {}),
   });
   const res = await fetchImpl(url, { signal });
   if (!res.ok) throw new Error(`Recherche indisponible (${res.status})`);
-  return parsePhoton(await res.json());
+  return distinctPlaces(parsePhoton(await res.json())).slice(0, limit);
 }

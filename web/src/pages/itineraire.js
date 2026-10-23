@@ -10,7 +10,7 @@ import { ICONS } from '../icons.js';
 import { appLink, parseRoute, routeLink } from '../links.js';
 import { RelayPool } from '../relays.js';
 import {
-  BLOCKING, RoutingError, alertSummary, alertsOnRoute, bounds, distanceText, durationText, fetchRoute, fetchRoutes,
+  BLOCKING, RoutingError, alertSummary, alertsOnRoute, bounds, distanceM, distanceText, durationText, fetchRoute, fetchRoutes,
   projectOnRoute,
 } from '../routing.js';
 import { config, mapStyle, watchColorScheme } from '../site.js';
@@ -33,6 +33,8 @@ const state = {
 };
 // How this visitor's trips compare with the engine, learned in this browser.
 let learned = loadPace();
+// Where the visitor is, once "Ma position" was asked (never before).
+let here = null;
 
 const map = new maplibregl.Map({
   container: 'map',
@@ -114,7 +116,11 @@ for (const [which, { input, list }] of Object.entries(fields)) {
         name.textContent = r.name;
         const detail = document.createElement('span');
         detail.textContent = r.detail;
-        li.append(name, detail);
+        // How far, as in the app and Waze: the nearest is easy to tell.
+        const far = document.createElement('small');
+        far.className = 'far';
+        far.textContent = r.km;
+        li.append(name, detail, far);
         // Before blur, so the click is not lost when the list closes.
         li.addEventListener('pointerdown', (e) => {
           e.preventDefault();
@@ -140,9 +146,12 @@ for (const [which, { input, list }] of Object.entries(fields)) {
     }
     timer = setTimeout(async () => {
       controller = new AbortController();
-      const c = map.getCenter();
+      const near = searchCentre(which);
       try {
-        results = await searchPlaces(settings.geocoderUrl, input.value, { near: { lat: c.lat, lon: c.lng }, signal: controller.signal });
+        results = (await searchPlaces(settings.geocoderUrl, input.value, { near, signal: controller.signal })).map((r) => ({
+          ...r,
+          km: distanceText(distanceM(near, r)),
+        }));
         active = -1;
         render();
         say(results.length ? '' : 'Aucun résultat');
@@ -184,12 +193,24 @@ $('locate').addEventListener('click', () => {
   navigator.geolocation.getCurrentPosition(
     (pos) => {
       say('');
-      setEnd('from', { lat: pos.coords.latitude, lon: pos.coords.longitude, name: 'Ma position', here: true });
+      here = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+      setEnd('from', { ...here, name: 'Ma position', here: true });
     },
     () => say('Position refusée ou introuvable : tapez une adresse de départ', true),
     { enableHighAccuracy: true, timeout: 10_000, maximumAge: 60_000 },
   );
 });
+
+/**
+ * Where to look first: around the departure for the destination, else
+ * around the visitor, else around the map's centre.
+ */
+function searchCentre(which) {
+  if (which === 'to' && state.from) return { lat: state.from.lat, lon: state.from.lon };
+  if (here) return here;
+  const c = map.getCenter();
+  return { lat: c.lat, lon: c.lng };
+}
 
 function setEnd(which, place) {
   state[which] = place;

@@ -50,6 +50,18 @@ def test_address_gets_nearest_city(index):
     assert ("address", None, "12", "Rue de la République", "Lyon") in rows
 
 
+def test_house_numbers_take_the_street_of_their_associated_street_relation(index):
+    rows = index.execute(
+        "SELECT housenumber, street, city FROM place WHERE kind = 'address' AND street = 'Rue Victor Hugo'"
+        " ORDER BY housenumber"
+    ).fetchall()
+    # A node and a building, both in the relation; Lyon from the boundary.
+    assert rows == [("12", "Rue Victor Hugo", "Lyon"), ("14", "Rue Victor Hugo", "Lyon")]
+    assert ("address", None, "12", "Rue Victor Hugo", "Lyon") in search(index, "12 victor hugo")
+    # A lone house number, without a street anywhere, stays out.
+    assert index.execute("SELECT count(*) FROM place WHERE housenumber = '99'").fetchone() == (0,)
+
+
 def test_city_comes_from_the_commune_boundary(index):
     city = dict(index.execute("SELECT name, city FROM place WHERE name IN ('Gare Part-Dieu', 'Izivia')").fetchall())
     # Closer to Villeurbanne's centre, but inside Lyon (boundary relation).

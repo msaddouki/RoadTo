@@ -39,7 +39,8 @@ class PhotonGeocoder implements Geocoder {
         .replace(
           queryParameters: {
             'q': query.trim(),
-            'limit': '$limit',
+            // A few more: the same street often comes back once per way.
+            'limit': '${limit + 4}',
             'lang': language,
             if (near != null) 'lat': near.lat.toStringAsFixed(4),
             if (near != null) 'lon': near.lon.toStringAsFixed(4),
@@ -47,8 +48,20 @@ class PhotonGeocoder implements Geocoder {
         );
     final res = await _client.get(uri).timeout(const Duration(seconds: 10));
     if (res.statusCode != 200) throw Exception('Recherche indisponible (${res.statusCode})');
-    return parsePhoton(jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>);
+    return distinctPlaces(
+      parsePhoton(jsonDecode(utf8.decode(res.bodyBytes)) as Map<String, dynamic>),
+    ).take(limit).toList();
   }
+}
+
+/// [places] once each by their label, in order: OSM cuts a street into
+/// several ways, all called "Rue de la République, Lyon".
+List<Place> distinctPlaces(Iterable<Place> places) {
+  final seen = <String>{};
+  return [
+    for (final p in places)
+      if (seen.add(p.label)) p,
+  ];
 }
 
 List<Place> parsePhoton(Map<String, dynamic> json) {

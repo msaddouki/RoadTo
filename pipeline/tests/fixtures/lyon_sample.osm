@@ -97,4 +97,28 @@
     <tag k="railway" v="station"/>
     <tag k="name" v="Gare Part-Dieu"/>
   </node>
+  <!-- House numbers without addr:street, their street in an
+       associatedStreet relation (as in the Grand Lyon import). -->
+  <node id="30" lat="45.7560" lon="4.8290" version="1">
+    <tag k="addr:housenumber" v="12"/>
+  </node>
+  <node id="31" lat="45.7561" lon="4.8295" version="1"/>
+  <node id="32" lat="45.7562" lon="4.8297" version="1"/>
+  <node id="33" lat="45.7563" lon="4.8295" version="1"/>
+  <way id="106" version="1">
+    <nd ref="31"/><nd ref="32"/><nd ref="33"/><nd ref="31"/>
+    <tag k="building" v="yes"/>
+    <tag k="addr:housenumber" v="14"/>
+  </way>
+  <!-- A lone house number, in no relation: not an address. -->
+  <node id="34" lat="45.7570" lon="4.8300" version="1">
+    <tag k="addr:housenumber" v="99"/>
+  </node>
+  <relation id="201" version="1">
+    <member type="node" ref="30" role="house"/>
+    <member type="way" ref="106" role="house"/>
+    <member type="way" ref="100" role="street"/>
+    <tag k="type" v="associatedStreet"/>
+    <tag k="name" v="Rue Victor Hugo"/>
+  </relation>
 </osm>
