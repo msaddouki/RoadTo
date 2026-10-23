@@ -109,9 +109,33 @@ def _poi_kind(tags) -> str | None:
     return None
 
 
-class _Collector(osmium.SimpleHandler):
+class _AssociatedStreets(osmium.SimpleHandler):
+    """House numbers of associatedStreet relations, with their street's name.
+
+    Many French imports (Grand Lyon, the cadastre) put a house number alone
+    on a node or a building and its street in such a relation: without it,
+    most of Lyon's addresses would be missing from the index.
+    """
+
     def __init__(self) -> None:
         super().__init__()
+        self.streets: dict[tuple[str, int], str] = {}
+
+    def relation(self, r) -> None:
+        if r.tags.get("type") not in ("associatedStreet", "street"):
+            return
+        name = r.tags.get("name")
+        if not name:
+            return
+        for m in r.members:
+            if m.role in ("house", "address") and m.type in ("n", "w"):
+                self.streets.setdefault((m.type, m.ref), name)
+
+
+class _Collector(osmium.SimpleHandler):
+    def __init__(self, associated: dict[tuple[str, int], str] | None = None) -> None:
+        super().__init__()
+        self.associated = associated or {}
         self.rows: list[Row] = []
         self.streets: dict[tuple[str, int, int], Row] = {}
         self.communes: list[tuple[str, str]] = []  # (name, WKB in hex)
@@ -119,7 +143,8 @@ class _Collector(osmium.SimpleHandler):
 
     def node(self, n) -> None:
         if n.location.valid():
-            self._feature(n.tags, n.location.lat, n.location.lon, is_way=False)
+            self._feature(n.tags, n.location.lat, n.location.lon, is_way=False,
+                          street=self.associated.get(("n", n.id)))
 
     def way(self, w) -> None:
         lats, lons = [], []
@@ -130,7 +155,8 @@ class _Collector(osmium.SimpleHandler):
         if not lats:
             return
         # Mean of the vertices: good enough to centre a result on screen.
-        self._feature(w.tags, sum(lats) / len(lats), sum(lons) / len(lons), is_way=True)
+        self._feature(w.tags, sum(lats) / len(lats), sum(lons) / len(lons), is_way=True,
+                      street=self.associated.get(("w", w.id)))
 
     def area(self, a) -> None:
         # Defining this callback makes apply_file() assemble areas (closed
@@ -146,11 +172,11 @@ class _Collector(osmium.SimpleHandler):
         except RuntimeError:
             pass  # broken geometry: the nearest settlement is used instead
 
-    def _feature(self, tags, lat: float, lon: float, *, is_way: bool) -> None:
+    def _feature(self, tags, lat: float, lon: float, *, is_way: bool, street: str | None = None) -> None:
         name = tags.get("name")
         addr = dict(
             housenumber=tags.get("addr:housenumber"),
-            street=tags.get("addr:street") or tags.get("addr:place"),
+            street=tags.get("addr:street") or tags.get("addr:place") or street,
             postcode=tags.get("addr:postcode"),
             city=tags.get("addr:city"),
         )
@@ -235,7 +261,10 @@ class _CommuneIndex:
 
 def collect(osm_path: str | Path) -> list[Row]:
     """Reads an OSM file (.osm.pbf or .osm) and returns the rows to index."""
-    handler = _Collector()
+    # Relations come last in a file: their streets are read in a first pass.
+    associated = _AssociatedStreets()
+    associated.apply_file(str(osm_path))
+    handler = _Collector(associated.streets)
     handler.apply_file(str(osm_path), locations=True)
     rows = handler.rows + list(handler.streets.values())
     pending = [r for r in rows if r.city is None and not r.kind.startswith("place=")]

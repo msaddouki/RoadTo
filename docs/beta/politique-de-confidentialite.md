@@ -75,7 +75,7 @@ s'adresse à des services publics fondés sur OpenStreetMap :
 | Service | Ce qu'il reçoit | Quand |
 | --- | --- | --- |
 | Tuiles de carte OpenFreeMap | les zones de carte affichées, votre adresse IP | carte en ligne |
-| Recherche Photon (Komoot) | le texte recherché, une position approximative pour classer les résultats | recherche hors région |
+| Recherche Photon (Komoot) | le texte recherché, une position approximative pour classer les résultats | recherche hors région, ou quand la région n'a rien de proche (à plus de 50 km) |
 | Itinéraires Valhalla (FOSSGIS) | le départ, l'arrivée et votre cap | itinéraire hors région, et toujours sur iPhone pendant la bêta |
 
 Sur le site, la page **Itinéraire** utilise les mêmes services, depuis

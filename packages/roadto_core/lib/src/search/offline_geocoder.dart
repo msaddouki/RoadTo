@@ -49,24 +49,24 @@ class OfflineGeocoder implements Geocoder {
     if (fts == null) return const [];
     final numbers = _token.allMatches(query).map((m) => m[0]!).where((t) => RegExp(r'^\d').hasMatch(t)).toSet();
 
-    final rows = _db.select(
-      'SELECT p.kind, p.name, p.housenumber, p.street, p.postcode, p.city, p.lat, p.lon, p.importance,'
-      ' bm25(place_fts, 10.0, 6.0, 2.0, 3.0) AS score'
-      ' FROM place_fts JOIN place p ON p.id = place_fts.rowid'
-      ' WHERE place_fts MATCH ?'
-      // Unnamed places (car parks, stations without a brand) are only found by category.
-      " AND (p.name IS NOT NULL OR p.kind IN ('address', 'street'))"
-      ' ORDER BY score LIMIT 300',
-      [fts],
-    );
+    // The best matches by their words, and the best around [near]: a common
+    // street name ("rue Victor Hugo") matches hundreds of places in a region,
+    // and the nearest is not always among the best by words alone.
+    final rows = {for (final r in _matches(fts)) r['id'] as int: r};
+    if (near != null) {
+      for (final r in _matches(fts, around: near)) {
+        rows[r['id'] as int] = r;
+      }
+    }
 
     final scored = <(double, Place)>[];
-    for (final r in rows) {
+    for (final r in rows.values) {
       final position = LatLon(r['lat'] as double, r['lon'] as double);
       // bm25 is negative, lower is better.
       var score = -(r['score'] as double) + (r['importance'] as int) / 25;
-      if (numbers.contains(r['housenumber'])) score += 3;
-      if (near != null) score -= math.log(1 + distanceM(near, position) / 1000) / 1.5;
+      // "12 rue Victor Hugo": number 12 first, not 128 (words match as prefixes).
+      if (numbers.isNotEmpty && r['kind'] == 'address') score += numbers.contains(r['housenumber']) ? 3 : -2;
+      if (near != null) score -= math.log(1 + distanceM(near, position) / 1000) * distanceWeight;
       scored.add((score, _toPlace(r, position)));
     }
     scored.sort((a, b) => b.$1.compareTo(a.$1));
@@ -77,6 +77,33 @@ class OfflineGeocoder implements Geocoder {
         if (seen.add(p.label)) p,
     ].take(limit).toList();
   }
+
+  /// How much distance counts against the words: at 1, a place 10 km away
+  /// needs a match about 2.4 points better than one next door.
+  static const distanceWeight = 1.0;
+
+  /// Half-side of the box searched around the driver, degrees (~35 km).
+  static const _aroundDeg = 0.3;
+
+  ResultSet _matches(String fts, {LatLon? around}) => _db.select(
+    'SELECT p.id, p.kind, p.name, p.housenumber, p.street, p.postcode, p.city, p.lat, p.lon, p.importance,'
+    ' bm25(place_fts, 10.0, 6.0, 2.0, 3.0) AS score'
+    ' FROM place_fts JOIN place p ON p.id = place_fts.rowid'
+    ' WHERE place_fts MATCH ?'
+    // Unnamed places (car parks, stations without a brand) are only found by category.
+    " AND (p.name IS NOT NULL OR p.kind IN ('address', 'street'))"
+    '${around == null ? '' : ' AND p.lat BETWEEN ? AND ? AND p.lon BETWEEN ? AND ?'}'
+    ' ORDER BY score LIMIT 300',
+    [
+      fts,
+      if (around != null) ...[
+        around.lat - _aroundDeg,
+        around.lat + _aroundDeg,
+        around.lon - _aroundDeg / math.cos(around.lat * math.pi / 180),
+        around.lon + _aroundDeg / math.cos(around.lat * math.pi / 180),
+      ],
+    ],
+  );
 
   static const _columns = 'kind, name, housenumber, street, postcode, city, lat, lon';
 

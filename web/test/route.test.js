@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 
-import { parsePhoton, searchPlaces } from '../src/geocoder.js';
+import { distinctPlaces, parsePhoton, searchPlaces } from '../src/geocoder.js';
 import { cellsAlong, encode } from '../src/geohash.js';
 import { parseRoute as parseRouteLink, routeLink } from '../src/links.js';
 import {
@@ -135,4 +135,15 @@ test('search: Photon answers as the app labels them', async () => {
   assert.equal(asked.pathname, '/api');
   assert.equal(asked.searchParams.get('q'), 'gare');
   assert.equal(asked.searchParams.get('lat'), '45.7600');
+});
+
+test('search: a street cut into several ways comes once, up to the limit', async () => {
+  const street = (city, lon) => ({ geometry: { coordinates: [lon, 45.76] }, properties: { name: 'Rue de la République', city } });
+  const fetchImpl = async (url) => {
+    assert.equal(new URL(url).searchParams.get('limit'), '7', 'a few more than shown');
+    return { ok: true, json: async () => ({ features: [street('Lyon', 4.836), street('Lyon', 4.837), street('Oullins', 4.81), street('Bron', 4.9)] }) };
+  };
+  const found = await searchPlaces('https://photon.example/', 'rue de la republique', { limit: 3, fetchImpl });
+  assert.deepEqual(found.map((p) => p.detail), ['Lyon', 'Oullins', 'Bron']);
+  assert.deepEqual(distinctPlaces([{ name: 'A', detail: 'x' }, { name: 'A', detail: 'x' }, { name: 'A', detail: '' }]).length, 2);
 });

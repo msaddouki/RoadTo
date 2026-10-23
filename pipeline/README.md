@@ -45,6 +45,12 @@ there is one; private ones (`access=private|no`) are left out. An index on
 `(kind, lat, lon)` serves category search; it is additive, so older apps
 read new packages unchanged.
 
+An address is a house number with its street: `addr:street` (or
+`addr:place`), or else the name of the `associatedStreet` relation the
+number belongs to (role `house`). Many French imports work that way, the
+Grand Lyon one among them: without the relations, most of Lyon's numbers
+were missing (112 addresses instead of 2,032 around Bellecour and Ainay).
+
 Each place shows its commune: `addr:city` when OSM has it, otherwise the
 commune whose boundary (`boundary=administrative`, `admin_level=8`) contains
 it, and the nearest city, town or village only where no boundary is known.
