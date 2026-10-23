@@ -32,8 +32,11 @@ the browser's location (`watchPosition`) with:
   gauche"), the streets counted ("Prenez la deuxième à droite") and the
   lanes to take before a turn, as in the app (`src/road.js`: Valhalla
   `trace_attributes`, and `trace_route` in OSRM form for the lanes);
-- a camera close in town and before a turn, further out when fast, with
-  the car low on the screen;
+- the lanes said by their place across the road, as Waze says them ("la
+  première voie à droite", "la voie du milieu", "les deux voies de
+  gauche");
+- a camera framed as Waze's: close in town and before a turn, further out
+  when fast, leaning at 60°, the car low on the screen;
 - the next alert ahead from the relays; a road reported closed or an
   accident ahead reroutes, as does leaving the route (3 fixes off, at most
   every 15 s);

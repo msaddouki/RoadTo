@@ -72,26 +72,48 @@ class LaneGuide {
 
   const LaneGuide(this.alongM, this.lanes);
 
-  /// Which lanes to take, for the voice: "la voie de gauche", "les deux
-  /// voies de droite"; null when any lane will do or the right ones are not
-  /// side by side.
+  /// Which lanes to take, for the voice, by their place across the road as
+  /// Waze says it: "la voie de droite" (of two), "la voie du milieu", "la
+  /// première voie à droite", "la deuxième voie à gauche" (counted from the
+  /// nearer side), "les deux voies de gauche"; null when any lane will do or
+  /// the right ones are not side by side.
   String? get hint {
+    final n = lanes.length;
     final valid = [
-      for (var i = 0; i < lanes.length; i++)
+      for (var i = 0; i < n; i++)
         if (lanes[i].valid) i,
     ];
-    if (lanes.length < 2 || valid.isEmpty || valid.length == lanes.length) return null;
-    if (valid.last - valid.first + 1 != valid.length) return null;
-    final side = valid.first == 0
-        ? 'de gauche'
-        : valid.last == lanes.length - 1
-        ? 'de droite'
-        : 'du milieu';
-    final n = valid.length;
-    return n == 1 ? 'la voie $side' : 'les ${_numbers[n] ?? '$n'} voies $side';
+    if (n < 2 || valid.isEmpty || valid.length == n) return null;
+    final a = valid.first, b = valid.last, k = valid.length;
+    if (b - a + 1 != k) return null;
+    // From each side, 1 for the lane at the edge.
+    final fromLeft = a + 1, fromRight = n - b;
+    if (k == 1) {
+      if (n == 2) return a == 0 ? 'la voie de gauche' : 'la voie de droite';
+      if (fromLeft == fromRight) return 'la voie du milieu';
+      return fromLeft < fromRight ? 'la ${_nth(fromLeft)} voie à gauche' : 'la ${_nth(fromRight)} voie à droite';
+    }
+    final count = _numbers[k] ?? '$k';
+    if (a == 0) return 'les $count voies de gauche';
+    if (b == n - 1) return 'les $count voies de droite';
+    if (fromLeft == fromRight || k > 2) return 'les $count voies du milieu';
+    // Two lanes off the middle: named from the nearer side.
+    return fromLeft < fromRight
+        ? 'la ${_nth(fromLeft)} ou la ${_nth(fromLeft + 1)} voie à gauche'
+        : 'la ${_nth(fromRight)} ou la ${_nth(fromRight + 1)} voie à droite';
   }
 
-  static const _numbers = {2: 'deux', 3: 'trois', 4: 'quatre'};
+  static const _numbers = {2: 'deux', 3: 'trois', 4: 'quatre', 5: 'cinq'};
+  static String _nth(int i) => _laneOrdinals[i] ?? '${i}e';
+
+  static const _laneOrdinals = {
+    1: 'première',
+    2: 'deuxième',
+    3: 'troisième',
+    4: 'quatrième',
+    5: 'cinquième',
+    6: 'sixième',
+  };
 }
 
 /// Valhalla `trace_attributes` request for the speed limits, traffic lights

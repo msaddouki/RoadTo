@@ -146,15 +146,19 @@ export class GuidanceEngine {
 }
 
 /**
- * The trip camera's zoom (navigationZoom in the core): close in town,
- * further out the faster the car, closer again just before a turn.
+ * The trip camera's zoom, as Waze frames it (navigationZoom in the core):
+ * close in town, further out the faster the car, closer again just before
+ * a turn.
  */
 export function navigationZoom(speedMps, distanceToTurnM = null) {
   const kph = speedMps * 3.6;
-  let zoom = 18 - (Math.min(Math.max(kph - 30, 0), 80) / 80) * 1.8;
-  if (distanceToTurnM !== null && distanceToTurnM < 200 && kph < 60) zoom = Math.max(zoom, 18.3);
+  let zoom = 18.5 - (Math.min(Math.max(kph - 50, 0), 80) / 80) * 1.9;
+  if (distanceToTurnM !== null && distanceToTurnM < 200 && kph < 60) zoom = Math.max(zoom, 18.8);
   return Math.round(zoom * 10) / 10;
 }
+
+/** The trip camera's tilt: Waze's 3D view, the most MapLibre allows. */
+export const NAVIGATION_TILT = 60;
 
 const lowerFirst = (s) => (s ? s[0].toLowerCase() + s.slice(1) : s);
 

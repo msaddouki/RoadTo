@@ -235,18 +235,30 @@ void main() {
       expect(lanes, hasLength(1));
       expect(lanes.single.alongM, closeTo(1000, 2));
       final details = const RoadDetails().withLanes(lanes);
-      expect(lanesFor(route, details, 1)!.hint, 'la voie de gauche');
+      expect(lanesFor(route, details, 1)!.hint, 'la première voie à gauche');
       expect(lanesFor(route, details, 2), isNull);
       expect(parseLanes(const {}, route), isEmpty);
     });
 
-    test('which lanes to take, in words', () {
+    test('which lanes to take, by their place across the road', () {
       LaneGuide guide(List<bool> valid) => LaneGuide(0, [
         for (final v in valid) Lane(const ['straight'], valid: v, arrow: 'straight'),
       ]);
+      // One lane: where it is across the road, counted from the nearer side.
       expect(guide([false, true]).hint, 'la voie de droite');
+      expect(guide([true, false]).hint, 'la voie de gauche');
+      expect(guide([false, true, false]).hint, 'la voie du milieu');
+      expect(guide([false, false, true]).hint, 'la première voie à droite');
+      expect(guide([true, false, false, false]).hint, 'la première voie à gauche');
+      expect(guide([false, true, false, false]).hint, 'la deuxième voie à gauche');
+      expect(guide([false, false, true, false]).hint, 'la deuxième voie à droite');
+      expect(guide([false, false, true, false, false]).hint, 'la voie du milieu');
+      // Several.
       expect(guide([false, true, true, false]).hint, 'les deux voies du milieu');
       expect(guide([true, true, true, false]).hint, 'les trois voies de gauche');
+      expect(guide([false, false, true, true]).hint, 'les deux voies de droite');
+      expect(guide([false, true, true, false, false]).hint, 'la deuxième ou la troisième voie à gauche');
+      expect(guide([false, false, true, true, false]).hint, 'la deuxième ou la troisième voie à droite');
       expect(guide([true, false, true]).hint, isNull, reason: 'not side by side');
       expect(guide([true, true]).hint, isNull);
       expect(guide([true]).hint, isNull);
@@ -254,11 +266,12 @@ void main() {
   });
 
   test('the trip camera: close in town, further out when fast, closer before a turn', () {
-    expect(navigationZoom(0), 18);
-    expect(navigationZoom(50 / 3.6), 17.6);
-    expect(navigationZoom(130 / 3.6), 16.2);
-    expect(navigationZoom(200 / 3.6), 16.2);
-    expect(navigationZoom(40 / 3.6, distanceToTurnM: 150), 18.3);
+    expect(navigationZoom(0), 18.5);
+    expect(navigationZoom(50 / 3.6), 18.5);
+    expect(navigationZoom(90 / 3.6), 17.6);
+    expect(navigationZoom(130 / 3.6), 16.6);
+    expect(navigationZoom(200 / 3.6), 16.6);
+    expect(navigationZoom(40 / 3.6, distanceToTurnM: 150), 18.8);
     expect(navigationZoom(80 / 3.6, distanceToTurnM: 150), navigationZoom(80 / 3.6));
   });
 }

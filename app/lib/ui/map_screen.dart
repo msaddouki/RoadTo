@@ -275,7 +275,7 @@ class _MapScreenState extends State<MapScreen> {
       _navInsets = app.navigating;
       // During a trip the car sits low on the screen with the road ahead
       // above it, under the banner, as in Waze.
-      await map.updateContentInsets(EdgeInsets.only(top: app.navigating ? _screenHeight * 0.4 : 0), true);
+      await map.updateContentInsets(EdgeInsets.only(top: app.navigating ? _screenHeight * 0.45 : 0), true);
     }
     final g = app.guidance;
     final preview = app.navigating ? null : app.preview;
@@ -325,7 +325,7 @@ class _MapScreenState extends State<MapScreen> {
             // Close in town and before a turn, further out when fast.
             zoom: nav ? navigationZoom(app.fix?.speedMps ?? 0, distanceToTurnM: g?.distanceToNextM) : 14,
             bearing: nav ? (app.fix?.bearingDeg ?? (g == null ? 0 : app.route!.bearingAt(g.projection.alongM))) : 0,
-            tilt: nav ? 50 : 0,
+            tilt: nav ? navigationTilt : 0,
           ),
         ),
         duration: const Duration(milliseconds: 900),
