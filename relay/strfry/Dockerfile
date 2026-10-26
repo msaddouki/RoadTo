@@ -2,7 +2,7 @@
 # Build from the repository root:
 #   docker build -f relay/strfry/Dockerfile -t roadto-relay .
 
-FROM dart:3.13.5-sdk AS build
+FROM dart:3.13.7-sdk AS build
 WORKDIR /src
 COPY packages/roadto_core packages/roadto_core
 COPY relay/strfry_policy relay/strfry_policy
